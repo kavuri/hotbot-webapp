@@ -16,25 +16,51 @@ import ExternalApi from "./views/ExternalApi";
 import Orders from "./views/Orders";
 import TestOrders from "./views/TestOrders";
 
+import Container from '@material-ui/core/Container';
+import Typography from '@material-ui/core/Typography';
+import Box from '@material-ui/core/Box';
+import Link from '@material-ui/core/Link';
+
+function Copyright() {
+  return (
+    <Typography variant="body2" color="textSecondary" align="center">
+      {'Copyright © '}
+      <Link color="inherit" href="https://kamamishu.com/">
+        Kamamishu
+      </Link>{' '}
+      {new Date().getFullYear()}
+      {'.'}
+    </Typography>
+  );
+}
+
 function App() {
   return (
-    <div className="App">
-      {/* Don't forget to include the history module */}
-      <Router history={history}>
-        <header>
-          <NavBar />
-        </header>
-        <Switch>
-          <Route path="/" exact />
-          {/* <Route path="/profile" component={Profile} /> */}
-          <PrivateRoute path="/profile" component={Profile} />
-          <PrivateRoute path="/devices" component={ExternalApi} />
-          {/* <Route path="/orders" component={Orders} /> */}
-          <PrivateRoute path="/orders" component={Orders} />
-          <PrivateRoute path="/testorders" component={TestOrders} />
-        </Switch>
-      </Router>
-    </div>
+    <Container maxWidth="sm">
+      <Box my={4}>
+        <Typography variant="h4" component="h1" gutterBottom>
+          Welcome
+        </Typography>
+
+        <Router history={history}>
+          <header>
+            <NavBar />
+          </header>
+          <Switch>
+            <Route path="/" exact />
+            {/* <Route path="/profile" component={Profile} /> */}
+            <PrivateRoute path="/profile" component={Profile} />
+            <PrivateRoute path="/devices" component={ExternalApi} />
+            {/* <Route path="/orders" component={Orders} /> */}
+            <PrivateRoute path="/orders" component={Orders} />
+            <PrivateRoute path="/testorders" component={TestOrders} />
+          </Switch>
+        </Router>
+
+        <Copyright />
+      </Box>
+    </Container>
+
   );
 }
 

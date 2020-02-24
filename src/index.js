@@ -5,6 +5,9 @@
 
 import React from "react";
 import ReactDOM from "react-dom";
+import { ThemeProvider } from '@material-ui/core/styles';
+import CssBaseline from '@material-ui/core/CssBaseline';
+import theme from './components/theme';
 import App from "./App";
 import * as serviceWorker from "./serviceWorker";
 import { Auth0Provider } from "./react-auth0-spa";
@@ -22,6 +25,8 @@ const onRedirectCallback = appState => {
 };
 
 ReactDOM.render(
+  <ThemeProvider theme={theme}>
+  <CssBaseline />
   <Auth0Provider
     domain={config.domain}
     client_id={config.clientId}
@@ -31,6 +36,7 @@ ReactDOM.render(
   >
     <App />
   </Auth0Provider>,
+  </ThemeProvider>,
   document.getElementById("root")
 );
 
