@@ -6,16 +6,10 @@ import ListSubheader from '@material-ui/core/ListSubheader';
 import DashboardIcon from '@material-ui/icons/Dashboard';
 import ShoppingCartIcon from '@material-ui/icons/ShoppingCart';
 import PeopleIcon from '@material-ui/icons/People';
-import BarChartIcon from '@material-ui/icons/BarChart';
-import LayersIcon from '@material-ui/icons/Layers';
-import AssignmentIcon from '@material-ui/icons/Assignment';
+import SettingsIcon from '@material-ui/icons/Settings';
+import ExitToAppIcon from '@material-ui/icons/ExitToApp';
 
-import { Router, Route, Switch } from "react-router-dom";
 import { Link } from "react-router-dom";
-
-import Profile from "./Profile";
-import history from "../utils/history";
-import PrivateRoute from "./PrivateRoute";
 
 export const mainListItems = (
   <div>
@@ -33,7 +27,7 @@ export const mainListItems = (
     </ListItem>
     <ListItem button>
       <ListItemIcon>
-        <PeopleIcon />
+        <SettingsIcon />
       </ListItemIcon>
       <ListItemText primary="Settings" />
     </ListItem>
@@ -43,16 +37,16 @@ export const mainListItems = (
 export const secondaryListItems = (
   <div>
     <ListSubheader inset>My Details</ListSubheader>
-    <ListItem button>
+    <ListItem component={Link} to="/profile" button>
       <ListItemIcon>
-        <AssignmentIcon />
+        <PeopleIcon />
       </ListItemIcon>
       <ListItemText primary="Profile" />
     </ListItem>
 
     <ListItem button>
       <ListItemIcon>
-        <AssignmentIcon />
+        <ExitToAppIcon />
       </ListItemIcon>
       <ListItemText primary="Logout" />
     </ListItem>

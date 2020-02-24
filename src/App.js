@@ -18,30 +18,25 @@ import TestOrders from "./views/TestOrders";
 
 import Dashboard from './components/Dashoard';
 
-import Container from '@material-ui/core/Container';
 import Typography from '@material-ui/core/Typography';
-import Box from '@material-ui/core/Box';
-import Link from '@material-ui/core/Link';
-
-function Copyright() {
-  return (
-    <Typography variant="body2" color="textSecondary" align="center">
-      {'Copyright © '}
-      <Link color="inherit" href="https://kamamishu.com/">
-        Kamamishu
-      </Link>{' '}
-      {new Date().getFullYear()}
-      {'.'}
-    </Typography>
-  );
-}
 
 function App() {
   return (
     <div>
       <Typography variant="h4" component="h1" gutterBottom>
-        </Typography>
-      <Dashboard />
+      </Typography>
+      <Router history={history}>
+        <Dashboard />
+        <Switch>
+          <Route path="/" exact />
+          {/* <Route path="/profile" component={Profile} /> */}
+          <PrivateRoute path="/profile" component={Profile} />
+          <PrivateRoute path="/devices" component={ExternalApi} />
+          {/* <Route path="/orders" component={Orders} /> */}
+          <PrivateRoute path="/orders" component={Orders} />
+          <PrivateRoute path="/testorders" component={TestOrders} />
+        </Switch>
+      </Router>
     </div>
   );
 }

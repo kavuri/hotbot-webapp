@@ -26,16 +26,16 @@ const onRedirectCallback = appState => {
 
 ReactDOM.render(
   <ThemeProvider theme={theme}>
-  <CssBaseline />
-  <Auth0Provider
-    domain={config.domain}
-    client_id={config.clientId}
-    redirect_uri={window.location.origin}
-    audience={config.audience}
-    onRedirectCallback={onRedirectCallback}
-  >
-    <App />
-  </Auth0Provider>,
+    <CssBaseline />
+    <Auth0Provider
+      domain={config.domain}
+      client_id={config.clientId}
+      redirect_uri={window.location.origin}
+      audience={config.audience}
+      onRedirectCallback={onRedirectCallback}
+    >
+      <App />
+    </Auth0Provider>,
   </ThemeProvider>,
   document.getElementById("root")
 );
