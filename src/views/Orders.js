@@ -6,8 +6,11 @@
 
 import React, { useState, useEffect } from "react";
 import { useAuth0 } from "../react-auth0-spa";
+import '../App.css'
 
 const ExternalApi = () => {
+  const [nests, setNests] = useState([]);
+  const [listening, setListening] = useState(false);
   const [showResult, setShowResult] = useState(false);
   const [apiMessage, setApiMessage] = useState("");
   const { user, getTokenSilently } = useAuth0();
@@ -17,14 +20,18 @@ const ExternalApi = () => {
       const token = await getTokenSilently();
 console.log('token=',token, user)
 
-      //const response = await fetch("http://localhost:3000/api/v1/user/" + user.sub, {
-      const response = await fetch("http://localhost:3000/api/v1/order/listen", {
-        headers: {
-          Authorization: `Bearer ${token}`
-        }
-      });
+      if (!listening) {
+         const events = new EventSource("http://localhost:3000/api/v1/order/listen?token="+token);
 
-      const responseData = await response.json();
+         var responseData;
+         events.onmessage = (event) => {
+            console.log('got data=', event);
+            responseData = JSON.parse(event.data);
+            //setNests((nests) => nests.concat(responseData));
+         }
+         setListening(true);
+      }
+      //setListening(true);
 
       setShowResult(true);
       setApiMessage(responseData);
@@ -37,7 +44,7 @@ console.log('error=',error);
   return (
     <>
       <h1>External API</h1>
-      <button onClick={callApi}>Ping API</button>
+      <button onClick={callApi}>Listen for Orders</button>
       {showResult && <code>{JSON.stringify(apiMessage, null, 2)}</code>}
     </>
   );

@@ -5,6 +5,7 @@
 
 import React from "react";
 import NavBar from "./components/NavBar";
+import './App.css'
 
 // New - import the React Router components, and the Profile page component
 import { Router, Route, Switch } from "react-router-dom";
@@ -12,6 +13,8 @@ import Profile from "./components/Profile";
 import history from "./utils/history";
 import PrivateRoute from "./components/PrivateRoute";
 import ExternalApi from "./views/ExternalApi";
+import Orders from "./views/Orders";
+import TestOrders from "./views/TestOrders";
 
 function App() {
   return (
@@ -26,6 +29,9 @@ function App() {
           {/* <Route path="/profile" component={Profile} /> */}
           <PrivateRoute path="/profile" component={Profile} />
           <PrivateRoute path="/devices" component={ExternalApi} />
+          {/* <Route path="/orders" component={Orders} /> */}
+          <PrivateRoute path="/orders" component={Orders} />
+          <PrivateRoute path="/testorders" component={TestOrders} />
         </Switch>
       </Router>
     </div>

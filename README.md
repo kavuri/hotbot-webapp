@@ -66,3 +66,7 @@ This section has moved here: https://facebook.github.io/create-react-app/docs/de
 ### `yarn build` fails to minify
 
 This section has moved here: https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify
+
+### Test order listner
+curl command to send a notification
+`curl -X POST  -H "Content-Type: application/json"  -d '{"momma": "lady.12121sharp.tooth", "eggs": 42, "temperature": 32}' -s http://localhost:3000/api/v1/order/nest`
