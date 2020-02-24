@@ -16,6 +16,8 @@ import ExternalApi from "./views/ExternalApi";
 import Orders from "./views/Orders";
 import TestOrders from "./views/TestOrders";
 
+import Dashboard from './components/Dashoard';
+
 import Container from '@material-ui/core/Container';
 import Typography from '@material-ui/core/Typography';
 import Box from '@material-ui/core/Box';
@@ -36,31 +38,11 @@ function Copyright() {
 
 function App() {
   return (
-    <Container maxWidth="sm">
-      <Box my={4}>
-        <Typography variant="h4" component="h1" gutterBottom>
-          Welcome
+    <div>
+      <Typography variant="h4" component="h1" gutterBottom>
         </Typography>
-
-        <Router history={history}>
-          <header>
-            <NavBar />
-          </header>
-          <Switch>
-            <Route path="/" exact />
-            {/* <Route path="/profile" component={Profile} /> */}
-            <PrivateRoute path="/profile" component={Profile} />
-            <PrivateRoute path="/devices" component={ExternalApi} />
-            {/* <Route path="/orders" component={Orders} /> */}
-            <PrivateRoute path="/orders" component={Orders} />
-            <PrivateRoute path="/testorders" component={TestOrders} />
-          </Switch>
-        </Router>
-
-        <Copyright />
-      </Box>
-    </Container>
-
+      <Dashboard />
+    </div>
   );
 }
 
