@@ -6,6 +6,9 @@
 import React, { useState, useEffect, useContext } from "react";
 import createAuth0Client from "@auth0/auth0-spa-js";
 
+const fetch = require('node-fetch');
+require('dotenv').config({ path: '../.env' });
+
 const DEFAULT_REDIRECT_CALLBACK = () =>
   window.history.replaceState({}, document.title, window.location.pathname);
 
@@ -28,7 +31,7 @@ export const Auth0Provider = ({
       setAuth0(auth0FromHook);
 
       if (window.location.search.includes("code=") &&
-          window.location.search.includes("state=")) {
+        window.location.search.includes("state=")) {
         const { appState } = await auth0FromHook.handleRedirectCallback();
         onRedirectCallback(appState);
       }
@@ -39,7 +42,25 @@ export const Auth0Provider = ({
 
       if (isAuthenticated) {
         const user = await auth0FromHook.getUser();
-        setUser(user);
+
+        // Get the full-user from API server
+        const token = await auth0FromHook.getTokenSilently();
+
+        let full_user;
+        try {
+          full_user = await fetch("http://localhost:3000/api/v1/user/" + user.sub, {
+            headers: {
+              Authorization: `Bearer ${token}`
+            }
+          }).then((u) => {
+            return u.json();
+          }).then((user) => {
+            return user;
+          })
+        } catch (error) {
+
+        }
+        setUser(full_user);
       }
 
       setLoading(false);
@@ -70,6 +91,7 @@ export const Auth0Provider = ({
     setIsAuthenticated(true);
     setUser(user);
   };
+
   return (
     <Auth0Context.Provider
       value={{
