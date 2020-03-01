@@ -46,20 +46,17 @@ export const Auth0Provider = ({
         // Get the full-user from API server
         const token = await auth0FromHook.getTokenSilently();
 
-        let full_user;
-        try {
-          full_user = await fetch("http://localhost:3000/api/v1/user/" + user.sub, {
-            headers: {
-              Authorization: `Bearer ${token}`
-            }
-          }).then((u) => {
-            return u.json();
-          }).then((user) => {
-            return user;
-          })
-        } catch (error) {
+        const full_user = await fetch("http://localhost:3000/api/v1/user/" + user.sub, {
+          headers: {
+            Authorization: `Bearer ${token}`
+          }
+        }).then((u) => {
+          return u.json();
+        }).then((user) => {
+          return user;
+        })
 
-        }
+        console.log('setting fulluser=',full_user);
         setUser(full_user);
       }
 

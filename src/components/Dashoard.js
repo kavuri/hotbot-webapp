@@ -1,3 +1,9 @@
+/* Copyright (C) Kamamishu Pvt. Ltd. - All Rights Reserved
+ * Unauthorized copying of this file, via any medium is strictly prohibited
+ * Proprietary and confidential
+ */
+'use strict';
+
 import React from 'react';
 import clsx from 'clsx';
 import { makeStyles } from '@material-ui/core/styles';
@@ -17,23 +23,15 @@ import Paper from '@material-ui/core/Paper';
 import MenuIcon from '@material-ui/icons/Menu';
 import ChevronLeftIcon from '@material-ui/icons/ChevronLeft';
 import NotificationsIcon from '@material-ui/icons/Notifications';
-import { mainListItems, secondaryListItems } from './listItems';
 
-import ListItem from '@material-ui/core/ListItem';
-import ListItemIcon from '@material-ui/core/ListItemIcon';
-import ListItemText from '@material-ui/core/ListItemText';
-import ListSubheader from '@material-ui/core/ListSubheader';
-import DashboardIcon from '@material-ui/icons/Dashboard';
-import ShoppingCartIcon from '@material-ui/icons/ShoppingCart';
-import PeopleIcon from '@material-ui/icons/People';
-import SettingsIcon from '@material-ui/icons/Settings';
-import ExitToAppIcon from '@material-ui/icons/ExitToApp';
-
-import { Link } from "react-router-dom";
+import {isNull, isUndefined} from 'lodash';
 
 import Chart from './Chart';
 import Deposits from './Deposits';
 import Orders from './Orders';
+import ProfileMenu from './ProfileMenu';
+import AdminMenu from './admin/AdminMenu';
+import ConsumerMenu from './ConsumerMenu';
 
 import { useAuth0 } from "../react-auth0-spa";
 
@@ -130,8 +128,19 @@ const useStyles = makeStyles(theme => ({
 }));
 
 export default function Dashboard() {
+  const { user } = useAuth0();
   const classes = useStyles();
   const [open, setOpen] = React.useState(true);
+  const [role, setRole] = React.useState(null);
+  const checkUserRole = () => {
+    if (isNull(user) || isUndefined(user)) {
+      return;
+    }
+    if ((isNull(role) || isUndefined(role)) && !isUndefined(user)) {
+      setRole(user.app_metadata.role);
+    }
+  }
+  checkUserRole();
   const handleDrawerOpen = () => {
     setOpen(true);
   };
@@ -140,8 +149,15 @@ export default function Dashboard() {
   };
   const fixedHeightPaper = clsx(classes.paper, classes.fixedHeight);
 
-  const { isAuthenticated, loginWithRedirect, logout } = useAuth0();
-
+  const renderRBAMenu = (role) => {
+    if (role === 'admin') {
+      return <AdminMenu />
+    } else if (role === 'consumer') {
+      return <ConsumerMenu />
+    } else if (isUndefined(role)) {
+      return null;
+    }
+  }
   return (
     <div className={classes.root}>
       <CssBaseline />
@@ -158,7 +174,7 @@ export default function Dashboard() {
           </IconButton>
           <Typography component="h1" variant="h6" color="inherit" noWrap className={classes.title}>
             Dashboard
-          </Typography>
+        </Typography>
           <IconButton color="inherit">
             <Badge badgeContent={4} color="secondary">
               <NotificationsIcon />
@@ -179,49 +195,11 @@ export default function Dashboard() {
           </IconButton>
         </div>
         <Divider />
-        {/* <List>{mainListItems}</List> */}
         <List>
-          <div>
-            <ListItem button>
-              <ListItemIcon>
-                <DashboardIcon />
-              </ListItemIcon>
-              <ListItemText primary="Dashboard" />
-            </ListItem>
-            <ListItem button>
-              <ListItemIcon>
-                <ShoppingCartIcon />
-              </ListItemIcon>
-              <ListItemText primary="Orders" />
-            </ListItem>
-            <ListItem button>
-              <ListItemIcon>
-                <SettingsIcon />
-              </ListItemIcon>
-              <ListItemText primary="Settings" />
-            </ListItem>
-          </div>
+          {renderRBAMenu(role)}
         </List>
         <Divider />
-        {/* <List>{secondaryListItems}</List> */}
-        <List>
-          <div>
-            <ListSubheader inset>My Details</ListSubheader>
-            <ListItem component={Link} to="/profile" button>
-              <ListItemIcon>
-                <PeopleIcon />
-              </ListItemIcon>
-              <ListItemText primary="Profile" />
-            </ListItem>
-
-            <ListItem button onClick={() => logout()}>
-              <ListItemIcon>
-                <ExitToAppIcon />
-              </ListItemIcon>
-              <ListItemText primary="Logout" />
-            </ListItem>
-          </div>
-        </List>
+        <List><ProfileMenu /></List>
       </Drawer>
       <main className={classes.content}>
         <div className={classes.appBarSpacer} />
