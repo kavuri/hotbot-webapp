@@ -24,7 +24,7 @@ import MenuIcon from '@material-ui/icons/Menu';
 import ChevronLeftIcon from '@material-ui/icons/ChevronLeft';
 import NotificationsIcon from '@material-ui/icons/Notifications';
 
-import {isNull, isUndefined} from 'lodash';
+import { isNull, isUndefined } from 'lodash';
 
 import Chart from './Chart';
 import Deposits from './Deposits';
@@ -132,6 +132,8 @@ export default function Dashboard() {
   const classes = useStyles();
   const [open, setOpen] = React.useState(true);
   const [role, setRole] = React.useState(null);
+  const [option, setOption] = React.useState('');
+
   const checkUserRole = () => {
     if (isNull(user) || isUndefined(user)) {
       return;
@@ -149,18 +151,46 @@ export default function Dashboard() {
   };
   const fixedHeightPaper = clsx(classes.paper, classes.fixedHeight);
 
+  const menuOptionSelected = (option) => {
+    setOption(option);
+    console.log('option selected=', option);
+  }
   const renderRBAMenu = (role) => {
     if (role === 'admin') {
-      return <AdminMenu />
+      return <AdminMenu optionSelected={menuOptionSelected} />
     } else if (role === 'consumer') {
-      return <ConsumerMenu />
+      return <ConsumerMenu optionSelected={menuOptionSelected} />
     } else if (isUndefined(role)) {
       return null;
     }
   }
-  return (
-    <div className={classes.root}>
-      <CssBaseline />
+
+  const renderSideMenu = () => {
+    return (
+      <Drawer
+        variant="permanent"
+        classes={{
+          paper: clsx(classes.drawerPaper, !open && classes.drawerPaperClose),
+        }}
+        open={open}
+      >
+        <div className={classes.toolbarIcon}>
+          <IconButton onClick={handleDrawerClose}>
+            <ChevronLeftIcon />
+          </IconButton>
+        </div>
+        <Divider />
+        <List>
+          {renderRBAMenu(role)}
+        </List>
+        <Divider />
+        <List><ProfileMenu optionSelected={menuOptionSelected} /></List>
+      </Drawer>
+    )
+  }
+
+  const renderHeading = () => {
+    return (
       <AppBar position="absolute" className={clsx(classes.appBar, open && classes.appBarShift)}>
         <Toolbar className={classes.toolbar}>
           <IconButton
@@ -182,48 +212,43 @@ export default function Dashboard() {
           </IconButton>
         </Toolbar>
       </AppBar>
-      <Drawer
-        variant="permanent"
-        classes={{
-          paper: clsx(classes.drawerPaper, !open && classes.drawerPaperClose),
-        }}
-        open={open}
-      >
-        <div className={classes.toolbarIcon}>
-          <IconButton onClick={handleDrawerClose}>
-            <ChevronLeftIcon />
-          </IconButton>
-        </div>
-        <Divider />
-        <List>
-          {renderRBAMenu(role)}
-        </List>
-        <Divider />
-        <List><ProfileMenu /></List>
-      </Drawer>
+    );
+  }
+
+  const renderContent = (menuOption) => {
+    return (
+      <Grid container spacing={3}>
+        {/* Chart */}
+        <Grid item xs={12} md={8} lg={9}>
+          <Paper className={fixedHeightPaper}>
+            <Chart />
+          </Paper>
+        </Grid>
+        {/* Recent Deposits */}
+        <Grid item xs={12} md={4} lg={3}>
+          <Paper className={fixedHeightPaper}>
+            <Deposits />
+          </Paper>
+        </Grid>
+        {/* Recent Orders */}
+        <Grid item xs={12}>
+          <Paper className={classes.paper}>
+            <Orders />
+          </Paper>
+        </Grid>
+      </Grid>
+    )
+  }
+
+  return (
+    <div className={classes.root}>
+      <CssBaseline />
+      {renderHeading()}
+      {renderSideMenu()}
       <main className={classes.content}>
         <div className={classes.appBarSpacer} />
         <Container maxWidth="lg" className={classes.container}>
-          <Grid container spacing={3}>
-            {/* Chart */}
-            <Grid item xs={12} md={8} lg={9}>
-              <Paper className={fixedHeightPaper}>
-                <Chart />
-              </Paper>
-            </Grid>
-            {/* Recent Deposits */}
-            <Grid item xs={12} md={4} lg={3}>
-              <Paper className={fixedHeightPaper}>
-                <Deposits />
-              </Paper>
-            </Grid>
-            {/* Recent Orders */}
-            <Grid item xs={12}>
-              <Paper className={classes.paper}>
-                <Orders />
-              </Paper>
-            </Grid>
-          </Grid>
+          {renderContent('')}
           <Box pt={4}>
             <Copyright />
           </Box>

@@ -13,33 +13,58 @@ import TableCell from '@material-ui/core/TableCell';
 import TableHead from '@material-ui/core/TableHead';
 import TableRow from '@material-ui/core/TableRow';
 import MaterialTable from 'material-table';
+const fetch = require('node-fetch');
 import Title from './Title';
+import { API_SERVER_URL } from '../../Config';
 
 // Generate Order Data
 function createData(id, date, name, shipTo, paymentMethod, amount) {
-  return { id, date, name, shipTo, paymentMethod, amount };
+  return { id, name, description, Address, Hotels, Contact };
 }
 
 const rows = [
-  createData(0, '16 Mar, 2019', 'Elvis Presley', 'Tupelo, MS', 'VISA ⠀•••• 3719', 312.44),
-  createData(1, '16 Mar, 2019', 'Paul McCartney', 'London, UK', 'VISA ⠀•••• 2574', 866.99),
-  createData(2, '16 Mar, 2019', 'Tom Scholz', 'Boston, MA', 'MC ⠀•••• 1253', 100.81),
-  createData(3, '16 Mar, 2019', 'Michael Jackson', 'Gary, IN', 'AMEX ⠀•••• 2000', 654.39),
-  createData(4, '15 Mar, 2019', 'Bruce Springsteen', 'Long Branch, NJ', 'VISA ⠀•••• 5919', 212.79),
+  createData(0, 'Ginger Hotels', 'Head quarters of Ginger', { address1: 'ITPL', 'address2': 'Opp SAP', 'city': 'Bengaluru', 'state': 'KA', 'pin': '560037' }, { 'phone': ['080-232232', '9499292929'], 'email': 'contact@gingerhotels.com' }),
+  createData(1, 'Keys Hotels', 'Head quarters of Keys', { address1: 'ITPL', 'address2': 'Opp SAP', 'city': 'Bengaluru', 'state': 'KA', 'pin': '560037' }, { 'phone': ['080-232232', '9499292929'], 'email': 'contact@keyshotels.com' }),
+  createData(2, 'Lemon Hotels', 'Head quarters of Lemon', { address1: 'ITPL', 'address2': 'Opp SAP', 'city': 'Bengaluru', 'state': 'KA', 'pin': '560037' }, { 'phone': ['080-232232', '9499292929'], 'email': 'contact@lemonhotels.com' }),
+  createData(3, 'Ramada Hotels', 'Head quarters of Ramada', { address1: 'ITPL', 'address2': 'Opp SAP', 'city': 'Bengaluru', 'state': 'KA', 'pin': '560037' }, { 'phone': ['080-232232', '9499292929'], 'email': 'contact@ramadahotels.com' }),
+  createData(4, 'Taj Hotels', 'Head quarters of Taj', { address1: 'ITPL', 'address2': 'Opp SAP', 'city': 'Bengaluru', 'state': 'KA', 'pin': '560037' }, { 'phone': ['080-232232', '9499292929'], 'email': 'contact@tajhotels.com' })
 ];
 class Groups extends React.Component {
-    constructor(props) {
-        super(props);
-        this.state = {
-            error: null,
-            isLoaded: false,
-            groups: []
-        };
-    }
+  constructor(props) {
+    super(props);
+    this.state = {
+      error: null,
+      isLoaded: false,
+      groups: []
+    };
+  }
 
-    componentDidMount() {
-        // Fetch the groups
-    }
+  componentDidMount() {
+    // Fetch the groups
+    const token = window.$token;
+    fetch(API_SERVER_URL + '/hotelGroup', {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+        'authorization': 'Bearer ' + token.access_token
+      }
+    })
+      .then(res => res.json())
+      .then(
+        (result) => {
+          this.setState({
+            isLoaded: true,
+            groups: result
+          });
+        },
+        (error) => {
+          this.setState({
+            isLoaded: true,
+            error: error
+          })
+        }
+      )
+  }
 }
 function preventDefault(event) {
   event.preventDefault();
@@ -86,97 +111,3 @@ export default function Orders() {
     </React.Fragment>
   );
 }
-
-<div className={classes.root}>
-        <CssBaseline />
-        <AppBar position="absolute" className={clsx(classes.appBar, open && classes.appBarShift)}>
-          <Toolbar className={classes.toolbar}>
-            <IconButton
-              edge="start"
-              color="inherit"
-              aria-label="open drawer"
-              onClick={handleDrawerOpen}
-              className={clsx(classes.menuButton, open && classes.menuButtonHidden)}
-            >
-              <MenuIcon />
-            </IconButton>
-            <Typography component="h1" variant="h6" color="inherit" noWrap className={classes.title}>
-              Dashboard
-          </Typography>
-            <IconButton color="inherit">
-              <Badge badgeContent={4} color="secondary">
-                <NotificationsIcon />
-              </Badge>
-            </IconButton>
-          </Toolbar>
-        </AppBar>
-        <Drawer
-          variant="permanent"
-          classes={{
-            paper: clsx(classes.drawerPaper, !open && classes.drawerPaperClose),
-          }}
-          open={open}
-        >
-          <div className={classes.toolbarIcon}>
-            <IconButton onClick={handleDrawerClose}>
-              <ChevronLeftIcon />
-            </IconButton>
-          </div>
-          <Divider />
-          {/* <List>{mainListItems}</List> */}
-          <List>
-            {/* <List>{user.app_metadata.role === 'admin' ? <AdminMenu /> : null}</List>
-          <List>{user.app_metadata.role === 'consumer' ? <ConsumerMenu /> : null}</List> */}
-            {/* <div>
-            <ListItem button>
-              <ListItemIcon>
-                <DashboardIcon />
-              </ListItemIcon>
-              <ListItemText primary="Dashboard" />
-            </ListItem>
-            <ListItem button>
-              <ListItemIcon>
-                <ShoppingCartIcon />
-              </ListItemIcon>
-              <ListItemText primary="Orders" />
-            </ListItem>
-            <ListItem button>
-              <ListItemIcon>
-                <SettingsIcon />
-              </ListItemIcon>
-              <ListItemText primary="Settings" />
-            </ListItem>
-          </div> */}
-          </List>
-          <Divider />
-          <List><ProfileMenu /></List>
-        </Drawer>
-        <main className={classes.content}>
-          <div className={classes.appBarSpacer} />
-          <Container maxWidth="lg" className={classes.container}>
-            <Grid container spacing={3}>
-              {/* Chart */}
-              <Grid item xs={12} md={8} lg={9}>
-                <Paper className={fixedHeightPaper}>
-                  <Chart />
-                </Paper>
-              </Grid>
-              {/* Recent Deposits */}
-              <Grid item xs={12} md={4} lg={3}>
-                <Paper className={fixedHeightPaper}>
-                  <Deposits />
-                </Paper>
-              </Grid>
-              {/* Recent Orders */}
-              <Grid item xs={12}>
-                <Paper className={classes.paper}>
-                  <Orders />
-                </Paper>
-              </Grid>
-            </Grid>
-            <Box pt={4}>
-              <Copyright />
-            </Box>
-          </Container>
-        </main>
-      </div>

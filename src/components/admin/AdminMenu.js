@@ -11,7 +11,14 @@ import ListItemText from '@material-ui/core/ListItemText';
 import PeopleIcon from '@material-ui/icons/People';
 import ExitToAppIcon from '@material-ui/icons/ExitToApp';
 
-export default function AdminMenu() {
+export default function AdminMenu(props) {
+    const handleGroupsOptionClick = () => {
+        props.optionSelected('groups');
+    }
+
+    const handleHotelsOptionClick = () => {
+        props.optionSelected('hotels');
+    }
 
     return (
         <div>
@@ -19,14 +26,14 @@ export default function AdminMenu() {
                 <ListItemIcon>
                     <PeopleIcon />
                 </ListItemIcon>
-                <ListItemText primary="Groups" />
+                <ListItemText primary="Groups" onClick={handleGroupsOptionClick} />
             </ListItem>
 
             <ListItem button>
                 <ListItemIcon>
                     <ExitToAppIcon />
                 </ListItemIcon>
-                <ListItemText primary="Hotels" />
+                <ListItemText primary="Hotels"  onClick={handleHotelsOptionClick} />
             </ListItem>
         </div>
     )

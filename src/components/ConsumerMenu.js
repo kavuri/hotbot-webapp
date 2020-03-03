@@ -13,12 +13,16 @@ import DashboardIcon from '@material-ui/icons/Dashboard';
 import ShoppingCartIcon from '@material-ui/icons/ShoppingCart';
 import SettingsIcon from '@material-ui/icons/Settings';
 
-import { Link } from "react-router-dom";
-import { useAuth0 } from "../react-auth0-spa";
+export default function ConsumerMenu(props) {
 
-export default function ConsumerMenu() {
-    const { logout } = useAuth0();
+    const handleOrdersOptionClick = () => {
+        props.optionSelected('orders');
+    }
 
+    const handleSettingsOptionClick = () => {
+        props.optionSelected('settings');
+    }
+    
     return (
         <div>
             <ListItem button>
@@ -31,13 +35,13 @@ export default function ConsumerMenu() {
                 <ListItemIcon>
                     <ShoppingCartIcon />
                 </ListItemIcon>
-                <ListItemText primary="Orders" />
+                <ListItemText primary="Orders" onClick={handleOrdersOptionClick}/>
             </ListItem>
             <ListItem button>
                 <ListItemIcon>
                     <SettingsIcon />
                 </ListItemIcon>
-                <ListItemText primary="Settings" />
+                <ListItemText primary="Settings" onClick={handleSettingsOptionClick}/>
             </ListItem>
         </div>
     )

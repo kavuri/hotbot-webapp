@@ -5,9 +5,8 @@
 
 import React, { useState, useEffect, useContext } from "react";
 import createAuth0Client from "@auth0/auth0-spa-js";
-
+import { API_SERVER_URL } from './Config';
 const fetch = require('node-fetch');
-require('dotenv').config({ path: '../.env' });
 
 const DEFAULT_REDIRECT_CALLBACK = () =>
   window.history.replaceState({}, document.title, window.location.pathname);
@@ -46,7 +45,7 @@ export const Auth0Provider = ({
         // Get the full-user from API server
         const token = await auth0FromHook.getTokenSilently();
 
-        const full_user = await fetch("http://localhost:3000/api/v1/user/" + user.sub, {
+        const full_user = await fetch(API_SERVER_URL + "/user/" + user.sub, {
           headers: {
             Authorization: `Bearer ${token}`
           }
@@ -56,7 +55,7 @@ export const Auth0Provider = ({
           return user;
         })
 
-        console.log('setting fulluser=',full_user);
+        console.log('setting fulluser=', full_user);
         setUser(full_user);
       }
 

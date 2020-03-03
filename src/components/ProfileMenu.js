@@ -15,9 +15,17 @@ import ExitToAppIcon from '@material-ui/icons/ExitToApp';
 import { Link } from "react-router-dom";
 import { useAuth0 } from "../react-auth0-spa";
 
-export default function ProfileMenu() {
+export default function ProfileMenu(props) {
     const { logout } = useAuth0();
 
+    const handleProfileOptionClick = () => {
+        props.optionSelected('profile');
+    }
+
+    const handleLogoutOptionClick = () => {
+        props.optionSelected('logout');
+    }
+    
     return (
         <div>
             <ListSubheader inset>My Details</ListSubheader>
@@ -25,14 +33,14 @@ export default function ProfileMenu() {
                 <ListItemIcon>
                     <PeopleIcon />
                 </ListItemIcon>
-                <ListItemText primary="Profile" />
+                <ListItemText primary="Profile" onClick={handleProfileOptionClick} />
             </ListItem>
 
             <ListItem button onClick={() => logout()}>
                 <ListItemIcon>
                     <ExitToAppIcon />
                 </ListItemIcon>
-                <ListItemText primary="Logout" />
+                <ListItemText primary="Logout" onClick={handleLogoutOptionClick} />
             </ListItem>
         </div>
     )
