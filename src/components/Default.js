@@ -6,10 +6,10 @@
 
 import React from 'react';
 
-export default function Hotels() {
+export default function Default() {
     return (
         <React.Fragment>
-            <div>Hotels...</div>
+            <div>Default page...</div>
         </React.Fragment>
     )
 }

@@ -12,14 +12,15 @@ import TableBody from '@material-ui/core/TableBody';
 import TableCell from '@material-ui/core/TableCell';
 import TableHead from '@material-ui/core/TableHead';
 import TableRow from '@material-ui/core/TableRow';
-import MaterialTable from 'material-table';
-const fetch = require('node-fetch');
-import Title from './Title';
+// import MaterialTable from 'material-table';
+import Title from '../Title';
 import { API_SERVER_URL } from '../../Config';
 
+const fetch = require('node-fetch');
+
 // Generate Order Data
-function createData(id, date, name, shipTo, paymentMethod, amount) {
-  return { id, name, description, Address, Hotels, Contact };
+function createData(id, name, description, address, hotels, contact) {
+  return { id, name, description, address, hotels, contact };
 }
 
 const rows = [
@@ -29,43 +30,43 @@ const rows = [
   createData(3, 'Ramada Hotels', 'Head quarters of Ramada', { address1: 'ITPL', 'address2': 'Opp SAP', 'city': 'Bengaluru', 'state': 'KA', 'pin': '560037' }, { 'phone': ['080-232232', '9499292929'], 'email': 'contact@ramadahotels.com' }),
   createData(4, 'Taj Hotels', 'Head quarters of Taj', { address1: 'ITPL', 'address2': 'Opp SAP', 'city': 'Bengaluru', 'state': 'KA', 'pin': '560037' }, { 'phone': ['080-232232', '9499292929'], 'email': 'contact@tajhotels.com' })
 ];
-class Groups extends React.Component {
-  constructor(props) {
-    super(props);
-    this.state = {
-      error: null,
-      isLoaded: false,
-      groups: []
-    };
-  }
+// class Groups extends React.Component {
+//   constructor(props) {
+//     super(props);
+//     this.state = {
+//       error: null,
+//       isLoaded: false,
+//       groups: []
+//     };
+//   }
 
-  componentDidMount() {
-    // Fetch the groups
-    const token = window.$token;
-    fetch(API_SERVER_URL + '/hotelGroup', {
-      method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-        'authorization': 'Bearer ' + token.access_token
-      }
-    })
-      .then(res => res.json())
-      .then(
-        (result) => {
-          this.setState({
-            isLoaded: true,
-            groups: result
-          });
-        },
-        (error) => {
-          this.setState({
-            isLoaded: true,
-            error: error
-          })
-        }
-      )
-  }
-}
+//   componentDidMount() {
+//     // Fetch the groups
+//     const token = window.$token;
+//     fetch(API_SERVER_URL + '/hotelGroup', {
+//       method: 'GET',
+//       headers: {
+//         'Content-Type': 'application/json',
+//         'authorization': 'Bearer ' + token.access_token
+//       }
+//     })
+//       .then(res => res.json())
+//       .then(
+//         (result) => {
+//           this.setState({
+//             isLoaded: true,
+//             groups: result
+//           });
+//         },
+//         (error) => {
+//           this.setState({
+//             isLoaded: true,
+//             error: error
+//           })
+//         }
+//       )
+//   }
+// }
 function preventDefault(event) {
   event.preventDefault();
 }
@@ -76,7 +77,7 @@ const useStyles = makeStyles(theme => ({
   },
 }));
 
-export default function Orders() {
+export default function Groups() {
   const classes = useStyles();
   return (
     <React.Fragment>

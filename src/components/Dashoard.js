@@ -24,14 +24,17 @@ import MenuIcon from '@material-ui/icons/Menu';
 import ChevronLeftIcon from '@material-ui/icons/ChevronLeft';
 import NotificationsIcon from '@material-ui/icons/Notifications';
 
-import { isNull, isUndefined } from 'lodash';
+import { isNull, isUndefined, isEqual } from 'lodash';
 
 import Chart from './Chart';
 import Deposits from './Deposits';
 import Orders from './Orders';
+import Hotels from './admin/Hotels';
+import Groups from './admin/Groups';
 import ProfileMenu from './ProfileMenu';
 import AdminMenu from './admin/AdminMenu';
 import ConsumerMenu from './ConsumerMenu';
+import Default from './Default';
 
 import { useAuth0 } from "../react-auth0-spa";
 
@@ -132,17 +135,30 @@ export default function Dashboard() {
   const classes = useStyles();
   const [open, setOpen] = React.useState(true);
   const [role, setRole] = React.useState(null);
-  const [option, setOption] = React.useState('');
-
+  const [ComponentToRender, setComponentToRender] = React.useState(Default);
+  
+  const menuComponentMap = {
+    'default': Default,
+    'groups': Groups,
+    'hotels': Hotels,
+    'addHotelGroup': 'AddHotelGroup',
+    'addHotel': 'AddHotel',
+    'settings': 'Settings',
+    'orders': Orders,
+    'profile': 'Profile'
+  };
   const checkUserRole = () => {
+    console.log('checking user role...')
     if (isNull(user) || isUndefined(user)) {
       return;
     }
+    console.log('user is not null', role)
     if ((isNull(role) || isUndefined(role)) && !isUndefined(user)) {
       setRole(user.app_metadata.role);
     }
   }
-  checkUserRole();
+  checkUserRole();  // Checks the user role on page open
+
   const handleDrawerOpen = () => {
     setOpen(true);
   };
@@ -152,11 +168,16 @@ export default function Dashboard() {
   const fixedHeightPaper = clsx(classes.paper, classes.fixedHeight);
 
   const menuOptionSelected = (option) => {
-    setOption(option);
-    console.log('option selected=', option);
+    const ComponentToRender = menuComponentMap[option];
+    setComponentToRender(<ComponentToRender />);
+    console.log('option selected=', option, ComponentToRender);
   }
+
   const renderRBAMenu = (role) => {
+    // role = 'admin'
     if (role === 'admin') {
+      // Set the intial screen as hotels
+
       return <AdminMenu optionSelected={menuOptionSelected} />
     } else if (role === 'consumer') {
       return <ConsumerMenu optionSelected={menuOptionSelected} />
@@ -215,25 +236,27 @@ export default function Dashboard() {
     );
   }
 
-  const renderContent = (menuOption) => {
+  const renderContent = () => {
     return (
       <Grid container spacing={3}>
         {/* Chart */}
-        <Grid item xs={12} md={8} lg={9}>
+        {/* <Grid item xs={12} md={8} lg={9}>
           <Paper className={fixedHeightPaper}>
             <Chart />
           </Paper>
-        </Grid>
+        </Grid> */}
         {/* Recent Deposits */}
-        <Grid item xs={12} md={4} lg={3}>
+        {/* <Grid item xs={12} md={4} lg={3}>
           <Paper className={fixedHeightPaper}>
             <Deposits />
           </Paper>
-        </Grid>
+        </Grid> */}
         {/* Recent Orders */}
         <Grid item xs={12}>
           <Paper className={classes.paper}>
-            <Orders />
+            {/* <Orders /> */}
+            {ComponentToRender}
+            {/* <Groups /> */}
           </Paper>
         </Grid>
       </Grid>
