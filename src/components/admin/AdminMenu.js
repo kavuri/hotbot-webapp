@@ -20,6 +20,10 @@ export default function AdminMenu(props) {
         props.optionSelected('hotels');
     }
 
+    const handleFacilitiesOptionClick = () => {
+        props.optionSelected('facilities');
+    }
+
     return (
         <div>
             <ListItem button>
@@ -33,7 +37,14 @@ export default function AdminMenu(props) {
                 <ListItemIcon>
                     <ExitToAppIcon />
                 </ListItemIcon>
-                <ListItemText primary="Hotels"  onClick={handleHotelsOptionClick} />
+                <ListItemText primary="Hotels" onClick={handleHotelsOptionClick} />
+            </ListItem>
+
+            <ListItem button>
+                <ListItemIcon>
+                    <ExitToAppIcon />
+                </ListItemIcon>
+                <ListItemText primary="Facilities" onClick={handleFacilitiesOptionClick} />
             </ListItem>
         </div>
     )

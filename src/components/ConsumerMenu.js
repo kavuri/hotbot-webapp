@@ -12,6 +12,7 @@ import ListSubheader from '@material-ui/core/ListSubheader';
 import DashboardIcon from '@material-ui/icons/Dashboard';
 import ShoppingCartIcon from '@material-ui/icons/ShoppingCart';
 import SettingsIcon from '@material-ui/icons/Settings';
+import MobileScreenShareIcon from '@material-ui/icons/MobileScreenShare';
 
 export default function ConsumerMenu(props) {
 
@@ -21,6 +22,10 @@ export default function ConsumerMenu(props) {
 
     const handleSettingsOptionClick = () => {
         props.optionSelected('settings');
+    }
+
+    const handleDeviceMgmtOptionClick = () => {
+        props.optionSelected('deviceMgmt');
     }
     
     return (
@@ -42,6 +47,12 @@ export default function ConsumerMenu(props) {
                     <SettingsIcon />
                 </ListItemIcon>
                 <ListItemText primary="Settings" onClick={handleSettingsOptionClick}/>
+            </ListItem>
+            <ListItem button>
+                <ListItemIcon>
+                    <MobileScreenShareIcon />
+                </ListItemIcon>
+                <ListItemText primary="Device Management" onClick={handleDeviceMgmtOptionClick}/>
             </ListItem>
         </div>
     )

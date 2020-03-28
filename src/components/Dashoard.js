@@ -26,11 +26,11 @@ import NotificationsIcon from '@material-ui/icons/Notifications';
 
 import { isNull, isUndefined, isEqual } from 'lodash';
 
-import Chart from './Chart';
-import Deposits from './Deposits';
 import Orders from './Orders';
 import Hotels from './admin/Hotels';
 import Groups from './admin/Groups';
+import DeviceMgmt from './DeviceMgmt';
+import Facilities from './admin/Facilities';
 import ProfileMenu from './ProfileMenu';
 import AdminMenu from './admin/AdminMenu';
 import ConsumerMenu from './ConsumerMenu';
@@ -136,14 +136,16 @@ export default function Dashboard() {
   const [open, setOpen] = React.useState(true);
   const [role, setRole] = React.useState(null);
   const [ComponentToRender, setComponentToRender] = React.useState(Default);
-  
+
   const menuComponentMap = {
     'default': Default,
     'groups': Groups,
     'hotels': Hotels,
     'addHotelGroup': 'AddHotelGroup',
     'addHotel': 'AddHotel',
+    'deviceMgmt': DeviceMgmt,
     'settings': 'Settings',
+    'facilities': Facilities,
     'orders': Orders,
     'profile': 'Profile'
   };
@@ -174,6 +176,7 @@ export default function Dashboard() {
   }
 
   const renderRBAMenu = (role) => {
+    role = 'consumer'
     // role = 'admin'
     if (role === 'admin') {
       // Set the intial screen as hotels
