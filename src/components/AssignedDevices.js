@@ -12,7 +12,6 @@ import TableCell from '@material-ui/core/TableCell';
 import TableContainer from '@material-ui/core/TableContainer';
 import TableHead from '@material-ui/core/TableHead';
 import TableRow from '@material-ui/core/TableRow';
-import Paper from '@material-ui/core/Paper';
 import DeleteRoundedIcon from '@material-ui/icons/DeleteRounded';
 import IconButton from '@material-ui/core/IconButton';
 import Button from '@material-ui/core/Button';
@@ -24,9 +23,10 @@ import DialogTitle from '@material-ui/core/DialogTitle';
 import FormControlLabel from '@material-ui/core/FormControlLabel';
 import Switch from '@material-ui/core/Switch';
 
-import { remove, isEqual } from 'lodash';
+import { isNull, isUndefined, isEqual, remove } from 'lodash';
 
 import { API_SERVER_URL } from '../Config';
+import Selector from './Selector';
 
 const useStyles = makeStyles((theme) => ({
   table: {
@@ -41,15 +41,20 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 export const DeviceStateChange = (props) => {
-  const [state, setState] = useState(props.device.status);
+  console.log('DeviceStateChange=', props);
+  const [state, setState] = useState(isNull(props.device.status) ? 'inactive' : 'active');
   const [device, setDevice] = useState(props.device);
   const [open, setOpen] = React.useState(false);
   const [loading, setLoading] = useState(false);
+  const [statesData, setStatesData] = useState({
+    active: { name: 'Active', dialogMsg: 'Confirm de-activation of device? Your hotel guests will not be able to use Kamamishu service' },
+    inactive: { name: 'Inactive', dialogMsg: 'Confirm activation of device? Kamamishu will be live for use' }
+  });
 
   const handleChange = (event) => {
     // setState({ ...state, [event.target.name]: event.target.checked });
     setOpen(true);
-    console.log('handleChange=',state, event.target.name, event.target.checked)
+    console.log('handleChange=', state, event.target.name, event.target.checked)
   };
 
   const handleClose = () => {
@@ -84,17 +89,11 @@ export const DeviceStateChange = (props) => {
     }
   }
 
-  let statesData =
-  {
-    active: { name: 'Active', dialogMsg: 'Confirm de-activation of device?' },
-    inactive: { name: 'Inactive', dialogMsg: 'Confirm activation of device?' }
-  };
-
-  console.log('statesData=',statesData[state]);
+  console.log('statesData=', statesData, ',state=',state);
 
   return (
     <div>
-      <FormControlLabel control={<Switch checked={state === 'active'} onChange={handleChange} name="active" />} label={statesData[state].name} />
+      <FormControlLabel control={<Switch checked={state === 'active'} onChange={handleChange} name='active' />} label={statesData[state].name} />
       <Dialog
         open={open}
         onClose={handleClose}
@@ -175,10 +174,11 @@ export default (props) => {
   const [value, setValue] = React.useState(0);
   const [assignedDevices, setAssignedDevices] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [hotels, setHotels] = useState([]);
 
   useEffect(() => {
-    setAssignedDevices(props.assignedDevices);
-  }, [props.assignedDevices])
+    loadHotels();
+  }, []);
 
   const handleChange = (event, newValue) => {
     setValue(newValue);
@@ -193,28 +193,71 @@ export default (props) => {
     console.log('device state change:', device);
   }
 
+  const loadHotels = () => {
+    if (!loading) {
+      setLoading(true);
+      // fetch(API_SERVER_URL + '/hotel', { method: 'GET', headers: { 'Content-Type': 'application/json', 'authorization': 'Bearer ' + token.access_token } })
+      fetch(API_SERVER_URL + '/hotel', { method: 'GET', headers: { 'Content-Type': 'application/json' } })
+        .then(res => res.json())
+        .then((results) => {
+          console.log('hotels=', results);
+          let allHotels = results.map((h) => { return { name: h.name, id: h.hotel_id, _id: h._id } });
+          setHotels(allHotels);
+          setLoading(false);
+        })
+        .catch(() => setLoading(false));
+    }
+  }
+
+  const getDevices = (hotel) => {
+    console.log('getting devices for ', hotel.id);
+    if (!loading) {
+      setLoading(true);
+      // fetch(API_SERVER_URL + '/hotel', { method: 'GET', headers: { 'Content-Type': 'application/json', 'authorization': 'Bearer ' + token.access_token } })
+      fetch(API_SERVER_URL + '/device?hotel_id=' + hotel.id, { method: 'GET', headers: { 'Content-Type': 'application/json' } })
+        .then(res => res.json())
+        .then((results) => {
+          console.log('all assigned devices=', results);
+          let assigned = [];
+          for (var i = 0; i < results.length; i++) {
+            if (isNull(results[i].room) || isUndefined(results[i].room) || isNull(results[i].belongs_to) || isUndefined(results[i].belongs_to)) {
+            } else {
+              assigned.push(results[i]);
+              console.log('pushing to assined...', assigned)
+            }
+          }
+          setAssignedDevices(assigned);
+          setLoading(false);
+        })
+        .catch(() => setLoading(false));
+    }
+  }
+
   return (
-    <TableContainer >
-      <Table className={classes.table} size="small" aria-label="a dense table">
-        <TableHead>
-          <TableRow>
-            <TableCell>Room</TableCell>
-            <TableCell align="right">Status</TableCell>
-            <TableCell align="right">Deregister Device</TableCell>
-          </TableRow>
-        </TableHead>
-        <TableBody>
-          {assignedDevices.map((row) => (
-            <TableRow key={row.room_no}>
-              <TableCell component="th" scope="row">
-                {row.room_no}
-              </TableCell>
-              <TableCell align="right"><DeviceStateChange device={row} onDeviceStateChange={changeDeviceState} /></TableCell>
-              <TableCell align="right"><DeregisterDevice device={row} onDeviceDeregister={updateAssignedDevices} /></TableCell>
+    <div>
+      <Selector menuName="Hotels" items={hotels} onSelectEntry={getDevices} />
+      <TableContainer >
+        <Table className={classes.table} size="small" aria-label="a dense table">
+          <TableHead>
+            <TableRow>
+              <TableCell>Room</TableCell>
+              <TableCell align="right">Status</TableCell>
+              <TableCell align="right">Deregister Device</TableCell>
             </TableRow>
-          ))}
-        </TableBody>
-      </Table>
-    </TableContainer>
+          </TableHead>
+          <TableBody>
+            {assignedDevices.map((row) => (
+              <TableRow key={row.room_no}>
+                <TableCell component="th" scope="row">
+                  {row.room_no}
+                </TableCell>
+                <TableCell align="right"><DeviceStateChange device={row} onDeviceStateChange={changeDeviceState} /></TableCell>
+                <TableCell align="right"><DeregisterDevice device={row} onDeviceDeregister={updateAssignedDevices} /></TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      </TableContainer>
+    </div>
   );
 }
