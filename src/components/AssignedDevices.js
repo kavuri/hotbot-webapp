@@ -21,8 +21,10 @@ import DialogActions from '@material-ui/core/DialogActions';
 import DialogContent from '@material-ui/core/DialogContent';
 import DialogContentText from '@material-ui/core/DialogContentText';
 import DialogTitle from '@material-ui/core/DialogTitle';
+import FormControlLabel from '@material-ui/core/FormControlLabel';
+import Switch from '@material-ui/core/Switch';
 
-import { remove } from 'lodash';
+import { remove, isEqual } from 'lodash';
 
 import { API_SERVER_URL } from '../Config';
 
@@ -38,64 +40,82 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-/*
-const IOSSwitch = withStyles(theme => ({
-  root: {
-    width: 42,
-    height: 26,
-    padding: 0,
-    margin: theme.spacing(1),
-  },
-  switchBase: {
-    padding: 1,
-    '&$checked': {
-      transform: 'translateX(16px)',
-      color: theme.palette.common.white,
-      '& + $track': {
-        backgroundColor: '#52d869',
-        opacity: 1,
-        border: 'none',
-      },
-    },
-    '&$focusVisible $thumb': {
-      color: '#52d869',
-      border: '6px solid #fff',
-    },
-  },
-  thumb: {
-    width: 24,
-    height: 24,
-  },
-  track: {
-    borderRadius: 26 / 2,
-    border: `1px solid ${theme.palette.grey[400]}`,
-    backgroundColor: theme.palette.grey[50],
-    opacity: 1,
-    transition: theme.transitions.create(['background-color', 'border']),
-  },
-  checked: {},
-  focusVisible: {},
-}))(({ classes, ...props }) => {
+export const DeviceStateChange = (props) => {
+  const [state, setState] = useState(props.device.status);
+  const [device, setDevice] = useState(props.device);
+  const [open, setOpen] = React.useState(false);
+  const [loading, setLoading] = useState(false);
+
+  const handleChange = (event) => {
+    // setState({ ...state, [event.target.name]: event.target.checked });
+    setOpen(true);
+    console.log('handleChange=',state, event.target.name, event.target.checked)
+  };
+
+  const handleClose = () => {
+    setOpen(false);
+  };
+
+  const changeStatus = () => {
+    console.log('###change status=', state);
+    let URL;
+    if (isEqual(state, 'active')) {
+      // Deactivate the device
+      URL = API_SERVER_URL + '/device/' + device.device_id + '/deactivate?hotel_id=' + device.hotel_id;
+    } else if (isEqual(state, 'inactive')) {
+      // activate the device
+      URL = API_SERVER_URL + '/device/' + device.device_id + '/activate?hotel_id=' + device.hotel_id;
+    }
+
+    if (!loading) {
+      setLoading(true);
+      // fetch(API_SERVER_URL + '/hotel', { method: 'GET', headers: { 'Content-Type': 'application/json', 'authorization': 'Bearer ' + token.access_token } })
+      fetch(URL, { method: 'POST', headers: { 'Content-Type': 'application/json' } })
+        .then(res => res.json())
+        .then((result) => {
+          console.log('devices=', result);
+          setDevice(result);
+          setLoading(false);
+          setState(result.status);
+          setOpen(false);
+          props.onDeviceDeregister(result);
+        })
+        .catch(() => setLoading(false));
+    }
+  }
+
+  let statesData =
+  {
+    active: { name: 'Active', dialogMsg: 'Confirm de-activation of device?' },
+    inactive: { name: 'Inactive', dialogMsg: 'Confirm activation of device?' }
+  };
+
+  console.log('statesData=',statesData[state]);
+
   return (
-    <Switch
-      focusVisibleClassName={classes.focusVisible}
-      disableRipple
-      classes={{
-        root: classes.root,
-        switchBase: classes.switchBase,
-        thumb: classes.thumb,
-        track: classes.track,
-        checked: classes.checked,
-      }}
-      {...props}
-    />
+    <div>
+      <FormControlLabel control={<Switch checked={state === 'active'} onChange={handleChange} name="active" />} label={statesData[state].name} />
+      <Dialog
+        open={open}
+        onClose={handleClose}
+        aria-labelledby="alert-dialog-title"
+        aria-describedby="alert-dialog-description"
+      >
+        <DialogTitle id="alert-dialog-title">{"Change Device Status"}</DialogTitle>
+        <DialogContent>
+          <DialogContentText id="alert-dialog-description"> {statesData[state].dialogMsg}</DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleClose} color="primary"> No </Button>
+          <Button onClick={changeStatus} color="primary" autoFocus> Yes </Button>
+        </DialogActions>
+      </Dialog>
+    </div>
   );
-});
-*/
+}
 
 export const DeregisterDevice = (props) => {
   const [device, setDevice] = useState(props.device);
-  console.log(device);
   const [loading, setLoading] = useState(false);
   const [open, setOpen] = React.useState(false);
 
@@ -164,17 +184,13 @@ export default (props) => {
     setValue(newValue);
   };
 
-  const deactivateDevice = (deviceId) => {
-
-  }
-
-  const activateDevice = (deviceId) => {
-
-  }
-
   const updateAssignedDevices = (device) => {
     console.log('should remove:', device);
     remove(assignedDevices, { room_no: device.room_no });
+  }
+
+  const changeDeviceState = (device) => {
+    console.log('device state change:', device);
   }
 
   return (
@@ -193,7 +209,7 @@ export default (props) => {
               <TableCell component="th" scope="row">
                 {row.room_no}
               </TableCell>
-              <TableCell align="right">{row.status}</TableCell>
+              <TableCell align="right"><DeviceStateChange device={row} onDeviceStateChange={changeDeviceState} /></TableCell>
               <TableCell align="right"><DeregisterDevice device={row} onDeviceDeregister={updateAssignedDevices} /></TableCell>
             </TableRow>
           ))}
