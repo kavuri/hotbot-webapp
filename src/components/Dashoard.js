@@ -29,7 +29,7 @@ import { isNull, isUndefined, isEqual } from 'lodash';
 import Orders from './Orders';
 import Hotels from './admin/Hotels';
 import Groups from './admin/Groups';
-import DeviceMgmt from './DeviceMgmt';
+import Devices from './Devices';
 import Facilities from './admin/Facilities';
 import ProfileMenu from './ProfileMenu';
 import AdminMenu from './admin/AdminMenu';
@@ -143,7 +143,7 @@ export default function Dashboard() {
     'hotels': Hotels,
     'addHotelGroup': 'AddHotelGroup',
     'addHotel': 'AddHotel',
-    'deviceMgmt': DeviceMgmt,
+    'deviceMgmt': Devices,
     'settings': 'Settings',
     'facilities': Facilities,
     'orders': Orders,

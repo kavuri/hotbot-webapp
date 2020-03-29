@@ -17,7 +17,7 @@ const useStyles = makeStyles(theme => ({
     },
 }));
 
-export default () => {
+export default (props) => {
     const classes = useStyles();
     const [hotel, setHotel] = React.useState('');
     const [loading, setLoading] = useState(false);
@@ -33,7 +33,7 @@ export default () => {
             fetch(API_SERVER_URL + '/hotel', { method: 'GET', headers: { 'Content-Type': 'application/json' } })
                 .then(res => res.json())
                 .then((results) => {
-                    let allItems = results.map((h) => { return { 'name': h.name, '_id': h._id } });
+                    let allItems = results.map((h) => { return { 'name': h.name, 'hotel_id': h.hotel_id } });
                     console.log('All hotels=', allItems);
                     setItems(allItems);
                     setLoading(false);
@@ -48,16 +48,18 @@ export default () => {
     }, []);
 
     const handleChange = event => {
+        console.log('new event=',event.target)
+        var hotel = event.target.value;
         setHotel(event.target.value);
+        props.onSelectHotel(hotel);
     };
 
     return (
         <div>
-
             <FormControl variant="outlined" className={classes.formControl}>
                 <InputLabel ref={inputLabel} id="demo-simple-select-outlined-label">
                     Hotels
-        </InputLabel>
+                </InputLabel>
                 <Select
                     labelId="demo-simple-select-outlined-label"
                     id="demo-simple-select-outlined"
@@ -68,10 +70,9 @@ export default () => {
                     <MenuItem value="">
                         <em>None</em>
                     </MenuItem>
-                    {items.map((h) => <MenuItem key={h._id} value={h._id}>{h.name}</MenuItem>)}
+                    {items.map((h) => <MenuItem key={h.hotel_id} value={h.hotel_id}>{h.name}</MenuItem>)}
                 </Select>
             </FormControl>
-
         </div>
     );
 }
