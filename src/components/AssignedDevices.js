@@ -25,7 +25,7 @@ import Switch from '@material-ui/core/Switch';
 
 import { isNull, isUndefined, isEqual, remove } from 'lodash';
 
-import { API_SERVER_URL } from '../Config';
+import { changeDeviceStatus, deregisterDevice, allHotels, getHotelDevices } from '../utils/API';
 import Selector from './Selector';
 
 const useStyles = makeStyles((theme) => ({
@@ -41,7 +41,6 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 export const DeviceStateChange = (props) => {
-  console.log('DeviceStateChange=', props);
   const [state, setState] = useState(isNull(props.device.status) ? 'inactive' : 'active');
   const [device, setDevice] = useState(props.device);
   const [open, setOpen] = React.useState(false);
@@ -61,35 +60,23 @@ export const DeviceStateChange = (props) => {
     setOpen(false);
   };
 
-  const changeStatus = () => {
-    console.log('###change status=', state);
-    let URL;
-    if (isEqual(state, 'active')) {
-      // Deactivate the device
-      URL = API_SERVER_URL + '/device/' + device.device_id + '/deactivate?hotel_id=' + device.hotel_id;
-    } else if (isEqual(state, 'inactive')) {
-      // activate the device
-      URL = API_SERVER_URL + '/device/' + device.device_id + '/activate?hotel_id=' + device.hotel_id;
-    }
-
+  const changeStatus = async () => {
     if (!loading) {
       setLoading(true);
-      // fetch(API_SERVER_URL + '/hotel', { method: 'GET', headers: { 'Content-Type': 'application/json', 'authorization': 'Bearer ' + token.access_token } })
-      fetch(URL, { method: 'POST', headers: { 'Content-Type': 'application/json' } })
-        .then(res => res.json())
-        .then((result) => {
-          console.log('devices=', result);
-          setDevice(result);
-          setLoading(false);
-          setState(result.status);
-          setOpen(false);
-          props.onDeviceDeregister(result);
-        })
-        .catch(() => setLoading(false));
+      let result = await changeDeviceStatus(state, device);
+      if (result instanceof Error) {
+        //FIXME: Do something
+      } else {
+        setDevice(result);
+        setLoading(false);
+        setState(result.status);
+        setOpen(false);
+        props.onDeviceDeregister(result);
+      }
     }
   }
 
-  console.log('statesData=', statesData, ',state=',state);
+  console.log('statesData=', statesData, ',state=', state);
 
   return (
     <div>
@@ -127,21 +114,19 @@ export const DeregisterDevice = (props) => {
     setOpen(false);
   };
 
-  const handleDeregister = () => {
+  const handleDeregister = async () => {
     console.log('###deegister device=', device);
     if (!loading) {
       setLoading(true);
-      // fetch(API_SERVER_URL + '/hotel', { method: 'GET', headers: { 'Content-Type': 'application/json', 'authorization': 'Bearer ' + token.access_token } })
-      fetch(API_SERVER_URL + '/device/' + device.device_id + '/deregister?hotel_id=' + device.hotel_id + '&room_no=' + device.room_no, { method: 'POST', headers: { 'Content-Type': 'application/json' } })
-        .then(res => res.json())
-        .then((result) => {
-          console.log('devices=', result);
-          setDevice(result);
-          setLoading(false);
-          setOpen(false);
-          props.onDeviceDeregister(result);
-        })
-        .catch(() => setLoading(false));
+      let result = await deregisterDevice(device);
+      if (result instanceof Error) {
+        //FIXME: Do something
+      } else {
+        setDevice(result);
+        setLoading(false);
+        setOpen(false);
+        props.onDeviceDeregister(result);
+      }
     }
   }
 
@@ -193,43 +178,42 @@ export default (props) => {
     console.log('device state change:', device);
   }
 
-  const loadHotels = () => {
+  const loadHotels = async () => {
     if (!loading) {
       setLoading(true);
-      // fetch(API_SERVER_URL + '/hotel', { method: 'GET', headers: { 'Content-Type': 'application/json', 'authorization': 'Bearer ' + token.access_token } })
-      fetch(API_SERVER_URL + '/hotel', { method: 'GET', headers: { 'Content-Type': 'application/json' } })
-        .then(res => res.json())
-        .then((results) => {
-          console.log('hotels=', results);
-          let allHotels = results.map((h) => { return { name: h.name, id: h.hotel_id, _id: h._id } });
-          setHotels(allHotels);
-          setLoading(false);
-        })
-        .catch(() => setLoading(false));
+      let results = await allHotels();
+      console.log('loadHotels resu=', results);
+      if (results instanceof Error) {
+        console.error('error in loadHotels=', results);
+        //FIXME: Do something
+      } else {
+        let res = results.map((h) => { return { name: h.name, id: h.hotel_id, _id: h._id } });
+        setHotels(res);
+      }
+      setLoading(false);
     }
   }
 
-  const getDevices = (hotel) => {
+  const getDevices = async (hotel) => {
     console.log('getting devices for ', hotel.id);
     if (!loading) {
       setLoading(true);
-      // fetch(API_SERVER_URL + '/hotel', { method: 'GET', headers: { 'Content-Type': 'application/json', 'authorization': 'Bearer ' + token.access_token } })
-      fetch(API_SERVER_URL + '/device?hotel_id=' + hotel.id, { method: 'GET', headers: { 'Content-Type': 'application/json' } })
-        .then(res => res.json())
-        .then((results) => {
-          console.log('all assigned devices=', results);
-          let assigned = [];
-          for (var i = 0; i < results.length; i++) {
-            if (isNull(results[i].room) || isUndefined(results[i].room) || isNull(results[i].belongs_to) || isUndefined(results[i].belongs_to)) {
-            } else {
-              assigned.push(results[i]);
-              console.log('pushing to assined...', assigned)
-            }
+      let results = await getHotelDevices(hotel);
+      if (results instanceof Error) {
+        console.error('error in getDevices=', results);
+        //FIXME: Do something
+      } else {
+        let assigned = [];
+        for (var i = 0; i < results.length; i++) {
+          if (isNull(results[i].room) || isUndefined(results[i].room) || isNull(results[i].belongs_to) || isUndefined(results[i].belongs_to)) {
+          } else {
+            assigned.push(results[i]);
+            console.log('pushing to assined...', assigned)
           }
-          setAssignedDevices(assigned);
-          setLoading(false);
-        })
-        .catch(() => setLoading(false));
+        }
+        setAssignedDevices(assigned);
+        setLoading(false);
+      }
     }
   }
 

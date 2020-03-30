@@ -15,6 +15,7 @@ import { isEqual } from 'lodash';
 
 import AssignedDevices from './AssignedDevices';
 import UnassignedDevices from './UnassignedDevices';
+import Selector from './Selector';
 
 const useStyles = makeStyles(theme => ({
   root: {
@@ -29,6 +30,7 @@ const useStyles = makeStyles(theme => ({
 export default () => {
   const [value, setValue] = useState(0);
   const [assignedDevices, setAssignedDevices] = useState([]);
+  const [hotels, setHotels] = useState([]);
   const [unassignedDevices, setUnassignedDevices] = useState([]);
   const [loading, setLoading] = useState(false);
   const classes = useStyles();
@@ -39,6 +41,7 @@ export default () => {
 
   return (
     <div>
+      {/* <Selector menuName="Hotels" items={hotels} onSelectEntry={getDevices} /> */}
       <Paper square className={classes.root}>
         <Tabs
           value={value}

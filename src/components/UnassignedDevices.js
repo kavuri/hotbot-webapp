@@ -13,7 +13,7 @@ import AssignmentTurnedInRoundedIcon from '@material-ui/icons/AssignmentTurnedIn
 import { remove } from 'lodash';
 
 import Selector from './Selector';
-import { API_SERVER_URL } from '../Config';
+import { allHotels, allUnassignedDevices, getHotelRooms, assignDevice } from '../utils/API';
 
 const useStyles = makeStyles(theme => ({
   root: {
@@ -47,54 +47,50 @@ export default (props) => {
     loadHotels();
   }, []);
 
-  const loadUnassignedDevices = () => {
+  const loadUnassignedDevices = async () => {
     if (!loading) {
       setLoading(true);
-      // fetch(API_SERVER_URL + '/hotel', { method: 'GET', headers: { 'Content-Type': 'application/json', 'authorization': 'Bearer ' + token.access_token } })
-      fetch(API_SERVER_URL + '/device/unassigned', { method: 'GET', headers: { 'Content-Type': 'application/json' } })
-        .then(res => res.json())
-        .then((results) => {
-          console.log('unassigned devices=', results);
-          let allItems = results.map((d) => { return { name: d.address.addressLine1 + '; ' + d.address.addressLine2, id: d.device_id } });
-          // let allItems = results.map((d) => { return { name: d.address.addressLine1 + '; ' + d.address.addressLine2, id: d.device_id, _id: d._id } });
-          setUnassignedDevices(allItems);
-          setLoading(false);
-        })
-        .catch(() => setLoading(false));
+      let results = await allUnassignedDevices();
+      if (results instanceof Error) {
+        //FIXME: Do something
+      } else {
+        let res = results.map((d) => { return { name: d.address.addressLine1 + '; ' + d.address.addressLine2, id: d.device_id } });
+        setUnassignedDevices(res);
+      }
+      setLoading(false);
     }
   }
 
-  const loadHotels = () => {
+  const loadHotels = async () => {
     if (!loading) {
       setLoading(true);
-      // fetch(API_SERVER_URL + '/hotel', { method: 'GET', headers: { 'Content-Type': 'application/json', 'authorization': 'Bearer ' + token.access_token } })
-      fetch(API_SERVER_URL + '/hotel', { method: 'GET', headers: { 'Content-Type': 'application/json' } })
-        .then(res => res.json())
-        .then((results) => {
-          console.log('hotels=', results);
-          let allHotels = results.map((h) => { return { name: h.name, id: h.hotel_id, _id: h._id } });
-          setHotels(allHotels);
-          setLoading(false);
-        })
-        .catch(() => setLoading(false));
+      let results = await allHotels();
+      console.log('loadHotels resu=', results);
+      if (results instanceof Error) {
+        console.error('error in loadHotels=', results);
+        //FIXME: Do something
+      } else {
+        let res = results.map((h) => { return { name: h.name, id: h.hotel_id, _id: h._id } });
+        setHotels(res);
+      }
+      setLoading(false);
     }
   }
 
-  const getRooms = (hotel) => {
+  const getRooms = async (hotel) => {
     console.log('getting rooms...', hotel);
     if (!loading) {
       setLoading(true);
-      // fetch(API_SERVER_URL + '/hotel', { method: 'GET', headers: { 'Content-Type': 'application/json', 'authorization': 'Bearer ' + token.access_token } })
-      fetch(API_SERVER_URL + '/hotel/' + hotel.id, { method: 'GET', headers: { 'Content-Type': 'application/json' } })
-        .then(res => res.json())
-        .then((results) => {
-          console.log('rooms=', results);
-          let allRooms = results.rooms.map((r) => { return { name: r.room_no + ', ' + r.type, id: r.room_no, _id: r._id } })
-          setRooms(allRooms);
-          setHotel(hotel);
-          setLoading(false);
-        })
-        .catch(() => setLoading(false));
+      let results = await getHotelRooms(hotel);
+      if (results instanceof Error) {
+        console.error('error in getHotelRooms:', results);
+        //FIXME: Do something
+      } else {
+        let allRooms = results.rooms.map((r) => { return { name: r.room_no + ', ' + r.type, id: r.room_no, _id: r._id } })
+        setRooms(allRooms);
+        setHotel(hotel);
+        setLoading(false);
+      }
     }
   }
 
@@ -106,21 +102,16 @@ export default (props) => {
     setRoom(room);
   }
 
-  const handleAssign = () => {
+  const handleAssign = async () => {
     console.log('device=', device, ',hotel=', hotel, ',room=', room);
     if (!loading) {
       setLoading(true);
       // fetch(API_SERVER_URL + '/hotel', { method: 'GET', headers: { 'Content-Type': 'application/json', 'authorization': 'Bearer ' + token.access_token } })
-      fetch(API_SERVER_URL + '/device/' + device.id + '/register?hotel_id=' + hotel.id + '&room_no=' + room.id, { method: 'POST', headers: { 'Content-Type': 'application/json' } })
-        .then(res => res.json())
-        .then((results) => {
-          console.log('device assigned=', results);
-          setUnassignedDevices(remove(unassignedDevices, { id: device.id }));
-          setHotels(remove(hotels, { id: hotel.id }));
-          setRooms(remove(rooms, { id: room.id }));
-          setLoading(false);
-        })
-        .catch(() => setLoading(false));
+      let results = await assignDevice(device, hotel, room);
+      setUnassignedDevices(remove(unassignedDevices, { id: device.id }));
+      setHotels(remove(hotels, { id: hotel.id }));
+      setRooms(remove(rooms, { id: room.id }));
+      setLoading(false);
     }
   }
 
