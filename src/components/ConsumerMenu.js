@@ -13,6 +13,7 @@ import DashboardIcon from '@material-ui/icons/Dashboard';
 import ShoppingCartIcon from '@material-ui/icons/ShoppingCart';
 import SettingsIcon from '@material-ui/icons/Settings';
 import MobileScreenShareIcon from '@material-ui/icons/MobileScreenShare';
+import PeopleAltRoundedIcon from '@material-ui/icons/PeopleAltRounded';
 
 export default function ConsumerMenu(props) {
 
@@ -28,6 +29,9 @@ export default function ConsumerMenu(props) {
         props.optionSelected('deviceMgmt');
     }
     
+    const handleCheckinCheckoutMgmtOptionClick = () => {
+        props.optionSelected('checkinCheckout');
+    }
     return (
         <div>
             <ListItem button>
@@ -53,6 +57,12 @@ export default function ConsumerMenu(props) {
                     <MobileScreenShareIcon />
                 </ListItemIcon>
                 <ListItemText primary="Device Management" onClick={handleDeviceMgmtOptionClick}/>
+            </ListItem>
+            <ListItem button>
+                <ListItemIcon>
+                    <PeopleAltRoundedIcon />
+                </ListItemIcon>
+                <ListItemText primary="Checkin-Checkout" onClick={handleCheckinCheckoutMgmtOptionClick}/>
             </ListItem>
         </div>
     )

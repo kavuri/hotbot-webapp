@@ -30,6 +30,7 @@ import Orders from './Orders';
 import Hotels from './admin/Hotels';
 import Groups from './admin/Groups';
 import Devices from './Devices';
+import CheckinCheckout from './CheckinCheckout';
 import Facilities from './admin/Facilities';
 import ProfileMenu from './ProfileMenu';
 import AdminMenu from './admin/AdminMenu';
@@ -144,6 +145,7 @@ export default function Dashboard() {
     'addHotelGroup': 'AddHotelGroup',
     'addHotel': 'AddHotel',
     'deviceMgmt': Devices,
+    'checkinCheckout': CheckinCheckout,
     'settings': 'Settings',
     'facilities': Facilities,
     'orders': Orders,
