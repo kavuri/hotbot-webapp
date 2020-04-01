@@ -30,7 +30,6 @@ export default () => {
   const [value, setValue] = useState(0);
   const [assignedDevices, setAssignedDevices] = useState([]);
   const [unassignedDevices, setUnassignedDevices] = useState([]);
-  const [loading, setLoading] = useState(false);
   const classes = useStyles();
 
   const handleChange = (event, newValue) => {

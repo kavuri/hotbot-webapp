@@ -12,8 +12,8 @@ import AssignmentTurnedInRoundedIcon from '@material-ui/icons/AssignmentTurnedIn
 
 import { remove } from 'lodash';
 
-import Selector from './Selector';
-import { allHotels, allUnassignedDevices, getHotelRooms, assignDevice } from '../utils/API';
+import Selector from '../Selector';
+import { allHotels, allUnassignedDevices, getHotelRooms, assignDevice } from '../../utils/API';
 
 const useStyles = makeStyles(theme => ({
   root: {
@@ -86,11 +86,11 @@ export default (props) => {
         console.error('error in getHotelRooms:', results);
         //FIXME: Do something
       } else {
-        let allRooms = results.rooms.map((r) => { return { name: r.room_no + ', ' + r.type, id: r.room_no, _id: r._id } })
+        let allRooms = results.map((r) => { return { name: r.room_no + ', ' + r.type, id: r.room_no, _id: r._id } })
         setRooms(allRooms);
         setHotel(hotel);
-        setLoading(false);
       }
+      setLoading(false);
     }
   }
 

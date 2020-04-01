@@ -25,8 +25,8 @@ import Switch from '@material-ui/core/Switch';
 
 import { isNull, isUndefined, isEqual, remove } from 'lodash';
 
-import { changeDeviceStatus, deregisterDevice, allHotels, getHotelDevices } from '../utils/API';
-import Selector from './Selector';
+import { changeDeviceStatus, deregisterDevice, allHotels, getHotelDevices } from '../../utils/API';
+import Selector from '../Selector';
 
 const useStyles = makeStyles((theme) => ({
   table: {
@@ -212,8 +212,8 @@ export default (props) => {
           }
         }
         setAssignedDevices(assigned);
-        setLoading(false);
       }
+      setLoading(false);
     }
   }
 

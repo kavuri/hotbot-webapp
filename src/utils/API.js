@@ -34,7 +34,7 @@ export const getHotelRooms = async (hotel) => {
     let hotelRooms = await fetch(API_SERVER_URL + '/hotel/' + hotel.id, { method: 'GET', headers: headers })
         .then(res => res.json())
         .then((results) => {
-            return results;
+            return results.rooms;
         })
         .catch((error) => { return error });
     return hotelRooms;
@@ -84,6 +84,33 @@ export const deregisterDevice = async (device) => {
 
 export const getHotelDevices = async (hotel) => {
     let results = await fetch(API_SERVER_URL + '/device?hotel_id=' + hotel.id, { method: 'GET', headers: headers })
+        .then(res => res.json())
+        .then((results) => {
+            return results;
+        })
+        .catch((error) => { return error; })
+    return results;
+}
+
+export const checkinGuest = async (room, guestData) => {
+    console.log('guest details=', guestData)
+    let results = await fetch(
+        API_SERVER_URL + '/room/' + room.room_no +
+        '/checkin?hotel_id=' + room.hotel_id,
+        { method: 'POST', body: JSON.stringify(guestData), headers: headers })
+        .then(res => res.json())
+        .then((results) => {
+            return results;
+        })
+        .catch((error) => { return error; })
+    return results;
+}
+
+export const checkoutGuest = async (room) => {
+    let results = await fetch(
+        API_SERVER_URL + '/room/' + room.room_no +
+        '/checkout?hotel_id=' + room.hotel_id,
+        { method: 'POST', headers: headers })
         .then(res => res.json())
         .then((results) => {
             return results;
