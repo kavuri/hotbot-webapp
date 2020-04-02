@@ -11,7 +11,7 @@ import Tabs from '@material-ui/core/Tabs';
 import Tab from '@material-ui/core/Tab';
 import DeviceUnknownRoundedIcon from '@material-ui/icons/DeviceUnknownRounded';
 import PhonelinkSetupRoundedIcon from '@material-ui/icons/PhonelinkSetupRounded';
-import { isEqual } from 'lodash';
+import { isEqual, concat } from 'lodash';
 
 import AssignedDevices from './AssignedDevices';
 import UnassignedDevices from './UnassignedDevices';
@@ -36,6 +36,19 @@ export default () => {
     setValue(newValue);
   };
 
+  const addToUnassigned = (device) => {
+    console.log('Devices::deregistered device=', device);
+
+    let ud = concat(unassignedDevices, device);
+    setUnassignedDevices(ud);
+  }
+
+  const addToAssigned = (device) => {
+    console.log('DEvices::registered device=', device);
+    let ad = concat(assignedDevices, device);
+    setAssignedDevices(ad);
+  }
+
   return (
     <div>
       <Paper square className={classes.root}>
@@ -50,8 +63,8 @@ export default () => {
           <Tab icon={<PhonelinkSetupRoundedIcon fontSize="large" color="secondary" />} label="ASSIGNED" />
           <Tab icon={<DeviceUnknownRoundedIcon fontSize="large" color="error" />} label="UNASSIGNED" />
         </Tabs>
-        {isEqual(value, 0) && <AssignedDevices assignedDevices={assignedDevices} />}
-        {isEqual(value, 1) && <UnassignedDevices unassignedDevices={unassignedDevices} />}
+        {isEqual(value, 0) && <AssignedDevices assignedDevices={assignedDevices} deviceDeregistered={addToUnassigned} />}
+        {isEqual(value, 1) && <UnassignedDevices unassignedDevices={unassignedDevices} deviceRegistered={addToAssigned} />}
       </Paper>
     </div>
   );

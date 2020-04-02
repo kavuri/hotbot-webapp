@@ -8,7 +8,7 @@ import React, { useState, useEffect } from 'react';
 import { makeStyles } from '@material-ui/core/styles';
 import { Grid } from '@material-ui/core';
 import IconButton from '@material-ui/core/IconButton';
-import AssignmentTurnedInRoundedIcon from '@material-ui/icons/AssignmentTurnedInRounded';
+import AddCircleRoundedIcon from '@material-ui/icons/AddCircleRounded';
 
 import { remove } from 'lodash';
 
@@ -51,13 +51,13 @@ export default (props) => {
     if (!loading) {
       setLoading(true);
       let results = await allUnassignedDevices();
+      setLoading(false);
       if (results instanceof Error) {
         //FIXME: Do something
       } else {
         let res = results.map((d) => { return { name: d.address.addressLine1 + '; ' + d.address.addressLine2, id: d.device_id } });
         setUnassignedDevices(res);
       }
-      setLoading(false);
     }
   }
 
@@ -65,6 +65,7 @@ export default (props) => {
     if (!loading) {
       setLoading(true);
       let results = await allHotels();
+      setLoading(false);
       console.log('loadHotels resu=', results);
       if (results instanceof Error) {
         console.error('error in loadHotels=', results);
@@ -73,7 +74,6 @@ export default (props) => {
         let res = results.map((h) => { return { name: h.name, id: h.hotel_id, _id: h._id } });
         setHotels(res);
       }
-      setLoading(false);
     }
   }
 
@@ -82,6 +82,7 @@ export default (props) => {
     if (!loading) {
       setLoading(true);
       let results = await getHotelRooms(hotel);
+      setLoading(false);
       if (results instanceof Error) {
         console.error('error in getHotelRooms:', results);
         //FIXME: Do something
@@ -90,7 +91,6 @@ export default (props) => {
         setRooms(allRooms);
         setHotel(hotel);
       }
-      setLoading(false);
     }
   }
 
@@ -108,10 +108,11 @@ export default (props) => {
       setLoading(true);
       // fetch(API_SERVER_URL + '/hotel', { method: 'GET', headers: { 'Content-Type': 'application/json', 'authorization': 'Bearer ' + token.access_token } })
       let results = await assignDevice(device, hotel, room);
-      setUnassignedDevices(remove(unassignedDevices, { id: device.id }));
-      setHotels(remove(hotels, { id: hotel.id }));
-      setRooms(remove(rooms, { id: room.id }));
       setLoading(false);
+      remove(unassignedDevices, { id: device.id });
+      remove(hotels, { id: hotel.id });
+      remove(rooms, { id: room.id });
+      props.deviceRegistered(device);
     }
   }
 
@@ -130,7 +131,7 @@ export default (props) => {
       </Grid>
       <Grid item xs={12}  >
         <IconButton aria-label="assign" className={classes.margin} onClick={handleAssign} >
-          <AssignmentTurnedInRoundedIcon fontSize="large" /> Assign Device
+          <AddCircleRoundedIcon fontSize="large" /> Assign Device
         </IconButton>
       </Grid>
     </Grid>

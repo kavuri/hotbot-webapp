@@ -23,7 +23,7 @@ import DialogTitle from '@material-ui/core/DialogTitle';
 import FormControlLabel from '@material-ui/core/FormControlLabel';
 import Switch from '@material-ui/core/Switch';
 
-import { isNull, isUndefined, isEqual, remove } from 'lodash';
+import { isNull, isUndefined, remove } from 'lodash';
 
 import { changeDeviceStatus, deregisterDevice, allHotels, getHotelDevices } from '../../utils/API';
 import Selector from '../Selector';
@@ -64,19 +64,17 @@ export const DeviceStateChange = (props) => {
     if (!loading) {
       setLoading(true);
       let result = await changeDeviceStatus(state, device);
+      setLoading(false);
       if (result instanceof Error) {
         //FIXME: Do something
       } else {
         setDevice(result);
-        setLoading(false);
         setState(result.status);
         setOpen(false);
-        props.onDeviceDeregister(result);
+        props.onDeviceStateChange(result);
       }
     }
   }
-
-  console.log('statesData=', statesData, ',state=', state);
 
   return (
     <div>
@@ -105,6 +103,10 @@ export const DeregisterDevice = (props) => {
   const [loading, setLoading] = useState(false);
   const [open, setOpen] = React.useState(false);
 
+  useEffect(() => {
+    setDevice(props.device);
+  }, [props.device]);
+
   const classes = useStyles();
   const handleClickOpen = () => {
     setOpen(true);
@@ -119,11 +121,11 @@ export const DeregisterDevice = (props) => {
     if (!loading) {
       setLoading(true);
       let result = await deregisterDevice(device);
+      setLoading(false);
       if (result instanceof Error) {
         //FIXME: Do something
       } else {
         setDevice(result);
-        setLoading(false);
         setOpen(false);
         props.onDeviceDeregister(result);
       }
@@ -172,6 +174,7 @@ export default (props) => {
   const updateAssignedDevices = (device) => {
     console.log('should remove:', device);
     remove(assignedDevices, { room_no: device.room_no });
+    props.deviceDeregistered(device);
   }
 
   const changeDeviceState = (device) => {
@@ -182,6 +185,7 @@ export default (props) => {
     if (!loading) {
       setLoading(true);
       let results = await allHotels();
+      setLoading(false);
       console.log('loadHotels resu=', results);
       if (results instanceof Error) {
         console.error('error in loadHotels=', results);
@@ -190,7 +194,6 @@ export default (props) => {
         let res = results.map((h) => { return { name: h.name, id: h.hotel_id, _id: h._id } });
         setHotels(res);
       }
-      setLoading(false);
     }
   }
 
@@ -199,6 +202,7 @@ export default (props) => {
     if (!loading) {
       setLoading(true);
       let results = await getHotelDevices(hotel);
+      setLoading(false);
       if (results instanceof Error) {
         console.error('error in getDevices=', results);
         //FIXME: Do something
@@ -213,7 +217,6 @@ export default (props) => {
         }
         setAssignedDevices(assigned);
       }
-      setLoading(false);
     }
   }
 
