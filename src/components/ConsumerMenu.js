@@ -8,7 +8,7 @@ import React from 'react';
 import ListItem from '@material-ui/core/ListItem';
 import ListItemIcon from '@material-ui/core/ListItemIcon';
 import ListItemText from '@material-ui/core/ListItemText';
-import ListSubheader from '@material-ui/core/ListSubheader';
+import Badge from '@material-ui/core/Badge';
 import DashboardIcon from '@material-ui/icons/Dashboard';
 import ShoppingCartIcon from '@material-ui/icons/ShoppingCart';
 import SettingsIcon from '@material-ui/icons/Settings';
@@ -28,7 +28,7 @@ export default function ConsumerMenu(props) {
     const handleDeviceMgmtOptionClick = () => {
         props.optionSelected('deviceMgmt');
     }
-    
+
     const handleCheckinCheckoutMgmtOptionClick = () => {
         props.optionSelected('checkinCheckout');
     }
@@ -42,27 +42,28 @@ export default function ConsumerMenu(props) {
             </ListItem>
             <ListItem button>
                 <ListItemIcon>
-                    <ShoppingCartIcon />
+                    {/* //FIXME: Get the actual order count in the badge */}
+                    <Badge badgeContent={4} color="error"> <ShoppingCartIcon /></Badge>
                 </ListItemIcon>
-                <ListItemText primary="Orders" onClick={handleOrdersOptionClick}/>
+                <ListItemText primary="Orders" onClick={handleOrdersOptionClick} />
             </ListItem>
             <ListItem button>
                 <ListItemIcon>
                     <SettingsIcon />
                 </ListItemIcon>
-                <ListItemText primary="Settings" onClick={handleSettingsOptionClick}/>
+                <ListItemText primary="Settings" onClick={handleSettingsOptionClick} />
             </ListItem>
             <ListItem button>
                 <ListItemIcon>
                     <MobileScreenShareIcon />
                 </ListItemIcon>
-                <ListItemText primary="Device Management" onClick={handleDeviceMgmtOptionClick}/>
+                <ListItemText primary="Device Management" onClick={handleDeviceMgmtOptionClick} />
             </ListItem>
             <ListItem button>
                 <ListItemIcon>
                     <PeopleAltRoundedIcon />
                 </ListItemIcon>
-                <ListItemText primary="Checkin-Checkout" onClick={handleCheckinCheckoutMgmtOptionClick}/>
+                <ListItemText primary="Checkin-Checkout" onClick={handleCheckinCheckoutMgmtOptionClick} />
             </ListItem>
         </div>
     )

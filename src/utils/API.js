@@ -5,7 +5,7 @@
 'use strict';
 
 import { API_SERVER_URL } from '../Config';
-import { isEqual } from 'lodash';
+import { isEqual, isUndefined } from 'lodash';
 
 const headers = { 'Content-Type': 'application/json' };
 // { 'Content-Type': 'application/json', 'authorization': 'Bearer ' + token.access_token }
@@ -111,6 +111,19 @@ export const checkoutGuest = async (room) => {
         API_SERVER_URL + '/room/' + room.room_no +
         '/checkout?hotel_id=' + room.hotel_id,
         { method: 'POST', headers: headers })
+        .then(res => res.json())
+        .then((results) => {
+            return results;
+        })
+        .catch((error) => { return error; })
+    return results;
+}
+
+export const allOrders = async (hotel, page, status) => {
+    console.log('getting allOrder:hotel=', hotel, ',page=', page,', status=',status);
+    let URL = API_SERVER_URL + '/order?hotel_id=' + hotel.id + '&resPerPage=' + 10 + '&page=' + page;
+    if (!isUndefined(status)) URL += '&status=' + status;
+    let results = await fetch(URL, { method: 'GET', headers: headers })
         .then(res => res.json())
         .then((results) => {
             return results;
