@@ -120,10 +120,34 @@ export const checkoutGuest = async (room) => {
 }
 
 export const allOrders = async (hotel, page, status) => {
-    console.log('getting allOrder:hotel=', hotel, ',page=', page,', status=',status);
-    let URL = API_SERVER_URL + '/order?hotel_id=' + hotel.id + '&resPerPage=' + 10 + '&page=' + page;
+    console.log('getting allOrder:hotel=', hotel, ',page=', page, ', status=', status);
+    let URL = API_SERVER_URL + '/order?hotel_id=' + hotel.id + '&rowsPerPage=' + 10 + '&page=' + page;
     if (!isUndefined(status)) URL += '&status=' + status;
     let results = await fetch(URL, { method: 'GET', headers: headers })
+        .then(res => res.json())
+        .then((results) => {
+            return results;
+        })
+        .catch((error) => { return error; })
+    return results;
+}
+
+export const searchOrders = async (hotel, page, text) => {
+    console.log('Search orders:hotel=', hotel, ',page=', page);
+    let URL = API_SERVER_URL + '/order/search?hotel_id=' + hotel.id + '&page=' + page + '&text=' + text;
+    let results = await fetch(URL, { method: 'GET', headers: headers })
+        .then(res => res.json())
+        .then((results) => {
+            return results;
+        })
+        .catch((error) => { return error; })
+    return results;
+}
+
+export const changeOrderStatus = async (order_id, newStatus) => {
+    console.log('changeOrderStatus :order=', order_id);
+    let URL = API_SERVER_URL + '/order/' + order_id;
+    let results = await fetch(URL, { method: 'PATCH', body: JSON.stringify({ status: newStatus }), headers: headers })
         .then(res => res.json())
         .then((results) => {
             return results;

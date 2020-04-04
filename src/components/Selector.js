@@ -5,7 +5,7 @@ import MenuItem from '@material-ui/core/MenuItem';
 import FormControl from '@material-ui/core/FormControl';
 import Select from '@material-ui/core/Select';
 
-import { isEmpty, isUndefined } from 'lodash';
+import { isEmpty, isUndefined, isNull } from 'lodash';
 
 const useStyles = makeStyles(theme => ({
     formControl: {
@@ -18,9 +18,10 @@ const useStyles = makeStyles(theme => ({
 }));
 
 export default (props) => {
-    console.log('Selector props=',props);
+    console.log('Selector props=', props);
     const classes = useStyles();
-    const [entry, setEntry] = React.useState({})
+    const [entry, setEntry] = useState({});
+    const [defaultEntry, setDefaultEntry] = useState(props.defaultEntry);
     const [menuName, setMenuName] = useState(props.menuName);
     const [items, setItems] = useState(props.items);
 
@@ -49,7 +50,7 @@ export default (props) => {
                 <Select
                     labelId="demo-simple-select-outlined-label"
                     id="demo-simple-select-outlined"
-                    value={entry}
+                    value={props.defaultEntry ? props.defaultEntry : ''}
                     onChange={handleChange}
                     labelWidth={labelWidth}
                 >
