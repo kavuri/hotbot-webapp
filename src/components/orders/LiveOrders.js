@@ -18,6 +18,7 @@ import { isNull, isUndefined, concat, find } from 'lodash';
 import Selector from '../Selector';
 import { allOrders, searchOrders, changeOrderStatus } from '../../utils/API';
 import { timeDiff } from '../../utils/helpers';
+import StatusButton from './StatusButton';
 
 const useStyles = makeStyles((theme) => ({
     root: {
@@ -30,7 +31,6 @@ const useStyles = makeStyles((theme) => ({
         fontSize: theme.typography.pxToRem(15),
         fontWeight: theme.typography.fontWeightRegular,
     },
-
 }));
 
 const statuses = [
@@ -96,9 +96,9 @@ export default (props) => {
                 filter: false,
                 sort: false,
                 searchable: false,
-                customBodyRender: (value, tabbleMeta, updateValue) => {
-                    // If the order status="done" or "cant_serve", do not show the time since request
-                }
+                // customBodyRender: (value, tabbleMeta, updateValue) => {
+                //     // If the order status="done" or "cant_serve", do not show the time since request
+                // }
             }
         },
         {
@@ -117,38 +117,42 @@ export default (props) => {
                 sort: true,
                 searchable: true,
                 customBodyRender: (value, tableMeta, updateValue) => {
-                    var status = find(statuses, { id: tableMeta.rowData[6] });
-                    var borderColor = !isUndefined(status) ? status.borderColor : '#ffffff';
-                    var bgcolor = !isUndefined(status) ? status.bgcolor : '#ffffff';
+                    console.log('^^^^value=', value, ',tableMeta=', tableMeta);
                     return (
-                        <Box display="inline" borderRadius={6} p={1} m={1} borderColor={borderColor} bgcolor={bgcolor} border={2}>{value}</Box>
+                        <StatusButton status={value} data={tableMeta.rowData} onStatusUpdated={async (newStatus) => {
+                            console.log('###***###neStatus=', newStatus)
+                            tableMeta.tableData[tableMeta.rowIndex][6] = newStatus;
+                            tableMeta.rowData[6] = newStatus;
+                            console.log('______tableMeta=',tableMeta);
+                            updateValue(newStatus);
+                        }} />
                     );
                 }
             }
         },
-        {
-            label: "Change Status",
-            name: "newStatus",
-            options: {
-                filter: false,
-                sort: false,
-                searchable: false,
-                customBodyRender: (value, tableMeta, updateValue) => {
-                    console.log('+++++value=', value + 'ChangeStatus:tableMeta=', tableMeta, ',updateValue=', updateValue);
-                    return (
-                        <Selector items={statuses} onSelectEntry={async (value) => {
-                            console.log('$$$$changed=', value);
-                            let updatedOrder = await changeOrderStatus(tableMeta.rowData[0], value.id);
-                            console.log('&&&&&updatedOrder=', updatedOrder);
-                            tableMeta.tableData[tableMeta.rowIndex][6] = updatedOrder.curr_status.status;
-                            tableMeta.rowData[6] = updatedOrder.curr_status.status;
-                            console.log('#####Updated state rows=', tableMeta);
-                            updateValue(value);
-                        }} defaultEntry={find(statuses, { id: tableMeta.rowData[6] })} />
-                    );
-                }
-            }
-        }
+        // {
+        //     label: "Change Status",
+        //     name: "newStatus",
+        //     options: {
+        //         filter: false,
+        //         sort: false,
+        //         searchable: false,
+        //         customBodyRender: (value, tableMeta, updateValue) => {
+        //             console.log('+++++value=', value + 'ChangeStatus:tableMeta=', tableMeta, ',updateValue=', updateValue);
+        //             return (
+        //                 <Selector items={statuses} onSelectEntry={async (value) => {
+        //                     console.log('$$$$changed=', value);
+        //                     let updatedOrder = await changeOrderStatus(tableMeta.rowData[0], value.id);
+        //                     console.log('&&&&&updatedOrder=', updatedOrder);
+        //                     tableMeta.tableData[tableMeta.rowIndex][6] = updatedOrder.curr_status.status;
+        //                     tableMeta.rowData[6] = updatedOrder.curr_status.status;
+        //                     console.log('#####Updated state rows=', tableMeta);
+        //                     updateValue(value);
+        //                 }} defaultEntry={find(statuses, { id: tableMeta.rowData[6] })} />
+        //             );
+        //         }
+        //     }
+        // }
     ];
 
     const getOrders = async (page) => {
