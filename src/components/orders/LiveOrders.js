@@ -8,15 +8,10 @@ import React, { useState, useEffect } from 'react';
 import { makeStyles } from '@material-ui/core/styles';
 import Typography from '@material-ui/core/Typography';
 import CircularProgress from '@material-ui/core/Typography';
-import { purple, orange, green, yellow, red } from '@material-ui/core/colors';
-import Box from '@material-ui/core/Box';
 
 import MUIDataTable from "mui-datatables";
 
-import { isNull, isUndefined, concat, find } from 'lodash';
-
-import Selector from '../Selector';
-import { allOrders, searchOrders, changeOrderStatus } from '../../utils/API';
+import { allOrders, searchOrders } from '../../utils/API';
 import { timeDiff } from '../../utils/helpers';
 import StatusButton from './StatusButton';
 
@@ -32,14 +27,6 @@ const useStyles = makeStyles((theme) => ({
         fontWeight: theme.typography.fontWeightRegular,
     },
 }));
-
-const statuses = [
-    { name: 'NEW', id: 'new', borderColor: orange[700], bgcolor: orange[100] },
-    { name: 'PROGRESS', id: 'progress', borderColor: yellow['A700'], bgcolor: yellow['A100'] },
-    { name: 'FINISHED', id: 'done', borderColor: green[700], bgcolor: green['A100'] },
-    { name: 'NOT AVAILABLE', id: 'cant_serve', borderColor: purple[700], bgcolor: purple['A100'] },
-    { name: 'CANCELLED', id: 'cancelled', borderColor: red[700], bgcolor: purple['A100'] }
-];
 
 export default (props) => {
     const [hotel, setHotel] = useState(props.hotel);
@@ -59,7 +46,8 @@ export default (props) => {
         {
             name: "_id",
             options: {
-                display: false
+                display: false,
+                filter: false
             }
         },
         {
@@ -123,36 +111,13 @@ export default (props) => {
                             console.log('###***###neStatus=', newStatus)
                             tableMeta.tableData[tableMeta.rowIndex][6] = newStatus;
                             tableMeta.rowData[6] = newStatus;
-                            console.log('______tableMeta=',tableMeta);
+                            console.log('______tableMeta=', tableMeta);
                             updateValue(newStatus);
                         }} />
                     );
                 }
             }
         },
-        // {
-        //     label: "Change Status",
-        //     name: "newStatus",
-        //     options: {
-        //         filter: false,
-        //         sort: false,
-        //         searchable: false,
-        //         customBodyRender: (value, tableMeta, updateValue) => {
-        //             console.log('+++++value=', value + 'ChangeStatus:tableMeta=', tableMeta, ',updateValue=', updateValue);
-        //             return (
-        //                 <Selector items={statuses} onSelectEntry={async (value) => {
-        //                     console.log('$$$$changed=', value);
-        //                     let updatedOrder = await changeOrderStatus(tableMeta.rowData[0], value.id);
-        //                     console.log('&&&&&updatedOrder=', updatedOrder);
-        //                     tableMeta.tableData[tableMeta.rowIndex][6] = updatedOrder.curr_status.status;
-        //                     tableMeta.rowData[6] = updatedOrder.curr_status.status;
-        //                     console.log('#####Updated state rows=', tableMeta);
-        //                     updateValue(value);
-        //                 }} defaultEntry={find(statuses, { id: tableMeta.rowData[6] })} />
-        //             );
-        //         }
-        //     }
-        // }
     ];
 
     const getOrders = async (page) => {
