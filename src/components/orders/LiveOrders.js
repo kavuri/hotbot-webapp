@@ -10,8 +10,10 @@ import Typography from '@material-ui/core/Typography';
 import CircularProgress from '@material-ui/core/Typography';
 
 import MUIDataTable from "mui-datatables";
+import moment from 'moment';
+import { isUndefined, isEmpty } from 'lodash';
 
-import { allOrders, searchOrders } from '../../utils/API';
+import { allOrders } from '../../utils/API';
 import { timeDiff } from '../../utils/helpers';
 import StatusButton from './StatusButton';
 
@@ -123,10 +125,9 @@ export default (props) => {
     const getOrders = async (page) => {
         setTableState({ isLoading: true, page: page });
         console.log('$$getOrders=', tableState, ',hotel=', hotel);
-        let orders = await allOrders(hotel, tableState.page);
+        let orders = await allOrders(hotel, { page: tableState.page, status: undefined, selectedDate: new Date().toISOString() });
         let now = new Date();
-        // let modOrders = orders.data.map(o => ({ ...o, timeSinceRequest: 'music'}));
-        let modOrders = orders.data.map(o => ({ ...o, timeSinceRequest: timeDiff(o.created_at, now), newStatus: '' }));
+        let modOrders = isUndefined(orders.data) || isEmpty(orders.data) ? [] : orders.data.map(o => ({ ...o, timeSinceRequest: timeDiff(o.created_at, o.curr_status.created), newStatus: '' }));
         console.log('modOrders=', modOrders);
         setTableState({ data: modOrders, count: orders.total, isLoading: false });
     }
@@ -138,16 +139,6 @@ export default (props) => {
         console.log('%%% changing page=', tableState);
         getOrders(page);
     };
-
-    const orderSearch = async (state) => {
-        console.log('### searching for ' + state.searchText);
-        let orders = await searchOrders(hotel, state.page, state.searchText);
-        setTableState({ data: orders.data, count: orders.total, isLoading: false });
-    }
-
-    const orderFilter = async (hotel, filter) => {
-
-    }
 
     const options = {
         filter: true,

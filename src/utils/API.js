@@ -5,7 +5,7 @@
 'use strict';
 
 import { API_SERVER_URL } from '../Config';
-import { isEqual, isUndefined } from 'lodash';
+import { isEqual, isUndefined, has } from 'lodash';
 
 const headers = { 'Content-Type': 'application/json' };
 // { 'Content-Type': 'application/json', 'authorization': 'Bearer ' + token.access_token }
@@ -119,10 +119,11 @@ export const checkoutGuest = async (room) => {
     return results;
 }
 
-export const allOrders = async (hotel, page, status) => {
-    console.log('getting allOrder:hotel=', hotel, ',page=', page, ', status=', status);
-    let URL = API_SERVER_URL + '/order?hotel_id=' + hotel.id + '&rowsPerPage=' + 10 + '&page=' + page;
-    if (!isUndefined(status)) URL += '&status=' + status;
+export const allOrders = async (hotel, filter) => {
+    console.log('getting allOrder:hotel=', hotel, ',filter=', filter);
+    let URL = API_SERVER_URL + '/order?hotel_id=' + hotel.id + '&rowsPerPage=' + 10 + '&page=' + filter.page;
+    if (has(filter, 'status') && !isUndefined(filter.status)) URL += '&status=' + filter.status;
+    if (has(filter, 'selectedDate') && !isUndefined(filter.selectedDate)) URL += '&selectedDate=' + filter.selectedDate;
     let results = await fetch(URL, { method: 'GET', headers: headers })
         .then(res => res.json())
         .then((results) => {

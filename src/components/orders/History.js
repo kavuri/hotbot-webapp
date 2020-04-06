@@ -9,12 +9,19 @@ import { makeStyles } from '@material-ui/core/styles';
 import Typography from '@material-ui/core/Typography';
 import CircularProgress from '@material-ui/core/Typography';
 
-import MUIDataTable from "mui-datatables";
+import ChevronRightRoundedIcon from "@material-ui/icons/ChevronRightRounded";
+import ChevronLeftRoundedIcon from "@material-ui/icons/ChevronLeftRounded";
+import IconButton from "@material-ui/core/IconButton";
+import MomentUtils from '@date-io/moment';
+import { MuiPickersUtilsProvider, KeyboardDatePicker } from "@material-ui/pickers";
 
-import { isNull, isUndefined, concat, remove } from 'lodash';
+import MUIDataTable from "mui-datatables";
+import moment from 'moment';
+import { isUndefined, isEmpty } from 'lodash';
 
 import { allOrders, searchOrders } from '../../utils/API';
-import CustomSearchRender from './CustomSearchRender';
+import { timeDiff } from '../../utils/helpers';
+import StatusButton from './StatusButton';
 
 const useStyles = makeStyles((theme) => ({
     root: {
@@ -30,7 +37,6 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 export default (props) => {
-    const classes = useStyles();
     const [hotel, setHotel] = useState(props.hotel);
     const [tableState, setTableState] = useState({
         page: 0,
@@ -39,6 +45,33 @@ export default (props) => {
         data: [['Loading...']]
     });
 
+    const [selectedDate, setSelectedDate] = useState(moment());
+    // const [selectedDate, setSelectedDate] = useState(moment().subtract(1, 'day'));
+
+    const handleDateChange = date => {
+        console.log('-----Date change called=', date);
+        let dtClone = selectedDate.clone();
+        dtClone = date;
+        setSelectedDate(dtClone);
+        console.log('+++DATE SELECTED+++', selectedDate);
+        getOrders(date);
+    };
+
+    const moveRight = () => {
+        let d = moment(selectedDate).add(1, 'day');
+        setSelectedDate(d);
+        console.log('+++RIGHT+++', selectedDate);
+        getOrders(d);
+    };
+
+    const moveLeft = () => {
+        // setSelectedDate(moment(selectedDate).subtract(1, 'day'));
+        let d = moment(selectedDate).subtract(1, 'day');
+        setSelectedDate(d);
+        console.log('+++LEFT+++', selectedDate, d);
+        getOrders(d);
+    }
+
     useEffect(() => {
         setHotel(props.hotel);
         getOrders();
@@ -46,16 +79,23 @@ export default (props) => {
 
     const columns = [
         {
+            name: "_id",
+            options: {
+                display: false,
+                filter: false
+            }
+        },
+        {
             name: "room_no",
             label: "Room",
             options: {
                 filter: true,
-                sort: false,
+                sort: true,
                 searchable: false
             }
         },
         {
-            name: "guestName",
+            name: "checkincheckout.guestName",
             label: "Guest Name",
             options: {
                 filter: true,
@@ -73,16 +113,20 @@ export default (props) => {
             }
         },
         {
-            name: "createdAt",
-            label: "Date/Time",
+            name: "item.req_count",
+            label: "Count",
             options: {
-                filter: true,
-                sort: true
+                filter: false,
+                sort: false,
+                searchable: false,
+                // customBodyRender: (value, tabbleMeta, updateValue) => {
+                //     // If the order status="done" or "cant_serve", do not show the time since request
+                // }
             }
         },
         {
-            name: "serviceTime",
-            label: "Service Time",
+            name: "timeSinceRequest",
+            label: "Time Since Request",
             options: {
                 filter: false,
                 sort: true
@@ -94,16 +138,34 @@ export default (props) => {
             options: {
                 filter: true,
                 sort: true,
-                searchable: true
+                searchable: true,
+                customBodyRender: (value, tableMeta, updateValue) => {
+                    // console.log('^^^^value=', value, ',tableMeta=', tableMeta);
+                    return (
+                        <StatusButton status={value} data={tableMeta.rowData} onStatusUpdated={async (newStatus) => {
+                            console.log('###***###neStatus=', newStatus)
+                            tableMeta.tableData[tableMeta.rowIndex][6] = newStatus;
+                            tableMeta.rowData[6] = newStatus;
+                            console.log('______tableMeta=', tableMeta);
+                            updateValue(newStatus);
+                        }} />
+                    );
+                }
             }
-        }
+        },
     ];
 
-    const getOrders = async (page) => {
-        setTableState({ isLoading: true, page: page });
-        console.log('$$getOrders=', tableState);
-        let orders = await allOrders(hotel, tableState.page);
-        setTableState({ data: orders.data, count: orders.total, isLoading: false });
+    const getOrders = async (dt) => {
+        if (!tableState.isLoading) {
+            setTableState({ isLoading: true });
+            console.log('^^^^^GETTING ORDERS WITH SELECTED DATE=', selectedDate);
+            let d = isUndefined(dt) ? selectedDate : dt;
+            let orders = await allOrders(hotel, { page: tableState.page, status: undefined, selectedDate: d.toISOString() });
+            // let modOrders = orders.data.map(o => ({ ...o, timeSinceRequest: 'music'}));
+            let modOrders = isUndefined(orders.data) || isEmpty(orders.data) ? [] : orders.data.map(o => ({ ...o, timeSinceRequest: timeDiff(o.created_at, o.curr_status.created), newStatus: '' }));
+            console.log('modOrders=', modOrders);
+            setTableState({ data: modOrders, count: orders.total, isLoading: false });
+        }
     }
 
     const changePage = async (page) => {
@@ -111,18 +173,8 @@ export default (props) => {
         // setTableState({ page: page });
         tableState.page = page;
         console.log('%%% changing page=', tableState);
-        getOrders(page);
+        getOrders();
     };
-
-    const orderSearch = async (state) => {
-        console.log('### searching for ' + state.searchText);
-        let orders = await searchOrders(hotel, state.page, state.searchText);
-        setTableState({ data: orders.data, count: orders.total, isLoading: false });
-    }
-
-    const orderFilter = async (hotel, filter) => {
-
-    }
 
     const options = {
         filter: true,
@@ -133,37 +185,15 @@ export default (props) => {
         download: false,
         print: false,
         viewColumns: false,
-        serverSide: true,   // Only required in history. Make 'false' for LiveOrders as we will get all orders into browser memory
+        // serverSide: true,   // Only required in history. Make 'false' for LiveOrders as we will get all orders into browser memory
         pagination: true,
         count: tableState.count,
         page: tableState.page,
-        customSearchRender: (searchText, handleSearch, hideSearch, options) => {
-            return (
-                <CustomSearchRender
-                    searchText={searchText}
-                    onSearch={handleSearch}
-                    onHide={hideSearch}
-                    options={options}
-                />
-            );
-        },
         onTableChange: (action, state) => {
             console.log('action=', action, 'state=', state);
             switch (action) {
                 case 'changePage':
                     changePage(state.page);
-                    break;
-                // case 'search':
-                //     let searchText = state.searchText;
-                //     console.log('^^^^^ searchText=', searchText);
-                //     if (!isNull(searchText) && (searchText.length >= 3)) {
-                //         // Only then search in server
-                //         orderSearch(state);
-                //     }
-                //     break;
-                case 'filterChange':
-                    // Combine state.columns and state.filterList to get the key/value pairs of searchable items
-                    // var filter = 
                     break;
             }
         }
@@ -171,6 +201,32 @@ export default (props) => {
 
     return (
         <div>
+            <MuiPickersUtilsProvider utils={MomentUtils}>
+                {/* <Grid container justify="space-around"> */}
+                <IconButton aria-label="left" color="primary" onClick={moveLeft}>
+                    <ChevronLeftRoundedIcon />
+                </IconButton>
+                <KeyboardDatePicker
+                    disableToolbar
+                    variant="inline"
+                    inputVariant="outlined"
+                    autoOk="true"
+                    format="DD/MM/YYYY"
+                    margin="none"
+                    id="date-picker-inline"
+                    label="Select date"
+                    value={selectedDate}
+                    disableFuture={true}
+                    onChange={date => handleDateChange(date)}
+                    KeyboardButtonProps={{
+                        "aria-label": "change date"
+                    }}
+                />
+                <IconButton aria-label="right" color="primary" onClick={moveRight}>
+                    <ChevronRightRoundedIcon />
+                </IconButton>
+                {/* </Grid> */}
+            </MuiPickersUtilsProvider>
             <MUIDataTable
                 title={<Typography variant="body2">
                     All Orders
@@ -181,6 +237,6 @@ export default (props) => {
                 columns={columns}
                 options={options}
             />
-        </div>
+        </div >
     );
 }
