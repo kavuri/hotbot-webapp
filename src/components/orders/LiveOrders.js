@@ -109,7 +109,7 @@ export default (props) => {
                 customBodyRender: (value, tableMeta, updateValue) => {
                     console.log('^^^^value=', value, ',tableMeta=', tableMeta);
                     return (
-                        <StatusButton status={value} data={tableMeta.rowData} onStatusUpdated={async (newStatus) => {
+                        <StatusButton status={value} chip={false} data={tableMeta.rowData} onStatusUpdated={async (newStatus) => {
                             console.log('###***###neStatus=', newStatus)
                             tableMeta.tableData[tableMeta.rowIndex][6] = newStatus;
                             tableMeta.rowData[6] = newStatus;
@@ -154,7 +154,7 @@ export default (props) => {
         count: tableState.count,
         page: tableState.page,
         onTableChange: (action, state) => {
-            console.log('action=', action, 'state=', state);
+            // console.log('action=', action, 'state=', state);
             switch (action) {
                 case 'changePage':
                     changePage(state.page);

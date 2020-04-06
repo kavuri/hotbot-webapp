@@ -18,7 +18,7 @@ const useStyles = makeStyles(theme => ({
 }));
 
 export default (props) => {
-    console.log('Selector props=', props);
+    // console.log('Selector props=', props);
     const classes = useStyles();
     const [entry, setEntry] = useState({});
     const [defaultEntry, setDefaultEntry] = useState(props.defaultEntry);
@@ -34,7 +34,7 @@ export default (props) => {
     }, [props.items]);
 
     const handleChange = event => {
-        console.log('new event=', event.target)
+        // console.log('new event=', event.target)
         setEntry(event.target.value);
         if (!isEmpty(props.onSelectEntry) || !isUndefined(props.onSelectEntry)) {
             props.onSelectEntry(event.target.value);

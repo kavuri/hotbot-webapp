@@ -120,7 +120,7 @@ export const checkoutGuest = async (room) => {
 }
 
 export const allOrders = async (hotel, filter) => {
-    console.log('getting allOrder:hotel=', hotel, ',filter=', filter);
+    // console.log('getting allOrder:hotel=', hotel, ',filter=', filter);
     let URL = API_SERVER_URL + '/order?hotel_id=' + hotel.id + '&rowsPerPage=' + 10 + '&page=' + filter.page;
     if (has(filter, 'status') && !isUndefined(filter.status)) URL += '&status=' + filter.status;
     if (has(filter, 'selectedDate') && !isUndefined(filter.selectedDate)) URL += '&selectedDate=' + filter.selectedDate;

@@ -7,34 +7,19 @@
 import React, { useState, useEffect } from 'react';
 import { makeStyles } from '@material-ui/core/styles';
 import Typography from '@material-ui/core/Typography';
-import CircularProgress from '@material-ui/core/Typography';
 
 import ChevronRightRoundedIcon from "@material-ui/icons/ChevronRightRounded";
 import ChevronLeftRoundedIcon from "@material-ui/icons/ChevronLeftRounded";
 import IconButton from "@material-ui/core/IconButton";
 import MomentUtils from '@date-io/moment';
 import { MuiPickersUtilsProvider, KeyboardDatePicker } from "@material-ui/pickers";
-
 import MUIDataTable from "mui-datatables";
 import moment from 'moment';
 import { isUndefined, isEmpty } from 'lodash';
 
-import { allOrders, searchOrders } from '../../utils/API';
+import { allOrders } from '../../utils/API';
 import { timeDiff } from '../../utils/helpers';
 import StatusButton from './StatusButton';
-
-const useStyles = makeStyles((theme) => ({
-    root: {
-        '& > *': {
-            margin: theme.spacing(1),
-            width: '25ch',
-        },
-    },
-    heading: {
-        fontSize: theme.typography.pxToRem(15),
-        fontWeight: theme.typography.fontWeightRegular,
-    },
-}));
 
 export default (props) => {
     const [hotel, setHotel] = useState(props.hotel);
@@ -49,18 +34,18 @@ export default (props) => {
     // const [selectedDate, setSelectedDate] = useState(moment().subtract(1, 'day'));
 
     const handleDateChange = date => {
-        console.log('-----Date change called=', date);
+        // console.log('-----Date change called=', date);
         let dtClone = selectedDate.clone();
         dtClone = date;
         setSelectedDate(dtClone);
-        console.log('+++DATE SELECTED+++', selectedDate);
+        // console.log('+++DATE SELECTED+++', selectedDate);
         getOrders(date);
     };
 
     const moveRight = () => {
         let d = moment(selectedDate).add(1, 'day');
         setSelectedDate(d);
-        console.log('+++RIGHT+++', selectedDate);
+        // console.log('+++RIGHT+++', selectedDate);
         getOrders(d);
     };
 
@@ -68,7 +53,7 @@ export default (props) => {
         // setSelectedDate(moment(selectedDate).subtract(1, 'day'));
         let d = moment(selectedDate).subtract(1, 'day');
         setSelectedDate(d);
-        console.log('+++LEFT+++', selectedDate, d);
+        // console.log('+++LEFT+++', selectedDate, d);
         getOrders(d);
     }
 
@@ -142,13 +127,7 @@ export default (props) => {
                 customBodyRender: (value, tableMeta, updateValue) => {
                     // console.log('^^^^value=', value, ',tableMeta=', tableMeta);
                     return (
-                        <StatusButton status={value} data={tableMeta.rowData} onStatusUpdated={async (newStatus) => {
-                            console.log('###***###neStatus=', newStatus)
-                            tableMeta.tableData[tableMeta.rowIndex][6] = newStatus;
-                            tableMeta.rowData[6] = newStatus;
-                            console.log('______tableMeta=', tableMeta);
-                            updateValue(newStatus);
-                        }} />
+                        <StatusButton status={value} chip={true} data={tableState.data} />
                     );
                 }
             }
@@ -158,7 +137,7 @@ export default (props) => {
     const getOrders = async (dt) => {
         if (!tableState.isLoading) {
             setTableState({ isLoading: true });
-            console.log('^^^^^GETTING ORDERS WITH SELECTED DATE=', selectedDate);
+            // console.log('^^^^^GETTING ORDERS WITH SELECTED DATE=', selectedDate);
             let d = isUndefined(dt) ? selectedDate : dt;
             let orders = await allOrders(hotel, { page: tableState.page, status: undefined, selectedDate: d.toISOString() });
             // let modOrders = orders.data.map(o => ({ ...o, timeSinceRequest: 'music'}));
@@ -190,7 +169,7 @@ export default (props) => {
         count: tableState.count,
         page: tableState.page,
         onTableChange: (action, state) => {
-            console.log('action=', action, 'state=', state);
+            // console.log('action=', action, 'state=', state);
             switch (action) {
                 case 'changePage':
                     changePage(state.page);
@@ -230,9 +209,7 @@ export default (props) => {
             <MUIDataTable
                 title={<Typography variant="body2">
                     All Orders
-          {/* {tableState.isLoading && <CircularProgress size={24} style={{ marginLeft: 15, position: 'relative', top: 4 }} />} */}
-                </Typography>
-                }
+                </Typography>}
                 data={tableState.data}
                 columns={columns}
                 options={options}

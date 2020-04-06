@@ -18,6 +18,7 @@ import Radio from '@material-ui/core/Radio';
 import RadioGroup from '@material-ui/core/RadioGroup';
 import FormControlLabel from '@material-ui/core/FormControlLabel';
 import CheckCircleRoundedIcon from '@material-ui/icons/CheckCircleRounded';
+import Chip from '@material-ui/core/Chip';
 import { isEqual, isUndefined, find } from 'lodash';
 
 import { changeOrderStatus } from '../../utils/API';
@@ -30,6 +31,10 @@ var useStyles = makeStyles({
         color: 'black',
         height: 48,
         padding: '0 30px',
+    },
+    chip: {
+        border: 'solid 2px',
+        color: 'black'
     },
     new: {
         background: orange[200],
@@ -71,10 +76,22 @@ export default function StatusButton(props) {
     const [status, setStatus] = useState(isUndefined(props.status) ? '' : props.status)
     const [open, setOpen] = useState(false);
     const [data, setData] = useState(props.data);
+    const [chip, setChip] = useState(props.chip);   // This is for display in History. In LiveOrders, display is a button
     // console.log('+++data=', data);
 
+    useEffect(() => {
+        setStatus(isUndefined(props.status) ? '' : props.status);
+        setData(props.data);
+        setChip(props.chip);
+    }, [props.status, props.data, props.chip]);
+
     const classes = useStyles();
-    const className = clsx(classes.button, classes[status]);
+    let className;
+    if (isEqual(chip, false)) {
+        className = clsx(classes.button, classes[status]);
+    } else {
+        className = clsx(classes.chip, classes[status]);
+    }
     let dispName = isUndefined(status) ? '' : statusDispName[status];
     // console.log('-----classes[status]', classes[status]);
 
@@ -92,7 +109,6 @@ export default function StatusButton(props) {
 
     const handleStatusChange = async () => {
         // New status is in 'value'
-        console.log('changing status to=', value);
         let order = await changeOrderStatus(data[0], value);
         setStatus(value);
         props.onStatusUpdated(value);
@@ -101,30 +117,29 @@ export default function StatusButton(props) {
 
     return (
         <div>
-            <Button className={className} onClick={dialogOpen}> {dispName} </ Button>
-            <Dialog
-                open={open}
-                onClose={handleClose}
-                aria-labelledby="alert-dialog-title"
-                aria-describedby="alert-dialog-description"
-            >
-                <DialogTitle id="alert-dialog-title">Change Status of '{data[2]}' for '{data[3]}'</DialogTitle>
-                <DialogContent>
-                    <RadioGroup aria-label="status" name="selectedStatus" value={value} onChange={handleChange}  >
-                        {statusArr.map((s) => <FormControlLabel value={isUndefined(s) ? '' : s.s} disabled={isEqual(s.s, status)} color='primary' control={<Radio checkedIcon={<CheckCircleRoundedIcon />} />} label={isUndefined(s) ? '' : s.name} />)}
-                    </RadioGroup>
-                </DialogContent>
-                <DialogActions>
-                    <Button onClick={handleClose} color="primary"> Cancel </Button>
-                    <Button onClick={handleStatusChange} color="primary" autoFocus> Confirm </Button>
-                </DialogActions>
-            </Dialog>
+            {(chip == false) &&
+                <div>
+                    <Button className={className} onClick={dialogOpen}> {dispName} </ Button>
+                    <Dialog
+                        open={open}
+                        onClose={handleClose}
+                        aria-labelledby="alert-dialog-title"
+                        aria-describedby="alert-dialog-description"
+                    >
+                        <DialogTitle id="alert-dialog-title">Change Status of '{data[2]}' for '{data[3]}'</DialogTitle>
+                        <DialogContent>
+                            <RadioGroup aria-label="status" name="selectedStatus" value={value} onChange={handleChange}  >
+                                {statusArr.map((s) => <FormControlLabel value={isUndefined(s) ? '' : s.s} disabled={isEqual(s.s, status)} color='primary' control={<Radio checkedIcon={<CheckCircleRoundedIcon />} />} label={isUndefined(s) ? '' : s.name} />)}
+                            </RadioGroup>
+                        </DialogContent>
+                        <DialogActions>
+                            <Button onClick={handleClose} color="primary"> Cancel </Button>
+                            <Button onClick={handleStatusChange} color="primary" autoFocus> Confirm </Button>
+                        </DialogActions>
+                    </Dialog>
+                </div>
+            }
+            {(chip == true) && <Chip variant="outlined" size="medium" label={dispName} className={className} />}
         </div>
     );
 }
-
-StatusButton.propTypes = {
-    data: PropTypes.node
-};
-
-{/* export default withStyles(styles)(StatusButton); */ }
