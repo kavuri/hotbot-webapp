@@ -20,7 +20,7 @@ const useStyles = makeStyles(theme => ({
 export default (props) => {
     // console.log('Selector props=', props);
     const classes = useStyles();
-    const [entry, setEntry] = useState({});
+    const [entry, setEntry] = useState('');
     const [defaultEntry, setDefaultEntry] = useState(props.defaultEntry);
     const [menuName, setMenuName] = useState(props.menuName);
     const [items, setItems] = useState(props.items);
@@ -31,10 +31,11 @@ export default (props) => {
     useEffect(() => {
         setLabelWidth(inputLabel.current.offsetWidth);
         setItems(props.items);
-    }, [props.items]);
+        setDefaultEntry(props.defaultEntry);
+    }, [props.items, props.entry, props.defaultEntry]);
 
     const handleChange = event => {
-        // console.log('new event=', event.target)
+        console.log('new event=', event.target)
         setEntry(event.target.value);
         if (!isEmpty(props.onSelectEntry) || !isUndefined(props.onSelectEntry)) {
             props.onSelectEntry(event.target.value);
@@ -50,7 +51,7 @@ export default (props) => {
                 <Select
                     labelId="demo-simple-select-outlined-label"
                     id="demo-simple-select-outlined"
-                    value={props.defaultEntry ? props.defaultEntry : ''}
+                    value={entry}
                     onChange={handleChange}
                     labelWidth={labelWidth}
                 >
