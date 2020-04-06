@@ -12,7 +12,6 @@ import Badge from '@material-ui/core/Badge';
 import DashboardIcon from '@material-ui/icons/Dashboard';
 import ShoppingCartIcon from '@material-ui/icons/ShoppingCart';
 import SettingsIcon from '@material-ui/icons/Settings';
-import MobileScreenShareIcon from '@material-ui/icons/MobileScreenShare';
 import PeopleAltRoundedIcon from '@material-ui/icons/PeopleAltRounded';
 
 export default function ConsumerMenu(props) {
@@ -21,17 +20,10 @@ export default function ConsumerMenu(props) {
         props.optionSelected('orders');
     }
 
-    const handleSettingsOptionClick = () => {
-        props.optionSelected('settings');
-    }
-
-    const handleDeviceMgmtOptionClick = () => {
-        props.optionSelected('deviceMgmt');
-    }
-
     const handleCheckinCheckoutMgmtOptionClick = () => {
         props.optionSelected('checkinCheckout');
     }
+
     return (
         <div>
             <ListItem button>
@@ -47,18 +39,12 @@ export default function ConsumerMenu(props) {
                 </ListItemIcon>
                 <ListItemText primary="Orders" onClick={handleOrdersOptionClick} />
             </ListItem>
-            <ListItem button>
+            {/* <ListItem button>
                 <ListItemIcon>
                     <SettingsIcon />
                 </ListItemIcon>
                 <ListItemText primary="Settings" onClick={handleSettingsOptionClick} />
-            </ListItem>
-            <ListItem button>
-                <ListItemIcon>
-                    <MobileScreenShareIcon />
-                </ListItemIcon>
-                <ListItemText primary="Device Management" onClick={handleDeviceMgmtOptionClick} />
-            </ListItem>
+            </ListItem> */}
             <ListItem button>
                 <ListItemIcon>
                     <PeopleAltRoundedIcon />

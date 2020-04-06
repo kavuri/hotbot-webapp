@@ -20,6 +20,16 @@ export const allUnassignedDevices = async () => {
     return allItems;
 }
 
+export const allHotelGroups = async () => {
+    let hotels = await fetch(API_SERVER_URL + '/hotelGroup', { method: 'GET', headers: headers })
+        .then(res => res.json())
+        .then((results) => {
+            return results;
+        })
+        .catch((error) => { return error });
+    return hotels;
+}
+
 export const allHotels = async () => {
     let hotels = await fetch(API_SERVER_URL + '/hotel', { method: 'GET', headers: headers })
         .then(res => res.json())

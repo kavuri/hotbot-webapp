@@ -10,7 +10,6 @@ import Typography from '@material-ui/core/Typography';
 import CircularProgress from '@material-ui/core/Typography';
 
 import MUIDataTable from "mui-datatables";
-import moment from 'moment';
 import { isUndefined, isEmpty } from 'lodash';
 
 import { allOrders } from '../../utils/API';
@@ -126,7 +125,6 @@ export default (props) => {
         setTableState({ isLoading: true, page: page });
         console.log('$$getOrders=', tableState, ',hotel=', hotel);
         let orders = await allOrders(hotel, { page: tableState.page, status: undefined, selectedDate: new Date().toISOString() });
-        let now = new Date();
         let modOrders = isUndefined(orders.data) || isEmpty(orders.data) ? [] : orders.data.map(o => ({ ...o, timeSinceRequest: timeDiff(o.created_at, o.curr_status.created), newStatus: '' }));
         console.log('modOrders=', modOrders);
         setTableState({ data: modOrders, count: orders.total, isLoading: false });

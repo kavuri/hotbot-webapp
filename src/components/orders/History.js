@@ -5,7 +5,6 @@
 'use strict';
 
 import React, { useState, useEffect } from 'react';
-import { makeStyles } from '@material-ui/core/styles';
 import Typography from '@material-ui/core/Typography';
 
 import ChevronRightRoundedIcon from "@material-ui/icons/ChevronRightRounded";

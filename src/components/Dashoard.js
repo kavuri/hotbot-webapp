@@ -26,15 +26,13 @@ import ChevronLeftIcon from '@material-ui/icons/ChevronLeft';
 import { isNull, isUndefined, isEqual } from 'lodash';
 
 import Orders from './orders/Orders';
-import Hotels from './admin/Hotels';
-import Groups from './admin/Groups';
 import Devices from './devices/Devices';
 import CheckinCheckout from './checkins/CheckinCheckout';
-import Facilities from './admin/Facilities';
-import ProfileMenu from './ProfileMenu';
-import AdminMenu from './admin/AdminMenu';
+import HotelSettings from './HotelSettings';
+import AdminMenu from './AdminMenu';
 import ConsumerMenu from './ConsumerMenu';
 import Default from './Default';
+import HotelMgmt from './hotels/HotelMgmt';
 
 import { useAuth0 } from "../react-auth0-spa";
 
@@ -139,15 +137,11 @@ export default function Dashboard() {
 
   const menuComponentMap = {
     'default': Default,
-    'groups': Groups,
-    'hotels': Hotels,
-    'addHotelGroup': 'AddHotelGroup',
-    'addHotel': 'AddHotel',
-    'deviceMgmt': Devices,
+    'orders': Orders,
     'checkinCheckout': CheckinCheckout,
     'settings': 'Settings',
-    'facilities': Facilities,
-    'orders': Orders,
+    'deviceMgmt': Devices,
+    'hotels': HotelMgmt,
     'profile': 'Profile'
   };
   const checkUserRole = () => {
@@ -181,7 +175,6 @@ export default function Dashboard() {
     // role = 'admin'
     if (role === 'admin') {
       // Set the intial screen as hotels
-
       return <AdminMenu optionSelected={menuOptionSelected} />
     } else if (role === 'consumer') {
       return <ConsumerMenu optionSelected={menuOptionSelected} />
@@ -209,7 +202,7 @@ export default function Dashboard() {
           {renderRBAMenu(role)}
         </List>
         <Divider />
-        <List><ProfileMenu optionSelected={menuOptionSelected} /></List>
+        <List><HotelSettings optionSelected={menuOptionSelected} /></List>
       </Drawer>
     )
   }

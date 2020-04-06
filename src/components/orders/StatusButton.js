@@ -129,7 +129,7 @@ export default function StatusButton(props) {
                         <DialogTitle id="alert-dialog-title">Change Status of '{data[2]}' for '{data[3]}'</DialogTitle>
                         <DialogContent>
                             <RadioGroup aria-label="status" name="selectedStatus" value={value} onChange={handleChange}  >
-                                {statusArr.map((s) => <FormControlLabel value={isUndefined(s) ? '' : s.s} disabled={isEqual(s.s, status)} color='primary' control={<Radio checkedIcon={<CheckCircleRoundedIcon />} />} label={isUndefined(s) ? '' : s.name} />)}
+                                {statusArr.map((s) => <FormControlLabel key={s.s} value={isUndefined(s) ? '' : s.s} disabled={isEqual(s.s, status)} color='primary' control={<Radio checkedIcon={<CheckCircleRoundedIcon />} />} label={isUndefined(s) ? '' : s.name} />)}
                             </RadioGroup>
                         </DialogContent>
                         <DialogActions>
