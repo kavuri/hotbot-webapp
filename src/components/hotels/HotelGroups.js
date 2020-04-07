@@ -14,9 +14,9 @@ import { isUndefined, concat } from 'lodash';
 import { allHotelGroups } from '../../utils/API';
 import ToolbarAddButton from './ToolbarAddButton';
 import AddGroup from './AddGroup';
+import Hotels from './Hotels';
 
 export default (props) => {
-    const [hotelGroups, setHotelGroups] = useState([]);
     const [addGroupFlag, setAddGroupFlag] = useState(false);
     const [tableState, setTableState] = useState({
         page: 0,
@@ -28,7 +28,7 @@ export default (props) => {
 
     useEffect(() => {
         getHotelGroups();
-    }, [hotelGroups]);
+    }, []);
 
     const columns = [
         {
@@ -68,11 +68,6 @@ export default (props) => {
         console.log('+++TABLE STATE=', tableState);
     }
 
-    const changePage = async (page) => {
-        tableState.page = page;
-        getHotelGroups(page);
-    };
-
     const handleAddGroup = () => {
         console.log('add group called');
         setAddGroupFlag(true);
@@ -90,25 +85,23 @@ export default (props) => {
         selectableRows: 'single',
         selectableRowsOnClick: true,
         filterType: 'dropdown',
-        responsive: "scroll",
+        responsive: "scrollMaxHeight",
         rowsPerPage: 10,
         download: false,
         print: false,
         viewColumns: false,
-        pagination: false,
         rowsSelected: tableState.selected,
         customToolbar: () => {
-            return <div><ToolbarAddButton onAddClick={handleAddGroup} />{(addGroupFlag == true) && <AddGroup onGroupAdded={addGroupToTable} />}</div>;
+            return <span><ToolbarAddButton onAddClick={handleAddGroup} />{(addGroupFlag == true) && <AddGroup onGroupAdded={addGroupToTable} />}</span>;
         },
         onRowsDelete: (rowsDeleted) => {
             return false;
         },
         onRowsSelect: (rowsSelected, allRows) => {
-            // console.log('rowSelected=', rowsSelected, allRows);
-            console.log('SELECTED=', tableState.selected);
-            // setTableState({ ...tableState, selected: allRows });
-            // setTableState({ ...tableState, selected: allRows.map(row => row.dataIndex) });
-            console.log('+++tabeseta=', tableState);
+            console.log('SELECTED=', tableState, tableState.data[rowsSelected[0].dataIndex]);
+            setTableState({ ...tableState, selected: allRows.map(row => row.dataIndex) });
+
+            props.onHotelGroupSelected(tableState.data[rowsSelected[0].dataIndex]);
         },
         onRowClick: (rowData, rowState) => {
             console.log('---row clicked=', rowData, rowState);
@@ -122,7 +115,6 @@ export default (props) => {
         <div>
             <MUIDataTable
                 title={<Typography variant="body2">
-                    Hotel Groups
                 </Typography>
                 }
                 data={tableState.data}

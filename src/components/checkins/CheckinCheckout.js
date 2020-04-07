@@ -52,7 +52,7 @@ export default () => {
         console.error('error in loadHotels=', results);
         //FIXME: Do something
       } else {
-        let res = results.map((h) => { return { name: h.name, id: h.hotel_id, _id: h._id } });
+        let res = results.data.map((h) => { return { name: h.name, id: h.hotel_id, _id: h._id } });
         setHotels(res);
       }
       setLoading(false);

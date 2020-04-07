@@ -40,14 +40,24 @@ export const addHotelGroup = async (hotelGroup) => {
     return result;
 }
 
-export const allHotels = async () => {
-    let hotels = await fetch(API_SERVER_URL + '/hotel', { method: 'GET', headers: headers })
+export const allHotels = async (group_id) => {
+    let hotels = await fetch(API_SERVER_URL + '/hotel?group_id=' + group_id, { method: 'GET', headers: headers })
         .then(res => res.json())
         .then((results) => {
             return results;
         })
         .catch((error) => { return error });
     return hotels;
+}
+
+export const addHotel = async (hotel) => {
+    let result = await fetch(API_SERVER_URL + '/hotel', { method: 'POST', body: JSON.stringify(hotel), headers: headers })
+        .then(res => res.json())
+        .then((results) => {
+            return results;
+        })
+        .catch((error) => { return error; });
+    return result;
 }
 
 export const getHotelRooms = async (hotel) => {
