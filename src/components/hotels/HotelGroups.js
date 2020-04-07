@@ -6,15 +6,14 @@
 
 import React, { useState, useEffect } from 'react';
 import Typography from '@material-ui/core/Typography';
-
+import IconButton from "@material-ui/core/IconButton";
+import AddCircleRoundedIcon from '@material-ui/icons/AddCircleRounded';
 import MUIDataTable from "mui-datatables";
-import moment from 'moment';
-import { isUndefined, concat } from 'lodash';
+import { isUndefined, concat, isEqual } from 'lodash';
 
 import { allHotelGroups } from '../../utils/API';
 import ToolbarAddButton from './ToolbarAddButton';
 import AddGroup from './AddGroup';
-import Hotels from './Hotels';
 
 export default (props) => {
     const [addGroupFlag, setAddGroupFlag] = useState(false);
@@ -71,6 +70,7 @@ export default (props) => {
     const handleAddGroup = () => {
         console.log('add group called');
         setAddGroupFlag(true);
+        console.log('add group flag=', addGroupFlag);
     }
 
     const addGroupToTable = (group) => {
@@ -78,6 +78,7 @@ export default (props) => {
         let newList = concat(tableState.data, group);
         setTableState({ ...tableState, data: newList });
         console.log('^^^New table state=', tableState);
+        setAddGroupFlag(false);
     }
 
     const options = {
@@ -92,7 +93,7 @@ export default (props) => {
         viewColumns: false,
         rowsSelected: tableState.selected,
         customToolbar: () => {
-            return <span><ToolbarAddButton onAddClick={handleAddGroup} />{(addGroupFlag == true) && <AddGroup onGroupAdded={addGroupToTable} />}</span>;
+            return <span><IconButton key={addGroupFlag} onClick={handleAddGroup}> <AddCircleRoundedIcon /> </IconButton>{isEqual(addGroupFlag, true) && <AddGroup onGroupAdded={ addGroupToTable } />}</span>
         },
         onRowsDelete: (rowsDeleted) => {
             return false;

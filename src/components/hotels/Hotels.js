@@ -8,7 +8,9 @@ import React, { useState, useEffect } from 'react';
 import Typography from '@material-ui/core/Typography';
 
 import MUIDataTable from "mui-datatables";
-import { isUndefined, concat, join, isEmpty, isNull } from 'lodash';
+import IconButton from "@material-ui/core/IconButton";
+import AddCircleRoundedIcon from '@material-ui/icons/AddCircleRounded';
+import { isEqual, isUndefined, concat, join, isEmpty, isNull } from 'lodash';
 
 import { allHotels } from '../../utils/API';
 import ToolbarAddButton from './ToolbarAddButton';
@@ -125,31 +127,38 @@ export default (props) => {
         setTableState({ isLoading: true });
         console.log('----GETTNG hotels for group_id:', group.group_id);
         let hotels = await allHotels(group.group_id);
-        let modHotels = isUndefined(hotels.data) || isEmpty(hotels.data) ?
-            [] :
-            hotels.data.map(h => (
-                {
-                    ...h,
-                    fullAddress: join(Object.values(h.address, ', ')),
-                    fullContact: join(Object.values(h.contact['phone']), ', ') + ', ' + join(Object.values(h.contact['email']), ', '),
-                    fullCoordinates: 'lat: ' + h.coordinates.lat + ', lng:' + h.coordinates.lng,
-                    roomCount: h.rooms.length
-                }
-            ));
-        console.log('++allHotels=', hotels);
+        let modHotels = isUndefined(hotels.data) || isEmpty(hotels.data) ? [] : remapFields(hotels.data);
+        console.log('++allHotels=', modHotels);
         setTableState({ ...tableState, data: modHotels, count: hotels.total, isLoading: false });
     }
 
+    function remapFields(arr) {
+        console.log('Mapping for:', arr);
+        var res = arr.map(h => (
+            {
+                ...h,
+                fullAddress: join(Object.values(h.address, ', ')),
+                fullContact: join(Object.values(h.contact['phone']), ', ') + ', ' + join(Object.values(h.contact['email']), ', '),
+                fullCoordinates: 'lat: ' + h.coordinates.lat + ', lng:' + h.coordinates.lng,
+                roomCount: h.rooms.length
+            }
+        ));
+        return res;
+    }
+
     const handleAddHotel = () => {
-        console.log('add hotel called');
         setAddHotelFlag(true);
     }
 
     const addHotelToTable = (hotel) => {
-        console.log('adding to table:', hotel);
-        let newList = concat(tableState.data, hotel);
-        setTableState({ ...tableState, data: newList });
-        console.log('^^^New table state=', tableState);
+        if (!isUndefined(hotel)) {  // This can happen if the dialog is opened and closed without adding data
+            var remapped = remapFields([hotel]);
+            console.log('adding to table:', hotel);
+            let newList = concat(tableState.data, remapped);
+            setTableState({ ...tableState, data: newList });
+            console.log('^^^New table state=', tableState);
+        }
+        setAddHotelFlag(false);
     }
 
     const options = {
@@ -165,7 +174,8 @@ export default (props) => {
         pagination: false,
         rowsSelected: tableState.selected,
         customToolbar: () => {
-            return <span><ToolbarAddButton onAddClick={handleAddHotel} />{(addHotelFlag == true) && <AddHotel onHotelAdded={addHotelToTable} />}</span>;
+            return <span><IconButton key={addHotelFlag} onClick={handleAddHotel}> <AddCircleRoundedIcon /> </IconButton>{isEqual(addHotelFlag, true) && <AddHotel group={group} onHotelAdded={addHotelToTable} />}</span>
+            // return <span><ToolbarAddButton key={addHotelFlag} onAddClick={handleAddHotel} />{(addHotelFlag == true) && <AddHotel onHotelAdded={addHotelToTable} />}</span>;
         },
         onRowsDelete: (rowsDeleted) => {
             return false;
