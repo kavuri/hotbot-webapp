@@ -182,7 +182,7 @@ export default (props) => {
             console.log('SELECTED=', tableState, tableState.data[rowsSelected[0].dataIndex]);
             setTableState({ ...tableState, selected: allRows.map(row => row.dataIndex) });
 
-            // TODO: Show hotels belonging to the group
+            props.onHotelSelected(tableState.data[rowsSelected[0].dataIndex]);
         },
         onRowClick: (rowData, rowState) => {
             console.log('---row clicked=', rowData, rowState);

@@ -10,6 +10,7 @@ import Typography from '@material-ui/core/Typography';
 import { isEqual } from 'lodash';
 import HotelGroups from './HotelGroups';
 import Hotels from './Hotels';
+import Rooms from './Rooms';
 
 export default (props) => {
     const [hotelGroup, setHotelGroup] = useState('');
@@ -24,12 +25,21 @@ export default (props) => {
         setHotelGroup(grp);
     }
 
+    const hotelSelected = (htl) => {
+        if (isEqual(hotel, htl)) {
+            htl = '';
+        }
+        setHotel(htl);
+    }
+
     return (
         <div>
             <Typography variant="h4">Hotel Groups</Typography>
             <HotelGroups onHotelGroupSelected={hotelGroupSelected} />
             {(hotelGroup != '') && <div><Typography variant="h4">Hotels </Typography>
-                <Hotels key={hotelGroup.group_id} group={hotelGroup} /></div>}
+                <Hotels key={hotelGroup.group_id} group={hotelGroup} onHotelSelected={hotelSelected} /></div>}
+            {(hotel != '') && <div><Typography variant="h4">Rooms </Typography>
+                <Rooms key={hotel.hotel_id} hotel={hotel} /></div>}
         </div>
     )
 }
