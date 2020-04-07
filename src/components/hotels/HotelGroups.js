@@ -9,16 +9,20 @@ import Typography from '@material-ui/core/Typography';
 
 import MUIDataTable from "mui-datatables";
 import moment from 'moment';
-import { isUndefined, isEmpty } from 'lodash';
+import { isUndefined, concat } from 'lodash';
 
 import { allHotelGroups } from '../../utils/API';
+import ToolbarAddButton from './ToolbarAddButton';
+import AddGroup from './AddGroup';
 
 export default (props) => {
     const [hotelGroups, setHotelGroups] = useState([]);
+    const [addGroupFlag, setAddGroupFlag] = useState(false);
     const [tableState, setTableState] = useState({
         page: 0,
         count: 1,
         isLoading: false,
+        selected: [],
         data: [['Loading...']]
     });
 
@@ -49,7 +53,7 @@ export default (props) => {
             label: "Description",
             options: {
                 display: true,
-                filter: true,
+                filter: false,
                 sort: false,
                 searchable: false
             }
@@ -57,10 +61,11 @@ export default (props) => {
     ];
 
     const getHotelGroups = async () => {
-        setTableState({isLoading: true});
+        setTableState({ isLoading: true });
         let allGroups = await allHotelGroups();
         console.log('++allGroups=', allGroups);
         setTableState({ data: allGroups.data, count: allGroups.total, isLoading: false });
+        console.log('+++TABLE STATE=', tableState);
     }
 
     const changePage = async (page) => {
@@ -68,16 +73,49 @@ export default (props) => {
         getHotelGroups(page);
     };
 
+    const handleAddGroup = () => {
+        console.log('add group called');
+        setAddGroupFlag(true);
+    }
+
+    const addGroupToTable = (group) => {
+        console.log('adding to table:', group);
+        let newList = concat(tableState.data, group);
+        setTableState({ ...tableState, data: newList });
+        console.log('^^^New table state=', tableState);
+    }
+
     const options = {
         filter: true,
-        selectableRows: false,
-        filterType: 'checkbox',
+        selectableRows: 'single',
+        selectableRowsOnClick: true,
+        filterType: 'dropdown',
         responsive: "scroll",
         rowsPerPage: 10,
         download: false,
         print: false,
         viewColumns: false,
         pagination: false,
+        rowsSelected: tableState.selected,
+        customToolbar: () => {
+            return <div><ToolbarAddButton onAddClick={handleAddGroup} />{(addGroupFlag == true) && <AddGroup onGroupAdded={addGroupToTable} />}</div>;
+        },
+        onRowsDelete: (rowsDeleted) => {
+            return false;
+        },
+        onRowsSelect: (rowsSelected, allRows) => {
+            // console.log('rowSelected=', rowsSelected, allRows);
+            console.log('SELECTED=', tableState.selected);
+            // setTableState({ ...tableState, selected: allRows });
+            // setTableState({ ...tableState, selected: allRows.map(row => row.dataIndex) });
+            console.log('+++tabeseta=', tableState);
+        },
+        onRowClick: (rowData, rowState) => {
+            console.log('---row clicked=', rowData, rowState);
+        },
+        isRowSelectable: (dataIndex, selectedRows) => {
+            return true;
+        }
     };
 
     return (

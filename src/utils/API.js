@@ -30,6 +30,16 @@ export const allHotelGroups = async () => {
     return hotels;
 }
 
+export const addHotelGroup = async (hotelGroup) => {
+    let result = await fetch(API_SERVER_URL + '/hotelGroup', { method: 'POST', body: JSON.stringify(hotelGroup), headers: headers })
+        .then(res => res.json())
+        .then((results) => {
+            return results;
+        })
+        .catch((error) => { return error; });
+    return result;
+}
+
 export const allHotels = async () => {
     let hotels = await fetch(API_SERVER_URL + '/hotel', { method: 'GET', headers: headers })
         .then(res => res.json())
