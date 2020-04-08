@@ -14,7 +14,7 @@ import HistoryRoundedIcon from '@material-ui/icons/HistoryRounded';
 import { isEqual } from 'lodash';
 
 import Selector from '../Selector';
-import { allHotels } from '../../utils/API';
+import { APICall } from '../../utils/API';
 import LiveOrders from './LiveOrders';
 import History from './History';
 
@@ -46,15 +46,15 @@ export default () => {
   const loadHotels = async () => {
     if (!loading) {
       setLoading(true);
-      let results = await allHotels();
-      if (results instanceof Error) {
-        console.error('error in loadHotels=', results);
-        //FIXME: Do something
-      } else {
-        let res = results.data.map((h) => { return { name: h.name, id: h.hotel_id, _id: h._id } });
-        setHotels(res);
+      let results = undefined, res;
+      try {
+        results = await APICall('/hotel', { method: 'GET' });
+        setLoading(false);
+        res = results.data.map((h) => { return { name: h.name, id: h.hotel_id, _id: h._id } });
+      } catch (error) {
+        //TODO: Show Alert that unable to get hotels
       }
-      setLoading(false);
+      setHotels(res);
     }
   }
 

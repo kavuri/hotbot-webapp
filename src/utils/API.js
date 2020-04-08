@@ -20,36 +20,6 @@ export const allUnassignedDevices = async () => {
     return allItems;
 }
 
-export const allHotelGroups = async () => {
-    let hotels = await fetch(API_SERVER_URL + '/hotelGroup', { method: 'GET', headers: headers })
-        .then(res => res.json())
-        .then((results) => {
-            return results;
-        })
-        .catch((error) => { return error });
-    return hotels;
-}
-
-export const createHotelGroup = async (hotelGroup) => {
-    let result = await fetch(API_SERVER_URL + '/hotelGroup', { method: 'POST', body: JSON.stringify(hotelGroup), headers: headers })
-        .then(res => res.json())
-        .then((results) => {
-            return results;
-        })
-        .catch((error) => { return error; });
-    return result;
-}
-
-export const allHotels = async (group_id) => {
-    let hotels = await fetch(API_SERVER_URL + '/hotel?group_id=' + group_id, { method: 'GET', headers: headers })
-        .then(res => res.json())
-        .then((results) => {
-            return results;
-        })
-        .catch((error) => { return error });
-    return hotels;
-}
-
 export const allRooms = async (hotel_id) => {
     let hotels = await fetch(API_SERVER_URL + '/room?hotel_id=' + hotel_id, { method: 'GET', headers: headers })
         .then(res => res.json())
@@ -120,16 +90,6 @@ export const deregisterDevice = async (device) => {
         })
         .catch((error) => { return error; });
     return result;
-}
-
-export const getHotelDevices = async (hotel) => {
-    let results = await fetch(API_SERVER_URL + '/device?hotel_id=' + hotel.id, { method: 'GET', headers: headers })
-        .then(res => res.json())
-        .then((results) => {
-            return results;
-        })
-        .catch((error) => { return error; })
-    return results;
 }
 
 export const checkinGuest = async (room, guestData) => {
@@ -205,9 +165,9 @@ export const changeOrderStatus = async (order_id, newStatus) => {
  * @param {*} body 
  */
 export const APICall = async (endpoint, options) => {
-    console.log('+++options=', options);
+    console.log('+++endpoint=', endpoint, ', options=', options);
     let query = !isUndefined(options.keyValues) ? join(Object.keys(options.keyValues).map(key => { let s = key + '=' + options.keyValues[key]; return s; }), '&') : undefined;
-    console.log('APICall:', query);
+    console.log('APICall query=:', query);
     let URL = API_SERVER_URL + endpoint + (!isUndefined(query) ? '?' + query : '');
     let results = await fetch(URL, { method: options.method, body: JSON.stringify(options.body), headers: headers })
         .then(response => {

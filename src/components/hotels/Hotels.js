@@ -11,10 +11,9 @@ import MUIDataTable from "mui-datatables";
 import IconButton from "@material-ui/core/IconButton";
 import AddCircleRoundedIcon from '@material-ui/icons/AddCircleRounded';
 import EditRoundedIcon from '@material-ui/icons/EditRounded';
-import Snackbar from '@material-ui/core/Snackbar';
-import { isEqual, isUndefined, concat, join, isEmpty, isNull, findIndex } from 'lodash';
+import { isEqual, isNull, concat, join, isEmpty, findIndex, isUndefined } from 'lodash';
 
-import { allHotels } from '../../utils/API';
+import { APICall } from '../../utils/API';
 import AddHotel from './AddHotel';
 import Alert from '../Alert';
 
@@ -133,7 +132,7 @@ export default (props) => {
     const getHotels = async () => {
         setTableState({ isLoading: true });
         console.log('----GETTNG hotels for group_id:', group.group_id);
-        let hotels = await allHotels(group.group_id);
+        let hotels = await APICall('/hotel', { method: 'GET', keyValues: { group_id: group.group_id } });
         let modHotels = isUndefined(hotels.data) || isEmpty(hotels.data) ? [] : remapFields(hotels.data);
         console.log('++allHotels=', modHotels);
         setTableState({ ...tableState, data: modHotels, count: hotels.total, isLoading: false });
@@ -159,14 +158,14 @@ export default (props) => {
 
     const addHotelToTable = (hotel) => {
         console.log('^^^HOTEL=', hotel)
-        if (!isUndefined(hotel) && !isEmpty(hotel)) {  // This can happen if the dialog is opened and closed without adding data
+        if (!isNull(hotel) && !isEmpty(hotel)) {  // This can happen if the dialog is opened and closed without adding data
             var remapped = remapFields([hotel]);
-            let existsIdx = findIndex(tableState.data, {_id: hotel._id});
+            let existsIdx = findIndex(tableState.data, { _id: hotel._id });
             console.log('adding to table:', hotel, tableState.data, ':::', existsIdx);
             let newList = isEqual(existsIdx, -1) ? concat(tableState.data, remapped) : tableState.data[existsIdx] = remapped;
             setTableState({ ...tableState, data: newList });
             console.log('^^^New table state=', tableState);
-            setInfo({ message: 'Hotel info saved', open: true, severity: 'success' });
+            setInfo({ message: 'Hotel saved', open: true, severity: 'success' });
         } else {
             setInfo({ message: 'Error saving hotel', open: true, severity: 'error' });
         }

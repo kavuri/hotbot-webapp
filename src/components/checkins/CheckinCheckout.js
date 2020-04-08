@@ -14,7 +14,7 @@ import HistoryRoundedIcon from '@material-ui/icons/HistoryRounded';
 import { isEqual, isEmpty, isNull, isUndefined } from 'lodash';
 
 import Selector from '../Selector';
-import { allHotels, getHotelRooms } from '../../utils/API';
+import { APICall, getHotelRooms } from '../../utils/API';
 import Checkin from './Checkin';
 
 const useStyles = makeStyles(theme => ({
@@ -47,14 +47,14 @@ export default () => {
   const loadHotels = async () => {
     if (!loading) {
       setLoading(true);
-      let results = await allHotels();
-      if (results instanceof Error) {
-        console.error('error in loadHotels=', results);
-        //FIXME: Do something
-      } else {
-        let res = results.data.map((h) => { return { name: h.name, id: h.hotel_id, _id: h._id } });
-        setHotels(res);
+      let results = undefined, res;
+      try {
+        results = await APICall('/hotel', { method: 'GET' });
+        res = results.data.map((h) => { return { name: h.name, id: h.hotel_id, _id: h._id } });
+      } catch (error) {
+
       }
+      setHotels(res);
       setLoading(false);
     }
   }

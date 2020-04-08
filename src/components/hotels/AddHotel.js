@@ -63,7 +63,7 @@ export default (props) => {
             reception_number: values.frontDeskPhone
         };
 
-        let result = undefined;
+        let result = null;
         try {
             if (edit) {
                 result = await APICall('/hotel/' + hotel._id, { method: 'PATCH', body: obj });

@@ -20,7 +20,7 @@ import { Form, Field } from 'react-final-form';
 import HomeWorkRoundedIcon from '@material-ui/icons/HomeWorkRounded';
 import { isNull, isUndefined } from 'lodash';
 
-import { createHotelGroup } from '../../utils/API';
+import { createHotelGroup, APICall } from '../../utils/API';
 
 export default (props) => {
     const [open, setOpen] = useState(true);
@@ -32,9 +32,14 @@ export default (props) => {
             description: values.description,
         };
 
-        let hotelGroup = await createHotelGroup(obj);
+        let hotelGroup = null;
+        try {
+            hotelGroup = await APICall('/hotelGroup', { method: 'POST', body: obj });
+        } catch (error) {
+
+        }
         setOpen(false);
-        if (isUndefined(hotelGroup) || isNull(hotelGroup)) return;
+        // if (isUndefined(hotelGroup) || isNull(hotelGroup)) return;
 
         props.onGroupAdded(hotelGroup);
     };

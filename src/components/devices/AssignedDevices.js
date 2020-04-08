@@ -25,7 +25,7 @@ import Switch from '@material-ui/core/Switch';
 
 import { isNull, isUndefined, remove } from 'lodash';
 
-import { changeDeviceStatus, deregisterDevice, allHotels, getHotelDevices } from '../../utils/API';
+import { APICall, changeDeviceStatus, deregisterDevice } from '../../utils/API';
 import Selector from '../Selector';
 
 const useStyles = makeStyles((theme) => ({
@@ -184,29 +184,27 @@ export default (props) => {
   const loadHotels = async () => {
     if (!loading) {
       setLoading(true);
-      let results = await allHotels();
-      setLoading(false);
-      console.log('loadHotels resu=', results);
-      if (results instanceof Error) {
-        console.error('error in loadHotels=', results);
-        //FIXME: Do something
-      } else {
-        let res = results.data.map((h) => { return { name: h.name, id: h.hotel_id, _id: h._id } });
+      let results = null, res;
+      try {
+        results = await APICall('/hotel', { method: 'GET' });
+        setLoading(false);
+        res = results.data.map((h) => { return { name: h.name, id: h.hotel_id, _id: h._id } });
         setHotels(res);
+      } catch (error) {
+        //FIXME: Show alert
       }
     }
   }
 
   const getDevices = async (hotel) => {
     console.log('getting devices for ', hotel.id);
-    if (!loading) {
+    if (!loading && !isUndefined(hotel)) {
       setLoading(true);
-      let results = await getHotelDevices(hotel);
-      setLoading(false);
-      if (results instanceof Error) {
-        console.error('error in getDevices=', results);
-        //FIXME: Do something
-      } else {
+      let results = null;
+      try {
+        results = await APICall('/device', { method: 'GET', keyValues: { hotel_id: hotel.id } });
+        setLoading(false);
+
         let assigned = [];
         for (var i = 0; i < results.length; i++) {
           if (isNull(results[i].room) || isUndefined(results[i].room) || isNull(results[i].belongs_to) || isUndefined(results[i].belongs_to)) {
@@ -216,6 +214,8 @@ export default (props) => {
           }
         }
         setAssignedDevices(assigned);
+      } catch (error) {
+        //FIXME: Show alert
       }
     }
   }

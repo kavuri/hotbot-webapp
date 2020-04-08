@@ -10,10 +10,10 @@ import { Grid } from '@material-ui/core';
 import IconButton from '@material-ui/core/IconButton';
 import AddCircleRoundedIcon from '@material-ui/icons/AddCircleRounded';
 
-import { remove } from 'lodash';
+import { remove, isEmpty } from 'lodash';
 
 import Selector from '../Selector';
-import { allHotels, allUnassignedDevices, getHotelRooms, assignDevice } from '../../utils/API';
+import { APICall, allUnassignedDevices, getHotelRooms, assignDevice } from '../../utils/API';
 
 const useStyles = makeStyles(theme => ({
   root: {
@@ -64,22 +64,21 @@ export default (props) => {
   const loadHotels = async () => {
     if (!loading) {
       setLoading(true);
-      let results = await allHotels();
-      setLoading(false);
-      console.log('loadHotels resu=', results);
-      if (results instanceof Error) {
-        console.error('error in loadHotels=', results);
-        //FIXME: Do something
-      } else {
-        let res = results.data.map((h) => { return { name: h.name, id: h.hotel_id, _id: h._id } });
+      let results = undefined, res;
+      try {
+        results = await APICall('/hotel', { method: 'GET' });
+        setLoading(false);
+        res = results.data.map((h) => { return { name: h.name, id: h.hotel_id, _id: h._id } });
         setHotels(res);
+      } catch (error) {
+        // FIXME: Do something
       }
     }
   }
 
   const getRooms = async (hotel) => {
     console.log('getting rooms...', hotel);
-    if (!loading) {
+    if (!loading && !isEmpty(hotel)) {
       setLoading(true);
       let results = await getHotelRooms(hotel);
       setLoading(false);
