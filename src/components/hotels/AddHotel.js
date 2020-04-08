@@ -18,7 +18,6 @@ import {
     Button,
     CssBaseline,
     FormLabel,
-    MenuItem,
 } from '@material-ui/core';
 import HomeWorkRoundedIcon from '@material-ui/icons/HomeWorkRounded';
 import { isUndefined, isEmpty } from 'lodash';
@@ -32,10 +31,9 @@ export default (props) => {
     const [hotel, setHotel] = useState(props.hotel);
     const [edit, setEdit] = useState(props.edit);
     const [selectedState, setSelectedState] = useState(undefined);
-    console.log('+++++EDIT=', edit);
 
     const handleClose = () => {
-        props.onHotelAdded(); // This would reset the flag to open the dialog
+        props.onHotelAdded(null); // This would reset the flag to open the dialog
         setOpen(false);
     };
 
@@ -72,7 +70,7 @@ export default (props) => {
             }
         } catch (err) {
             console.log('API error:', err);
-            // Do nothing
+            //FIXME: Should something be done here?
         }
         setOpen(false);
         props.onHotelAdded(result);
@@ -149,7 +147,6 @@ export default (props) => {
         return <Select {...input} {...rest} searchable />
     }
 
-    // console.log('___Initial values=', initialValues());
     return (
         <Dialog open={open} onClose={handleClose} aria-labelledby="form-dialog-title">
             <DialogContent>
@@ -346,7 +343,6 @@ export default (props) => {
             </DialogContent>
             <DialogActions>
                 <Button onClick={handleClose} color="primary"> Cancel </Button>
-                {/* <Button onClick={handleStatusChange} color="primary" autoFocus> Confirm </Button> */}
             </DialogActions>
         </Dialog>
     );

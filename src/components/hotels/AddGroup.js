@@ -4,7 +4,7 @@
  */
 'use strict';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { TextField } from 'final-form-material-ui';
 import Dialog from '@material-ui/core/Dialog';
 import DialogContent from '@material-ui/core/DialogContent';
@@ -18,15 +18,13 @@ import {
 } from '@material-ui/core';
 import { Form, Field } from 'react-final-form';
 import HomeWorkRoundedIcon from '@material-ui/icons/HomeWorkRounded';
-import { isNull, isUndefined } from 'lodash';
 
-import { createHotelGroup, APICall } from '../../utils/API';
+import { APICall } from '../../utils/API';
 
 export default (props) => {
     const [open, setOpen] = useState(true);
 
     const onSubmit = async values => {
-        console.log('got submission for :', values)
         let obj = {
             name: values.name,
             description: values.description,
@@ -36,29 +34,23 @@ export default (props) => {
         try {
             hotelGroup = await APICall('/hotelGroup', { method: 'POST', body: obj });
         } catch (error) {
-
+            //FIXME: Should something be done here?
         }
         setOpen(false);
-        // if (isUndefined(hotelGroup) || isNull(hotelGroup)) return;
-
         props.onGroupAdded(hotelGroup);
     };
 
     const validate = values => {
-        console.log('va;ue=', values)
         const errors = {};
         if (!values.name) {
             errors.name = 'Required';
         }
-        console.log('errors=', errors);
-        // return errors;
         return {};
     };
 
     const handleClose = () => {
-        props.onGroupAdded();   // This would reset the flag to open the dialog
+        props.onGroupAdded(null);   // This would reset the flag to open the dialog
         setOpen(false);
-        console.log('^^^^^^ CLOSING addGroup Dialog', open);
     };
 
     return (
@@ -125,7 +117,6 @@ export default (props) => {
             </DialogContent>
             <DialogActions>
                 <Button onClick={handleClose} color="primary"> Cancel </Button>
-                {/* <Button onClick={handleStatusChange} color="primary" autoFocus> Confirm </Button> */}
             </DialogActions>
         </Dialog>
     );

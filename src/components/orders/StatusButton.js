@@ -19,9 +19,10 @@ import RadioGroup from '@material-ui/core/RadioGroup';
 import FormControlLabel from '@material-ui/core/FormControlLabel';
 import CheckCircleRoundedIcon from '@material-ui/icons/CheckCircleRounded';
 import Chip from '@material-ui/core/Chip';
-import { isEqual, isUndefined, find } from 'lodash';
+import { isEqual, isUndefined } from 'lodash';
+import { useSnackbar } from 'notistack';
 
-import { changeOrderStatus } from '../../utils/API';
+import { APICall } from '../../utils/API';
 
 // We can inject some CSS into the DOM.
 var useStyles = makeStyles({
@@ -77,7 +78,7 @@ export default function StatusButton(props) {
     const [open, setOpen] = useState(false);
     const [data, setData] = useState(props.data);
     const [chip, setChip] = useState(props.chip);   // This is for display in History. In LiveOrders, display is a button
-    // console.log('+++data=', data);
+    const { enqueueSnackbar } = useSnackbar();
 
     useEffect(() => {
         setStatus(isUndefined(props.status) ? '' : props.status);
@@ -93,7 +94,6 @@ export default function StatusButton(props) {
         className = clsx(classes.chip, classes[status]);
     }
     let dispName = isUndefined(status) ? '' : statusDispName[status];
-    // console.log('-----classes[status]', classes[status]);
 
     const dialogOpen = () => {
         setOpen(true);
@@ -108,8 +108,14 @@ export default function StatusButton(props) {
     };
 
     const handleStatusChange = async () => {
-        // New status is in 'value'
-        let order = await changeOrderStatus(data[0], value);
+        // New status is in 'value', coming from 'handleChange'
+        let order = null;
+        try {
+            order = await APICall('/order/' + data[0], { method: 'PATCH', body: { status: value } });
+        } catch (error) {
+            enqueueSnackbar('Error changing status. Try again', { variant: 'error' });
+            //FIXME: Should something be done?
+        }
         setStatus(value);
         props.onStatusUpdated(value);
         setOpen(false);

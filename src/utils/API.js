@@ -119,44 +119,6 @@ export const checkoutGuest = async (room) => {
     return results;
 }
 
-export const allOrders = async (hotel, filter) => {
-    // console.log('getting allOrder:hotel=', hotel, ',filter=', filter);
-    let URL = API_SERVER_URL + '/order?hotel_id=' + hotel.id + '&rowsPerPage=' + 10 + '&page=' + filter.page;
-    if (has(filter, 'status') && !isUndefined(filter.status)) URL += '&status=' + filter.status;
-    if (has(filter, 'selectedDate') && !isUndefined(filter.selectedDate)) URL += '&selectedDate=' + filter.selectedDate;
-    let results = await fetch(URL, { method: 'GET', headers: headers })
-        .then(res => res.json())
-        .then((results) => {
-            return results;
-        })
-        .catch((error) => { return error; })
-    return results;
-}
-
-export const searchOrders = async (hotel, page, text) => {
-    console.log('Search orders:hotel=', hotel, ',page=', page);
-    let URL = API_SERVER_URL + '/order/search?hotel_id=' + hotel.id + '&page=' + page + '&text=' + text;
-    let results = await fetch(URL, { method: 'GET', headers: headers })
-        .then(res => res.json())
-        .then((results) => {
-            return results;
-        })
-        .catch((error) => { return error; })
-    return results;
-}
-
-export const changeOrderStatus = async (order_id, newStatus) => {
-    console.log('changeOrderStatus :order=', order_id);
-    let URL = API_SERVER_URL + '/order/' + order_id;
-    let results = await fetch(URL, { method: 'PATCH', body: JSON.stringify({ status: newStatus }), headers: headers })
-        .then(res => res.json())
-        .then((results) => {
-            return results;
-        })
-        .catch((error) => { return error; })
-    return results;
-}
-
 /**
  * One method to rule them all
  * @param {*} endpoint 

@@ -12,6 +12,7 @@ import Tab from '@material-ui/core/Tab';
 import ShoppingCartRoundedIcon from '@material-ui/icons/ShoppingCartRounded';
 import HistoryRoundedIcon from '@material-ui/icons/HistoryRounded';
 import { isEqual } from 'lodash';
+import { useSnackbar } from 'notistack';
 
 import Selector from '../Selector';
 import { APICall } from '../../utils/API';
@@ -38,6 +39,7 @@ export default () => {
   const handleChange = (event, newValue) => {
     setValue(newValue);
   };
+  const { enqueueSnackbar } = useSnackbar();
 
   useEffect(() => {
     loadHotels();
@@ -52,7 +54,7 @@ export default () => {
         setLoading(false);
         res = results.data.map((h) => { return { name: h.name, id: h.hotel_id, _id: h._id } });
       } catch (error) {
-        //TODO: Show Alert that unable to get hotels
+        enqueueSnackbar('Error getting hotels', {variant: 'error'});
       }
       setHotels(res);
     }

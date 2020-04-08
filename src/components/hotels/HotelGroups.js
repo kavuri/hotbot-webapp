@@ -10,10 +10,10 @@ import IconButton from "@material-ui/core/IconButton";
 import AddCircleRoundedIcon from '@material-ui/icons/AddCircleRounded';
 import MUIDataTable from "mui-datatables";
 import { concat, isEqual, isNull } from 'lodash';
+import { useSnackbar } from 'notistack';
 
-import { allHotelGroups, APICall } from '../../utils/API';
+import { APICall } from '../../utils/API';
 import AddGroup from './AddGroup';
-import Alert from '../Alert';
 
 export default (props) => {
     const [addGroupFlag, setAddGroupFlag] = useState(false);
@@ -24,12 +24,7 @@ export default (props) => {
         selected: [],
         data: [['Loading...']]
     });
-
-    const [info, setInfo] = useState({
-        open: false,
-        message: '',
-        severity: ''
-    });
+    const { enqueueSnackbar } = useSnackbar();
 
     useEffect(() => {
         getHotelGroups();
@@ -66,29 +61,31 @@ export default (props) => {
     ];
 
     const getHotelGroups = async () => {
-        setTableState({ isLoading: true });
-        // let allGroups = await allHotelGroups();
-        let allGroups = await APICall('/hotelGroup', {method: 'GET'});
-        console.log('++allGroups=', allGroups);
-        setTableState({ data: allGroups.data, count: allGroups.total, isLoading: false });
-        console.log('+++TABLE STATE=', tableState);
+        if (!tableState.isLoading) {
+            setTableState({ ...tableState, isLoading: true });
+            let allGroups = null;
+            try {
+                allGroups = await APICall('/hotelGroup', { method: 'GET' });
+                setTableState({ ...tableState, data: allGroups.data, count: allGroups.total, isLoading: false });
+            } catch (error) {
+                setTableState({ ...tableState, isLoading: false });
+                enqueueSnackbar('Error getting hotel groups. Try again', { variant: 'error' });
+            }
+        }
     }
 
     const handleAddGroup = () => {
-        console.log('add group called');
         setAddGroupFlag(true);
-        console.log('add group flag=', addGroupFlag);
     }
 
     const addGroupToTable = (group) => {
-        console.log('adding to table:', group);
         if (!isNull(group)) {
             let newList = concat(tableState.data, group);
             setTableState({ ...tableState, data: newList });
-            console.log('^^^New table state=', tableState);
-            setInfo({ message: 'Hotel Group saved', open: true, severity: 'success' });
+
+            enqueueSnackbar('Hotel group saved', { variant: 'success' });
         } else {
-            setInfo({ message: 'Error saving hotel group', open: true, severity: 'error' });
+            enqueueSnackbar('Error saving hotel group', { variant: 'error' });
         }
         setAddGroupFlag(false);
     }
@@ -126,7 +123,6 @@ export default (props) => {
 
     return (
         <div>
-            <Alert key={info.open} open={info.open} message={info.message} severity={info.severity} />
             <MUIDataTable
                 title={<Typography variant="body2">
                 </Typography>

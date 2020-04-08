@@ -13,9 +13,10 @@ import AddCircleRoundedIcon from '@material-ui/icons/AddCircleRounded';
 import EditRoundedIcon from '@material-ui/icons/EditRounded';
 import { isEqual, isNull, concat, join, isEmpty, findIndex, isUndefined } from 'lodash';
 
+import { useSnackbar } from 'notistack';
+
 import { APICall } from '../../utils/API';
 import AddHotel from './AddHotel';
-import Alert from '../Alert';
 
 export default (props) => {
     const [group, setGroup] = useState(isNull(props.group) ? '' : props.group);
@@ -27,11 +28,7 @@ export default (props) => {
         selected: [],
         data: [['Loading...']]
     });
-    const [info, setInfo] = useState({
-        open: false,
-        message: '',
-        severity: ''
-    });
+    const { enqueueSnackbar } = useSnackbar();
 
     useEffect(() => {
         setGroup(isNull(props.group) ? '' : props.group);
@@ -130,16 +127,22 @@ export default (props) => {
     ];
 
     const getHotels = async () => {
-        setTableState({ isLoading: true });
-        console.log('----GETTNG hotels for group_id:', group.group_id);
-        let hotels = await APICall('/hotel', { method: 'GET', keyValues: { group_id: group.group_id } });
-        let modHotels = isUndefined(hotels.data) || isEmpty(hotels.data) ? [] : remapFields(hotels.data);
-        console.log('++allHotels=', modHotels);
-        setTableState({ ...tableState, data: modHotels, count: hotels.total, isLoading: false });
+        if (!tableState.isLoading) {
+            setTableState({ ...tableState, isLoading: true });
+            let hotels = null;
+            try {
+                hotels = await APICall('/hotel', { method: 'GET', keyValues: { group_id: group.group_id } });
+                let modHotels = isUndefined(hotels.data) || isEmpty(hotels.data) ? [] : remapFields(hotels.data);
+                setTableState({ ...tableState, data: modHotels, count: hotels.total, isLoading: false });
+                console.log('++allHotels=', modHotels);
+            } catch (error) {
+                enqueueSnackbar('Error getting hotels', { variant: 'error' });
+                setTableState({ ...tableState, isLoading: false });
+            }
+        }
     }
 
     function remapFields(arr) {
-        console.log('Mapping for:', arr);
         var res = arr.map(h => (
             {
                 ...h,
@@ -157,17 +160,15 @@ export default (props) => {
     }
 
     const addHotelToTable = (hotel) => {
-        console.log('^^^HOTEL=', hotel)
         if (!isNull(hotel) && !isEmpty(hotel)) {  // This can happen if the dialog is opened and closed without adding data
             var remapped = remapFields([hotel]);
             let existsIdx = findIndex(tableState.data, { _id: hotel._id });
-            console.log('adding to table:', hotel, tableState.data, ':::', existsIdx);
             let newList = isEqual(existsIdx, -1) ? concat(tableState.data, remapped) : tableState.data[existsIdx] = remapped;
             setTableState({ ...tableState, data: newList });
-            console.log('^^^New table state=', tableState);
-            setInfo({ message: 'Hotel saved', open: true, severity: 'success' });
+
+            enqueueSnackbar('Hotel saved', { variant: 'success' });
         } else {
-            setInfo({ message: 'Error saving hotel', open: true, severity: 'error' });
+            enqueueSnackbar('Error saving hotel', { variant: 'error' });
         }
         setAddHotelFlag(false);
     }
@@ -193,7 +194,6 @@ export default (props) => {
             </span >
         ),
         customToolbarSelect: selectedRows => {
-            console.log('^^^Selectedrows=', selectedRows)
             return (< span >
                 <IconButton key={addHotelFlag} onClick={handleAddHotel}>
                     <EditRoundedIcon />
@@ -205,7 +205,6 @@ export default (props) => {
             return false;
         },
         onRowsSelect: (rowsSelected, allRows) => {
-            console.log('SELECTED=', tableState, tableState.data[rowsSelected[0].dataIndex]);
             setTableState({ ...tableState, selected: allRows.map(row => row.dataIndex) });
 
             props.onHotelSelected(tableState.data[rowsSelected[0].dataIndex]);
@@ -220,7 +219,6 @@ export default (props) => {
 
     return (
         <div>
-            <Alert key={info.open} open={info.open} message={info.message} severity={info.severity} />
             <MUIDataTable
                 title={<Typography variant="body2">
                     Hotels

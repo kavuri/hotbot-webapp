@@ -14,9 +14,10 @@ import MomentUtils from '@date-io/moment';
 import { MuiPickersUtilsProvider, KeyboardDatePicker } from "@material-ui/pickers";
 import MUIDataTable from "mui-datatables";
 import moment from 'moment';
+import { useSnackbar } from 'notistack';
 import { isUndefined, isEmpty } from 'lodash';
 
-import { allOrders } from '../../utils/API';
+import { APICall } from '../../utils/API';
 import { timeDiff } from '../../utils/helpers';
 import StatusButton from './StatusButton';
 
@@ -28,9 +29,8 @@ export default (props) => {
         isLoading: false,
         data: [['Loading...']]
     });
-
+    const { enqueueSnackbar } = useSnackbar();
     const [selectedDate, setSelectedDate] = useState(moment());
-    // const [selectedDate, setSelectedDate] = useState(moment().subtract(1, 'day'));
 
     const handleDateChange = date => {
         // console.log('-----Date change called=', date);
@@ -135,21 +135,26 @@ export default (props) => {
 
     const getOrders = async (dt) => {
         if (!tableState.isLoading) {
-            setTableState({ isLoading: true });
-            // console.log('^^^^^GETTING ORDERS WITH SELECTED DATE=', selectedDate);
+            setTableState({ ...tableState, isLoading: true });
             let d = isUndefined(dt) ? selectedDate : dt;
-            let orders = await allOrders(hotel, { page: tableState.page, status: undefined, selectedDate: d.toISOString() });
-            // let modOrders = orders.data.map(o => ({ ...o, timeSinceRequest: 'music'}));
-            let modOrders = isUndefined(orders.data) || isEmpty(orders.data) ? [] : orders.data.map(o => ({ ...o, timeSinceRequest: timeDiff(o.created_at, o.curr_status.created), newStatus: '' }));
-            console.log('modOrders=', modOrders);
-            setTableState({ data: modOrders, count: orders.total, isLoading: false });
+
+            let orders = null;
+            try {
+                orders = await APICall('/order', { method: 'GET', keyValues: { hotel_id: hotel.id, rowsPerPage: 10, page: tableState.page, selectedDate: d.toISOString() } });
+                // let orders = await allOrders(hotel, { page: tableState.page, status: undefined, selectedDate: d.toISOString() });
+                let modOrders = isUndefined(orders.data) || isEmpty(orders.data) ? [] : orders.data.map(o => ({ ...o, timeSinceRequest: timeDiff(o.created_at, o.curr_status.created), newStatus: '' }));
+                console.log('modOrders=', modOrders);
+                setTableState({ ...tableState, data: modOrders, count: orders.total, isLoading: false });
+            } catch (error) {
+                setTableState({ ...tableState, isLoading: false });
+                enqueueSnackbar('Error getting orders. Try again', { variant: 'error' });
+            }
         }
     }
 
     const changePage = async (page) => {
         console.log('Got request to change to page:', page);
-        // setTableState({ page: page });
-        tableState.page = page;
+        setTableState({ ...tableState, page: page });
         console.log('%%% changing page=', tableState);
         getOrders();
     };
@@ -180,7 +185,6 @@ export default (props) => {
     return (
         <div>
             <MuiPickersUtilsProvider utils={MomentUtils}>
-                {/* <Grid container justify="space-around"> */}
                 <IconButton aria-label="left" color="primary" onClick={moveLeft}>
                     <ChevronLeftRoundedIcon />
                 </IconButton>
@@ -203,7 +207,6 @@ export default (props) => {
                 <IconButton aria-label="right" color="primary" onClick={moveRight}>
                     <ChevronRightRoundedIcon />
                 </IconButton>
-                {/* </Grid> */}
             </MuiPickersUtilsProvider>
             <MUIDataTable
                 title={<Typography variant="body2">

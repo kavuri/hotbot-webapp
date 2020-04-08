@@ -8,11 +8,13 @@ import ReactDOM from "react-dom";
 import { ThemeProvider } from '@material-ui/core/styles';
 import CssBaseline from '@material-ui/core/CssBaseline';
 import theme from './components/theme';
+import { SnackbarProvider } from 'notistack';
 import App from "./App";
 import * as serviceWorker from "./serviceWorker";
 import { Auth0Provider } from "./react-auth0-spa";
 import config from "./auth_config.json";
 import history from "./utils/history";
+
 
 // A function that routes the user to the right place
 // after login
@@ -26,16 +28,18 @@ const onRedirectCallback = appState => {
 
 ReactDOM.render(
   <ThemeProvider theme={theme}>
-    <CssBaseline />
-    <Auth0Provider
-      domain={config.domain}
-      client_id={config.clientId}
-      redirect_uri={window.location.origin}
-      audience={config.audience}
-      onRedirectCallback={onRedirectCallback}
-    >
-      <App />
-    </Auth0Provider>,
+    <SnackbarProvider maxSnack={3} anchorOrigin={{ vertical: 'top', horizontal: 'right', }}>
+      <CssBaseline />
+      <Auth0Provider
+        domain={config.domain}
+        client_id={config.clientId}
+        redirect_uri={window.location.origin}
+        audience={config.audience}
+        onRedirectCallback={onRedirectCallback}
+      >
+        <App />
+      </Auth0Provider>,
+    </SnackbarProvider>
   </ThemeProvider>,
   document.getElementById("root")
 );

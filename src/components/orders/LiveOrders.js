@@ -5,29 +5,15 @@
 'use strict';
 
 import React, { useState, useEffect } from 'react';
-import { makeStyles } from '@material-ui/core/styles';
 import Typography from '@material-ui/core/Typography';
-import CircularProgress from '@material-ui/core/Typography';
 
 import MUIDataTable from "mui-datatables";
 import { isUndefined, isEmpty } from 'lodash';
+import { useSnackbar } from 'notistack';
 
-import { allOrders } from '../../utils/API';
+import { APICall } from '../../utils/API';
 import { timeDiff } from '../../utils/helpers';
 import StatusButton from './StatusButton';
-
-const useStyles = makeStyles((theme) => ({
-    root: {
-        '& > *': {
-            margin: theme.spacing(1),
-            width: '25ch',
-        },
-    },
-    heading: {
-        fontSize: theme.typography.pxToRem(15),
-        fontWeight: theme.typography.fontWeightRegular,
-    },
-}));
 
 export default (props) => {
     const [hotel, setHotel] = useState(props.hotel);
@@ -37,6 +23,7 @@ export default (props) => {
         isLoading: false,
         data: [['Loading...']]
     });
+    const { enqueueSnackbar } = useSnackbar();
 
     useEffect(() => {
         setHotel(props.hotel);
@@ -122,18 +109,23 @@ export default (props) => {
     ];
 
     const getOrders = async (page) => {
-        setTableState({ isLoading: true, page: page });
+        setTableState({ ...tableState, isLoading: true });
         console.log('$$getOrders=', tableState, ',hotel=', hotel);
-        let orders = await allOrders(hotel, { page: tableState.page, status: undefined, selectedDate: new Date().toISOString() });
-        let modOrders = isUndefined(orders.data) || isEmpty(orders.data) ? [] : orders.data.map(o => ({ ...o, timeSinceRequest: timeDiff(o.created_at, o.curr_status.created), newStatus: '' }));
-        console.log('modOrders=', modOrders);
-        setTableState({ data: modOrders, count: orders.total, isLoading: false });
+        let orders = null;
+        try {
+            orders = await APICall('/order', { method: 'GET', keyValues: { hotel_id: hotel.id, rowsPerPage: 10, page: page, selectedDate: new Date().toISOString() } });
+            let modOrders = isUndefined(orders.data) || isEmpty(orders.data) ? [] : orders.data.map(o => ({ ...o, timeSinceRequest: timeDiff(o.created_at, o.curr_status.created), newStatus: '' }));
+            console.log('modOrders=', modOrders);
+            setTableState({ ...tableState, data: modOrders, count: orders.total, isLoading: false });
+        } catch (error) {
+            setTableState({ ...tableState, isLoading: false });
+            enqueueSnackbar('Error getting orders. Try again', { variant: 'error' });
+        }
     }
 
     const changePage = async (page) => {
         console.log('Got request to change to page:', page);
         // setTableState({ page: page });
-        tableState.page = page;
         console.log('%%% changing page=', tableState);
         getOrders(page);
     };
@@ -166,7 +158,6 @@ export default (props) => {
             <MUIDataTable
                 title={<Typography variant="body2">
                     All Orders
-          {/* {tableState.isLoading && <CircularProgress size={24} style={{ marginLeft: 15, position: 'relative', top: 4 }} />} */}
                 </Typography>
                 }
                 data={tableState.data}
