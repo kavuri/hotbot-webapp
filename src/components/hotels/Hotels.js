@@ -10,10 +10,13 @@ import Typography from '@material-ui/core/Typography';
 import MUIDataTable from "mui-datatables";
 import IconButton from "@material-ui/core/IconButton";
 import AddCircleRoundedIcon from '@material-ui/icons/AddCircleRounded';
-import { isEqual, isUndefined, concat, join, isEmpty, isNull } from 'lodash';
+import EditRoundedIcon from '@material-ui/icons/EditRounded';
+import Snackbar from '@material-ui/core/Snackbar';
+import { isEqual, isUndefined, concat, join, isEmpty, isNull, findIndex } from 'lodash';
 
 import { allHotels } from '../../utils/API';
 import AddHotel from './AddHotel';
+import Alert from '../Alert';
 
 export default (props) => {
     const [group, setGroup] = useState(isNull(props.group) ? '' : props.group);
@@ -24,6 +27,11 @@ export default (props) => {
         isLoading: false,
         selected: [],
         data: [['Loading...']]
+    });
+    const [info, setInfo] = useState({
+        open: false,
+        message: '',
+        severity: ''
     });
 
     useEffect(() => {
@@ -150,12 +158,17 @@ export default (props) => {
     }
 
     const addHotelToTable = (hotel) => {
-        if (!isUndefined(hotel)) {  // This can happen if the dialog is opened and closed without adding data
+        console.log('^^^HOTEL=', hotel)
+        if (!isUndefined(hotel) && !isEmpty(hotel)) {  // This can happen if the dialog is opened and closed without adding data
             var remapped = remapFields([hotel]);
-            console.log('adding to table:', hotel);
-            let newList = concat(tableState.data, remapped);
+            let existsIdx = findIndex(tableState.data, {_id: hotel._id});
+            console.log('adding to table:', hotel, tableState.data, ':::', existsIdx);
+            let newList = isEqual(existsIdx, -1) ? concat(tableState.data, remapped) : tableState.data[existsIdx] = remapped;
             setTableState({ ...tableState, data: newList });
             console.log('^^^New table state=', tableState);
+            setInfo({ message: 'Hotel info saved', open: true, severity: 'success' });
+        } else {
+            setInfo({ message: 'Error saving hotel', open: true, severity: 'error' });
         }
         setAddHotelFlag(false);
     }
@@ -172,8 +185,22 @@ export default (props) => {
         viewColumns: false,
         pagination: false,
         rowsSelected: tableState.selected,
-        customToolbar: () => {
-            return <span><IconButton key={addHotelFlag} onClick={handleAddHotel}> <AddCircleRoundedIcon /> </IconButton>{isEqual(addHotelFlag, true) && <AddHotel group={group} onHotelAdded={addHotelToTable} />}</span>
+        customToolbar: () => (
+            <span>
+                <IconButton key={addHotelFlag} onClick={handleAddHotel}>
+                    <AddCircleRoundedIcon />
+                </IconButton>
+                {isEqual(addHotelFlag, true) && <AddHotel group={group} onHotelAdded={addHotelToTable} />}
+            </span >
+        ),
+        customToolbarSelect: selectedRows => {
+            console.log('^^^Selectedrows=', selectedRows)
+            return (< span >
+                <IconButton key={addHotelFlag} onClick={handleAddHotel}>
+                    <EditRoundedIcon />
+                </IconButton>
+                {isEqual(addHotelFlag, true) && <AddHotel hotel={tableState.data[selectedRows.data[0].dataIndex]} edit onHotelAdded={addHotelToTable} />}
+            </span >)
         },
         onRowsDelete: (rowsDeleted) => {
             return false;
@@ -194,6 +221,7 @@ export default (props) => {
 
     return (
         <div>
+            <Alert key={info.open} open={info.open} message={info.message} severity={info.severity} />
             <MUIDataTable
                 title={<Typography variant="body2">
                     Hotels

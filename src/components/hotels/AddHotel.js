@@ -4,11 +4,12 @@
  */
 'use strict';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import Dialog from '@material-ui/core/Dialog';
 import DialogContent from '@material-ui/core/DialogContent';
 import { Form, Field } from 'react-final-form';
-import { TextField, Select } from 'final-form-material-ui';
+import { TextField } from 'final-form-material-ui';
+import Select from 'react-select';
 import DialogActions from '@material-ui/core/DialogActions';
 import {
     Typography,
@@ -20,12 +21,18 @@ import {
     MenuItem,
 } from '@material-ui/core';
 import HomeWorkRoundedIcon from '@material-ui/icons/HomeWorkRounded';
+import { isUndefined, isEmpty } from 'lodash';
 
-import { createHotel } from '../../utils/API';
+import { APICall } from '../../utils/API';
+import { states, cities } from './statesAndCities';
 
 export default (props) => {
     const [open, setOpen] = useState(true);
     const [group, setGroup] = useState(props.group);
+    const [hotel, setHotel] = useState(props.hotel);
+    const [edit, setEdit] = useState(props.edit);
+    const [selectedState, setSelectedState] = useState(undefined);
+    console.log('+++++EDIT=', edit);
 
     const handleClose = () => {
         props.onHotelAdded(); // This would reset the flag to open the dialog
@@ -39,8 +46,8 @@ export default (props) => {
             address: {
                 address1: values.address1,
                 address2: values.address2,
-                city: values.city,
-                state: values.state,
+                city: values.city.label,
+                state: values.state.label,
                 pin: values.pincode,
                 country: 'India'
             },
@@ -56,13 +63,27 @@ export default (props) => {
             reception_number: values.frontDeskPhone
         };
 
-        let result = await createHotel(group.group_id, obj);
+        let result = undefined;
+        try {
+            if (edit) {
+                result = await APICall('/hotel/' + hotel._id, { method: 'PATCH', body: obj });
+            } else {
+                result = await APICall('/hotel', { method: 'POST', body: obj, keyValues: { group_id: group.group_id } });
+            }
+        } catch (err) {
+            console.log('API error:', err);
+            // Do nothing
+        }
         setOpen(false);
         props.onHotelAdded(result);
     };
 
     const validate = values => {
         const errors = {};
+        if (values.state) { // For state selection
+            setSelectedState(values.state);
+        }
+
         if (!values.name) {
             errors.name = 'Required';
         }
@@ -102,6 +123,33 @@ export default (props) => {
         return errors;
     };
 
+    const initialValues = () => {
+        let obj = {};
+        if (!isUndefined(hotel)) {
+            obj = {
+                name: hotel.name,
+                description: hotel.description,
+                phone: hotel.contact.phone[0],
+                email: hotel.contact.email[0],
+                address1: hotel.address.address1,
+                address2: hotel.address.address2,
+                state: hotel.address.state,
+                city: hotel.address.city,
+                pincode: hotel.address.pin,
+                lat: hotel.coordinates.lat,
+                lng: hotel.coordinates.lng,
+                frontDeskCount: hotel.front_desk_count,
+                frontDeskPhone: hotel.reception_number
+            }
+        }
+        return obj;
+    };
+
+    const ReactSelectAdapter = ({ input, ...rest }) => {
+        return <Select {...input} {...rest} searchable />
+    }
+
+    // console.log('___Initial values=', initialValues());
     return (
         <Dialog open={open} onClose={handleClose} aria-labelledby="form-dialog-title">
             <DialogContent>
@@ -114,6 +162,7 @@ export default (props) => {
                     <Form
                         onSubmit={onSubmit}
                         validate={validate}
+                        initialValues={initialValues()}
                         render={({ handleSubmit, reset, submitting, pristine, values }) => (
                             <form onSubmit={handleSubmit} noValidate>
                                 <Paper style={{ padding: 16 }}>
@@ -122,6 +171,7 @@ export default (props) => {
                                             <Field
                                                 fullWidth
                                                 required
+                                                disabled={edit}
                                                 name="name"
                                                 component={TextField}
                                                 type="text"
@@ -185,32 +235,24 @@ export default (props) => {
                                                         <Field
                                                             fullWidth
                                                             name="state"
+                                                            placeholder={'Select State'}
                                                             required
-                                                            component={Select}
-                                                            label="Select a State"
+                                                            component={ReactSelectAdapter}
+                                                            options={states()}
                                                             formControlProps={{ fullWidth: true }}
                                                         >
-                                                            <MenuItem value="London">London</MenuItem>
-                                                            <MenuItem value="Paris">Paris</MenuItem>
-                                                            <MenuItem value="Budapest">
-                                                                A city with a very long Name
-                                                            </MenuItem>
                                                         </Field>
                                                     </Grid>
                                                     <Grid item xs={6}>
                                                         <Field
                                                             fullWidth
                                                             name="city"
+                                                            placeholder={'Select City'}
                                                             required
-                                                            component={Select}
-                                                            label="Select a City"
+                                                            component={ReactSelectAdapter}
+                                                            options={isUndefined(selectedState) ? [] : cities(selectedState.label)}
                                                             formControlProps={{ fullWidth: true }}
                                                         >
-                                                            <MenuItem value="London">London</MenuItem>
-                                                            <MenuItem value="Paris">Paris</MenuItem>
-                                                            <MenuItem value="Budapest">
-                                                                A city with a very long Name
-                                                            </MenuItem>
                                                         </Field>
                                                     </Grid>
                                                     <Grid item xs={6}>
