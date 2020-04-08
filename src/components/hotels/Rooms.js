@@ -8,10 +8,12 @@ import React, { useState, useEffect } from 'react';
 import Typography from '@material-ui/core/Typography';
 import IconButton from "@material-ui/core/IconButton";
 import AddCircleRoundedIcon from '@material-ui/icons/AddCircleRounded';
+import EditRoundedIcon from '@material-ui/icons/EditRounded';
 import MUIDataTable from "mui-datatables";
-import { concat, isEqual, isNull } from 'lodash';
+import { useSnackbar } from 'notistack';
+import { concat, isEqual, isNull, findIndex } from 'lodash';
 
-import { allRooms } from '../../utils/API';
+import { APICall } from '../../utils/API';
 import AddRoom from './AddRoom';
 
 export default (props) => {
@@ -24,6 +26,7 @@ export default (props) => {
         selected: [],
         data: [['Loading...']]
     });
+    const { enqueueSnackbar } = useSnackbar();
 
     useEffect(() => {
         getRooms();
@@ -60,30 +63,43 @@ export default (props) => {
     ];
 
     const getRooms = async () => {
-        setTableState({ isLoading: true });
-        let rooms = await allRooms(hotel.hotel_id);
-        console.log('++allRooms=', rooms);
-        setTableState({ data: rooms.data, count: rooms.total, isLoading: false });
-        console.log('+++TABLE STATE=', tableState);
+        if (!tableState.isLoading) {
+            setTableState({ ...tableState, isLoading: true });
+            let rooms = null;
+            try {
+                rooms = await APICall('/room', { method: 'GET', keyValues: { hotel_id: hotel.hotel_id } });
+                setTableState({ ...tableState, data: rooms.data, count: rooms.total, isLoading: false });
+            } catch (error) {
+                setTableState({ ...tableState, isLoading: false });
+                enqueueSnackbar('Unable to get rooms', { variant: 'error' });
+            }
+        }
     }
 
     const handleAddRoom = () => {
-        console.log('add Room called');
         setAddRoomFlag(true);
-        console.log('add Roomroup flag=', addRoomFlag);
     }
 
     const addRoomToTable = (room) => {
-        console.log('adding to table:', room);
-        let newList = concat(tableState.data, room);
-        setTableState({ ...tableState, data: newList });
-        console.log('^^^New table state=', tableState);
+        if (!isNull(room)) {
+            let existsIdx = findIndex(tableState.data, { _id: room._id });
+            if (isEqual(existsIdx, -1)) {
+                let newList = concat(tableState.data, room);
+                setTableState({ ...tableState, data: newList });
+            } else {
+                tableState.data[existsIdx] = room;
+            }
+
+            enqueueSnackbar('Room saved', { variant: 'success' });
+        } else {
+            enqueueSnackbar('Error saving room', { variant: 'error' });
+        }
         setAddRoomFlag(false);
     }
 
     const options = {
         filter: true,
-        selectableRows: 'none',
+        selectableRows: 'single',
         selectableRowsOnClick: true,
         filterType: 'dropdown',
         responsive: "scrollMaxHeight",
@@ -93,16 +109,26 @@ export default (props) => {
         viewColumns: false,
         rowsSelected: tableState.selected,
         customToolbar: () => {
-            return <span><IconButton key={addRoomFlag} onClick={handleAddRoom}> <AddCircleRoundedIcon /> </IconButton>{isEqual(addRoomFlag, true) && <AddRoom hotel={hotel} onRoomAdded={ addRoomToTable } />}</span>
+            return (<span>
+                <IconButton key={addRoomFlag} onClick={handleAddRoom}>
+                    <AddCircleRoundedIcon />
+                </IconButton>
+                {isEqual(addRoomFlag, true) && <AddRoom hotel={hotel} onRoomAdded={addRoomToTable} />}
+            </span>)
+        },
+        customToolbarSelect: selectedRows => {
+            return (< span >
+                <IconButton key={addRoomFlag} onClick={handleAddRoom}>
+                    <EditRoundedIcon />
+                </IconButton>
+                {isEqual(addRoomFlag, true) && <AddRoom room={tableState.data[selectedRows.data[0].dataIndex]} edit onRoomAdded={addRoomToTable} />}
+            </span >)
         },
         onRowsDelete: (rowsDeleted) => {
             return false;
         },
         onRowsSelect: (rowsSelected, allRows) => {
-            console.log('SELECTED=', tableState, tableState.data[rowsSelected[0].dataIndex]);
             setTableState({ ...tableState, selected: allRows.map(row => row.dataIndex) });
-
-            props.onHotelGroupSelected(tableState.data[rowsSelected[0].dataIndex]);
         },
         onRowClick: (rowData, rowState) => {
             console.log('---row clicked=', rowData, rowState);

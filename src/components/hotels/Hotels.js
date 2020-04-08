@@ -142,6 +142,11 @@ export default (props) => {
         }
     }
 
+    /**
+     * 
+     * @param {*} arr Takes as input an array of hotel objects to map to the format of the table
+     * @returns an array of remapped objects
+     */
     function remapFields(arr) {
         var res = arr.map(h => (
             {
@@ -163,8 +168,12 @@ export default (props) => {
         if (!isNull(hotel) && !isEmpty(hotel)) {  // This can happen if the dialog is opened and closed without adding data
             var remapped = remapFields([hotel]);
             let existsIdx = findIndex(tableState.data, { _id: hotel._id });
-            let newList = isEqual(existsIdx, -1) ? concat(tableState.data, remapped) : tableState.data[existsIdx] = remapped;
-            setTableState({ ...tableState, data: newList });
+            if (isEqual(existsIdx, -1)) {
+                let newList = concat(tableState.data, remapped);
+                setTableState({ ...tableState, data: newList });
+            } else {
+                tableState.data[existsIdx] = remapped[0];
+            }
 
             enqueueSnackbar('Hotel saved', { variant: 'success' });
         } else {

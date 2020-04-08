@@ -20,7 +20,7 @@ import {
     FormLabel,
 } from '@material-ui/core';
 import HomeWorkRoundedIcon from '@material-ui/icons/HomeWorkRounded';
-import { isUndefined, isEmpty } from 'lodash';
+import { isUndefined } from 'lodash';
 
 import { APICall } from '../../utils/API';
 import { states, cities } from './statesAndCities';

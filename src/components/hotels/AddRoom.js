@@ -18,25 +18,36 @@ import {
     CssBaseline,
 } from '@material-ui/core';
 import HomeRoundedIcon from '@material-ui/icons/HomeRounded';
+import { isUndefined } from 'lodash';
 
-import { createRoom } from '../../utils/API';
+import { APICall } from '../../utils/API';
 
 export default (props) => {
     const [open, setOpen] = useState(true);
     const [hotel, setHotel] = useState(props.hotel);
+    const [room, setRoom] = useState(props.room);
+    const [edit, setEdit] = useState(props.edit);
 
     const handleClose = () => {
-        props.onRoomAdded(); // This would reset the flag to open the dialog
+        props.onRoomAdded(null); // This would reset the flag to open the dialog
         setOpen(false);
     };
 
     const onSubmit = async values => {
         let obj = {
-            room_no: values.room_no,
             type: values.type
         };
 
-        let result = await createRoom(hotel.hotel_id, obj);
+        let result = null;
+        try {
+            if (edit) {
+                result = await APICall('/room/' + room._id, { method: 'PATCH', body: obj });
+            } else {
+                result = await APICall('/room', { method: 'POST', body: obj, keyValues: { hotel_id: hotel.hotel_id } });
+            }
+        } catch (error) {
+            //FIXME: Do something?
+        }
         setOpen(false);
         props.onRoomAdded(result);
     };
@@ -52,18 +63,30 @@ export default (props) => {
         return errors;
     };
 
+    const initialValues = () => {
+        let obj = {};
+        if (!isUndefined(room)) {
+            obj = {
+                room_no: room.room_no,
+                type: room.type
+            };
+        }
+        return obj;
+    }
+
     return (
         <Dialog open={open} onClose={handleClose} aria-labelledby="form-dialog-title">
             <DialogContent>
                 <div style={{ padding: 16, margin: 'auto', maxWidth: 600 }}>
                     <CssBaseline />
                     <Typography variant="h5" align="center" component="h2" gutterBottom>
-                        <HomeRoundedIcon />Create Room 
+                        <HomeRoundedIcon />Create Room
                     </Typography>
 
                     <Form
                         onSubmit={onSubmit}
                         validate={validate}
+                        initialValues={initialValues()}
                         render={({ handleSubmit, reset, submitting, pristine, values }) => (
                             <form onSubmit={handleSubmit} noValidate>
                                 <Paper style={{ padding: 16 }}>
@@ -72,6 +95,7 @@ export default (props) => {
                                             <Field
                                                 fullWidth
                                                 required
+                                                disabled={edit}
                                                 name="room_no"
                                                 component={TextField}
                                                 type="text"
