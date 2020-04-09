@@ -32,7 +32,6 @@ export default (props) => {
 
     useEffect(() => {
         setGroup(isNull(props.group) ? '' : props.group);
-        console.log('+++GOT NEW GROUP=', props.group);
         getHotels();
     }, [group]);
 
@@ -134,7 +133,6 @@ export default (props) => {
                 hotels = await APICall('/hotel', { method: 'GET', keyValues: { group_id: group.group_id } });
                 let modHotels = isUndefined(hotels.data) || isEmpty(hotels.data) ? [] : remapFields(hotels.data);
                 setTableState({ ...tableState, data: modHotels, count: hotels.total, isLoading: false });
-                console.log('++allHotels=', modHotels);
             } catch (error) {
                 enqueueSnackbar('Error getting hotels', { variant: 'error' });
                 setTableState({ ...tableState, isLoading: false });

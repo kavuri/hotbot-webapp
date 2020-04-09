@@ -2,7 +2,6 @@
  * Unauthorized copying of this file, via any medium is strictly prohibited
  * Proprietary and confidential
  */
-'use strict';
 
 import React, { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
@@ -20,7 +19,7 @@ import FormControlLabel from '@material-ui/core/FormControlLabel';
 import CheckCircleRoundedIcon from '@material-ui/icons/CheckCircleRounded';
 import Chip from '@material-ui/core/Chip';
 import { isEqual, isUndefined } from 'lodash';
-import { useSnackbar } from 'notistack';
+// import { useSnackbar } from 'notistack';
 
 import { APICall } from '../../utils/API';
 
@@ -74,17 +73,15 @@ const statusArr = [
 
 // function StatusButton(props) {
 export default function StatusButton(props) {
-    const [status, setStatus] = useState(isUndefined(props.status) ? '' : props.status)
+    const [status, setStatus] = useState(isUndefined(props.status) ? '' : props.status);
     const [open, setOpen] = useState(false);
     const [data, setData] = useState(props.data);
     const [chip, setChip] = useState(props.chip);   // This is for display in History. In LiveOrders, display is a button
-    const { enqueueSnackbar } = useSnackbar();
-
+    // const { enqueueSnackbar } = useSnackbar();
     useEffect(() => {
         setStatus(isUndefined(props.status) ? '' : props.status);
         setData(props.data);
-        setChip(props.chip);
-    }, [props.status, props.data, props.chip]);
+    });
 
     const classes = useStyles();
     let className;
@@ -113,7 +110,7 @@ export default function StatusButton(props) {
         try {
             order = await APICall('/order/' + data[0], { method: 'PATCH', body: { status: value } });
         } catch (error) {
-            enqueueSnackbar('Error changing status. Try again', { variant: 'error' });
+            // enqueueSnackbar('Error changing status. Try again', { variant: 'error' });
             //FIXME: Should something be done?
         }
         setStatus(value);

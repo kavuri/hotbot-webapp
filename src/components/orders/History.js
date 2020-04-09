@@ -18,7 +18,6 @@ import { useSnackbar } from 'notistack';
 import { isUndefined, isEmpty } from 'lodash';
 
 import { APICall } from '../../utils/API';
-import { timeDiff } from '../../utils/helpers';
 import StatusButton from './StatusButton';
 
 export default (props) => {
@@ -27,10 +26,15 @@ export default (props) => {
         page: 0,
         count: 1,
         isLoading: false,
-        data: [['Loading...']]
+        data: []
     });
     const { enqueueSnackbar } = useSnackbar();
-    const [selectedDate, setSelectedDate] = useState(moment());
+    const [selectedDate, setSelectedDate] = useState(moment(moment().subtract(1, 'day')));
+    useEffect(() => {
+        setHotel(props.hotel);
+        getOrders();
+    }, []);
+
 
     const handleDateChange = date => {
         // console.log('-----Date change called=', date);
@@ -55,11 +59,6 @@ export default (props) => {
         // console.log('+++LEFT+++', selectedDate, d);
         getOrders(d);
     }
-
-    useEffect(() => {
-        setHotel(props.hotel);
-        getOrders();
-    }, []);
 
     const columns = [
         {
@@ -109,8 +108,16 @@ export default (props) => {
             }
         },
         {
-            name: "timeSinceRequest",
-            label: "Time Since Request",
+            name: "orderTime",
+            label: "Order Time",
+            options: {
+                filter: false,
+                sort: true
+            }
+        },
+        {
+            name: "statusChangeTime",
+            label: "Status Change Time",
             options: {
                 filter: false,
                 sort: true
@@ -126,7 +133,7 @@ export default (props) => {
                 customBodyRender: (value, tableMeta, updateValue) => {
                     // console.log('^^^^value=', value, ',tableMeta=', tableMeta);
                     return (
-                        <StatusButton status={value} chip={true} data={tableState.data} />
+                        <StatusButton status={value} chip data={tableState.data} />
                     );
                 }
             }
@@ -142,7 +149,7 @@ export default (props) => {
             try {
                 orders = await APICall('/order', { method: 'GET', keyValues: { hotel_id: hotel.id, rowsPerPage: 10, page: tableState.page, selectedDate: d.toISOString() } });
                 // let orders = await allOrders(hotel, { page: tableState.page, status: undefined, selectedDate: d.toISOString() });
-                let modOrders = isUndefined(orders.data) || isEmpty(orders.data) ? [] : orders.data.map(o => ({ ...o, timeSinceRequest: timeDiff(o.created_at, o.curr_status.created), newStatus: '' }));
+                let modOrders = isUndefined(orders.data) || isEmpty(orders.data) ? [] : remapFields(orders.data);
                 console.log('modOrders=', modOrders);
                 setTableState({ ...tableState, data: modOrders, count: orders.total, isLoading: false });
             } catch (error) {
@@ -150,6 +157,23 @@ export default (props) => {
                 enqueueSnackbar('Error getting orders. Try again', { variant: 'error' });
             }
         }
+    }
+
+    /**
+     * Remaps orders received from database to a format that the display table supports
+     * @param {*} arr 
+     * @returns an array of remappied orders
+     */
+    function remapFields(arr) {
+        var res = arr.map(o => (
+            {
+                ...o,
+                orderTime: moment(o.created_at).format('MMMM Do YYYY, h:mm A'),
+                statusChangeTime: moment(o.curr_status.created).format('MMMM Do YYYY, h:mm A'),
+                newStatus: ''
+            }
+        ));
+        return res;
     }
 
     const changePage = async (page) => {
@@ -170,13 +194,11 @@ export default (props) => {
         viewColumns: false,
         // serverSide: true,   // Only required in history. Make 'false' for LiveOrders as we will get all orders into browser memory
         pagination: true,
-        count: tableState.count,
-        page: tableState.page,
         onTableChange: (action, state) => {
             // console.log('action=', action, 'state=', state);
             switch (action) {
                 case 'changePage':
-                    changePage(state.page);
+                    // changePage(state.page);
                     break;
             }
         }
