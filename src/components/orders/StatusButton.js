@@ -29,8 +29,8 @@ var useStyles = makeStyles({
         borderRadius: 6,
         border: 'solid 2px',
         color: 'black',
-        height: 48,
-        padding: '0 30px',
+        height: 38,
+        padding: '0 10px',
     },
     chip: {
         border: 'solid 2px',

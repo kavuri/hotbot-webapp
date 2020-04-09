@@ -13,6 +13,8 @@ import { useSnackbar } from 'notistack';
 import moment from 'moment';
 import { APICall, orderListener } from '../../utils/API';
 import StatusButton from './StatusButton';
+import { cyan, lightBlue, teal } from '@material-ui/core/colors';
+import Chip from '@material-ui/core/Chip';
 
 export default (props) => {
     const [hotel, setHotel] = useState(props.hotel);    //FIXME: Temporary. Remove once auth is implemented
@@ -50,15 +52,6 @@ export default (props) => {
             }
         },
         {
-            name: "room_no",
-            label: "Room",
-            options: {
-                filter: true,
-                sort: true,
-                searchable: false
-            }
-        },
-        {
             name: "checkincheckout.guestName",
             label: "Guest Name",
             options: {
@@ -68,12 +61,27 @@ export default (props) => {
             }
         },
         {
+            name: "room_no",
+            label: "Room",
+            options: {
+                filter: true,
+                sort: true,
+                searchable: false,
+                customBodyRender: (value, tableMeta, updateValue) => {
+                    return <Chip size='medium' label={value} style={{ background: cyan[200] }} />
+                }
+            }
+        },
+        {
             name: "item.name",
             label: "Item",
             options: {
                 filter: true,
                 sort: false,
-                searchable: true
+                searchable: true,
+                customBodyRender: (value, tableMeta, updateValue) => {
+                    return <Chip size='medium' label={value} style={{ background: cyan[200] }} />
+                }
             }
         },
         {
@@ -83,6 +91,9 @@ export default (props) => {
                 filter: false,
                 sort: false,
                 searchable: false,
+                customBodyRender: (value, tableMeta, updateValue) => {
+                    return <Chip size='medium' label={value} style={{ background: cyan[200] }} />
+                }
             }
         },
         {
@@ -105,6 +116,7 @@ export default (props) => {
             name: "curr_status.status",
             label: "Status",
             options: {
+                empty: true,
                 filter: true,
                 sort: true,
                 searchable: true,
@@ -164,7 +176,7 @@ export default (props) => {
                 ...o,
                 orderTime: moment(o.created_at).format('MMMM Do YYYY, h:mm A'),
                 statusChangeTime: moment(o.curr_status.created).format('MMMM Do YYYY, h:mm A'),
-                newStatus: ''
+                // newStatus: ''
             }
         ));
         return res;
@@ -187,6 +199,12 @@ export default (props) => {
         pagination: true,
         // count: tableState.count,
         // page: tableState.page,
+        setTableProps: () => {
+            return {
+                padding: "default",
+                size: "small"
+            }
+        },
         onTableChange: (action, state) => {
             console.log('action=', action, 'state=', state);
             switch (action) {
@@ -201,7 +219,7 @@ export default (props) => {
         <div>
             <MUIDataTable
                 title={<Typography variant="body2">
-                    All Orders
+                    {/* All Orders */}
                 </Typography>
                 }
                 data={data}

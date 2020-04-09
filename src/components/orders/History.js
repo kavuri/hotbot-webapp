@@ -12,6 +12,8 @@ import ChevronLeftRoundedIcon from "@material-ui/icons/ChevronLeftRounded";
 import IconButton from "@material-ui/core/IconButton";
 import MomentUtils from '@date-io/moment';
 import { MuiPickersUtilsProvider, KeyboardDatePicker } from "@material-ui/pickers";
+import { cyan, lightBlue, teal } from '@material-ui/core/colors';
+import Chip from '@material-ui/core/Chip';
 import MUIDataTable from "mui-datatables";
 import moment from 'moment';
 import { useSnackbar } from 'notistack';
@@ -69,15 +71,6 @@ export default (props) => {
             }
         },
         {
-            name: "room_no",
-            label: "Room",
-            options: {
-                filter: true,
-                sort: true,
-                searchable: false
-            }
-        },
-        {
             name: "checkincheckout.guestName",
             label: "Guest Name",
             options: {
@@ -87,12 +80,27 @@ export default (props) => {
             }
         },
         {
+            name: "room_no",
+            label: "Room",
+            options: {
+                filter: true,
+                sort: true,
+                searchable: false,
+                customBodyRender: (value, tableMeta, updateValue) => {
+                    return <Chip size='medium' label={value} style={{ background: cyan[200] }} />
+                }
+            }
+        },
+        {
             name: "item.name",
             label: "Item",
             options: {
                 filter: true,
                 sort: false,
-                searchable: true
+                searchable: true,
+                customBodyRender: (value, tableMeta, updateValue) => {
+                    return <Chip size='medium' label={value} style={{ background: cyan[200] }} />
+                }
             }
         },
         {
@@ -102,9 +110,9 @@ export default (props) => {
                 filter: false,
                 sort: false,
                 searchable: false,
-                // customBodyRender: (value, tabbleMeta, updateValue) => {
-                //     // If the order status="done" or "cant_serve", do not show the time since request
-                // }
+                customBodyRender: (value, tableMeta, updateValue) => {
+                    return <Chip size='medium' label={value} style={{ background: cyan[200] }} />
+                }
             }
         },
         {
@@ -194,6 +202,12 @@ export default (props) => {
         viewColumns: false,
         // serverSide: true,   // Only required in history. Make 'false' for LiveOrders as we will get all orders into browser memory
         pagination: true,
+        setTableProps: () => {
+            return {
+                padding: "default",
+                size: "small"
+            }
+        },
         onTableChange: (action, state) => {
             // console.log('action=', action, 'state=', state);
             switch (action) {
