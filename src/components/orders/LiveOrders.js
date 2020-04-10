@@ -8,17 +8,17 @@ import React, { useState, useEffect } from 'react';
 import Typography from '@material-ui/core/Typography';
 
 import MUIDataTable from "mui-datatables";
-import { isEqual, concat, isEmpty, findIndex, isUndefined } from 'lodash';
+import { isEqual, concat, isEmpty, findIndex, isUndefined, countBy } from 'lodash';
 import { useSnackbar } from 'notistack';
 import moment from 'moment';
 import { APICall, orderListener } from '../../utils/API';
 import StatusButton from './StatusButton';
-import { cyan, lightBlue, teal } from '@material-ui/core/colors';
+import { cyan } from '@material-ui/core/colors';
 import Chip from '@material-ui/core/Chip';
 
 export default (props) => {
     const [hotel, setHotel] = useState(props.hotel);    //FIXME: Temporary. Remove once auth is implemented
-    // const [newOrderCount, setNewOrderCount] = useState({ count: 0 });
+    const [unservedOrderCount, setUnservedOrderCount] = useState({ count: 0 });
     const [data, setData] = useState([]);
     const { enqueueSnackbar } = useSnackbar();
 
@@ -124,7 +124,8 @@ export default (props) => {
                     // console.log('^^^^value=', value, ',tableMeta=', tableMeta);
                     return (
                         <StatusButton status={value} chip={false} data={tableMeta.rowData} onStatusUpdated={async (newStatus) => {
-                            console.log('###***###neStatus=', newStatus)
+                            console.log('###***###neStatus=', newStatus);
+                            // FIXME: If the order is not raised today, remove it from the rows
                             tableMeta.tableData[tableMeta.rowIndex][7] = newStatus;
                             tableMeta.rowData[7] = newStatus;
                             console.log('______tableMeta=', tableMeta);
@@ -139,7 +140,7 @@ export default (props) => {
     const getOrders = async (page) => {
         let orders = null;
         try {
-            orders = await APICall('/order', { method: 'GET', keyValues: { hotel_id: hotel.id, rowsPerPage: 10, page: page, selectedDate: new Date().toISOString() } });
+            orders = await APICall('/order', { method: 'GET', keyValues: { hotel_id: hotel.id, live: true, selectedDate: new Date().toISOString() } });
             let modOrders = isUndefined(orders.data) || isEmpty(orders.data) ? [] : remapFields(orders.data);
             setData(modOrders);
         } catch (error) {
@@ -166,6 +167,14 @@ export default (props) => {
     }
 
     /**
+     * Function to calculate the unserved order count
+     */
+    function calcUnservedOrderCount() {
+        let count = countBy(data, o => ((o.curr_status.status === 'new') || (o.curr_status.status === 'progress'))).true
+        return count;
+    }
+
+    /**
      * Remaps orders received from database to a format that the display table supports
      * @param {*} arr 
      * @returns an array of remappied orders
@@ -174,6 +183,7 @@ export default (props) => {
         var res = arr.map(o => (
             {
                 ...o,
+                checkincheckout: o.checkincheckout[0],
                 orderTime: moment(o.created_at).format('MMMM Do YYYY, h:mm A'),
                 statusChangeTime: moment(o.curr_status.created).format('MMMM Do YYYY, h:mm A'),
                 // newStatus: ''
@@ -181,11 +191,6 @@ export default (props) => {
         ));
         return res;
     }
-
-    const changePage = async (page) => {
-        // setTableState({ page: page });
-        getOrders(page);
-    };
 
     const options = {
         filter: true,
@@ -207,6 +212,11 @@ export default (props) => {
         },
         onTableChange: (action, state) => {
             console.log('action=', action, 'state=', state);
+            // Calculate the unservedOrderCount and set it
+            let count = calcUnservedOrderCount(data);
+            setUnservedOrderCount(count);
+            console.log('+++UNSERVED ORDER COUNT=', unservedOrderCount);
+            // props.onOrdersLoaded(unservedOrderCount);
             switch (action) {
                 case 'changePage':
                     // changePage(state.page);

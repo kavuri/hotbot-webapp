@@ -155,7 +155,7 @@ export default (props) => {
 
             let orders = null;
             try {
-                orders = await APICall('/order', { method: 'GET', keyValues: { hotel_id: hotel.id, rowsPerPage: 10, page: tableState.page, selectedDate: d.toISOString() } });
+                orders = await APICall('/order', { method: 'GET', keyValues: { hotel_id: hotel.id, live: false, selectedDate: d.toISOString() } });
                 // let orders = await allOrders(hotel, { page: tableState.page, status: undefined, selectedDate: d.toISOString() });
                 let modOrders = isUndefined(orders.data) || isEmpty(orders.data) ? [] : remapFields(orders.data);
                 console.log('modOrders=', modOrders);
@@ -176,6 +176,7 @@ export default (props) => {
         var res = arr.map(o => (
             {
                 ...o,
+                checkincheckout: o.checkincheckout[0],
                 orderTime: moment(o.created_at).format('MMMM Do YYYY, h:mm A'),
                 statusChangeTime: moment(o.curr_status.created).format('MMMM Do YYYY, h:mm A'),
                 newStatus: ''

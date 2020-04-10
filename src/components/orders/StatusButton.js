@@ -29,7 +29,7 @@ var useStyles = makeStyles({
         borderRadius: 6,
         border: 'solid 2px',
         color: 'black',
-        height: 38,
+        height: 28,
         padding: '0 10px',
     },
     chip: {
@@ -59,13 +59,13 @@ var useStyles = makeStyles({
 });
 
 const statusDispName = {
-    'new': 'New Order',
+    'new': 'New ',
     'progress': 'Progress ',
     'done': 'Completed',
     'cant_serve': 'Cant Serve',
 };
 const statusArr = [
-    { s: 'new', name: 'New Order' },
+    { s: 'new', name: 'New ' },
     { s: 'progress', name: 'Progress ' },
     { s: 'done', name: 'Completed' },
     { s: 'cant_serve', name: 'Cant Serve' },
