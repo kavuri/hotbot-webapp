@@ -4,7 +4,7 @@
  */
 'use strict';
 
-import React from 'react';
+import React, { useContext } from 'react';
 import clsx from 'clsx';
 import { makeStyles } from '@material-ui/core/styles';
 import CssBaseline from '@material-ui/core/CssBaseline';
@@ -23,6 +23,7 @@ import Paper from '@material-ui/core/Paper';
 import MenuIcon from '@material-ui/icons/Menu';
 import ChevronLeftIcon from '@material-ui/icons/ChevronLeft';
 import { isNull, isUndefined, isEqual } from 'lodash';
+import { useSnackbar } from 'notistack';
 
 import Orders from './orders/Orders';
 import Devices from './devices/Devices';
@@ -33,7 +34,10 @@ import ConsumerMenu from './ConsumerMenu';
 import Default from './Default';
 import HotelMgmt from './hotels/HotelMgmt';
 
+import Selector from './Selector';
 import { useAuth0 } from "../react-auth0-spa";
+import { APICall } from '../utils/API';
+import { KamAppContext } from './KamAppContext';
 
 function Copyright() {
   return (
@@ -132,7 +136,17 @@ export default function Dashboard() {
   const classes = useStyles();
   const [open, setOpen] = React.useState(true);
   const [role, setRole] = React.useState(null);
+  const [loading, setLoading] = React.useState(false);
   const [ComponentToRender, setComponentToRender] = React.useState(Default);
+  const [hotels, setHotels] = React.useState([]);
+
+  const ctx = useContext(KamAppContext);
+
+  const { enqueueSnackbar } = useSnackbar();
+
+  React.useEffect(() => {
+    loadHotels();
+  }, []);
 
   const menuComponentMap = {
     'default': Default,
@@ -182,27 +196,50 @@ export default function Dashboard() {
     }
   }
 
+  const loadHotels = async () => {
+    if (!loading) {
+      setLoading(true);
+      let results = undefined, res;
+      try {
+        results = await APICall('/hotel', { method: 'GET' });
+        setLoading(false);
+        res = results.data.map((h) => { return { name: h.name, id: h.hotel_id, _id: h._id } });
+      } catch (error) {
+        enqueueSnackbar('Error getting hotels', { variant: 'error' });
+      }
+      setHotels(res);
+    }
+  }
+
+  const handleHotelSelection = (hotel) => {
+    console.log('hotel=', hotel, ',context=', ctx);
+    ctx.setHotel(hotel);
+  }
+
   const renderSideMenu = () => {
     return (
-      <Drawer
-        variant="permanent"
-        classes={{
-          paper: clsx(classes.drawerPaper, !open && classes.drawerPaperClose),
-        }}
-        open={open}
-      >
-        <div className={classes.toolbarIcon}>
-          <IconButton onClick={handleDrawerClose}>
-            <ChevronLeftIcon />
-          </IconButton>
-        </div>
-        <Divider />
-        <List>
-          {renderRBAMenu(role)}
-        </List>
-        <Divider />
-        <List><HotelSettings optionSelected={menuOptionSelected} /></List>
-      </Drawer>
+      <React.Fragment>
+        <Drawer
+          variant="permanent"
+          classes={{
+            paper: clsx(classes.drawerPaper, !open && classes.drawerPaperClose),
+          }}
+          open={open}
+        >
+          <div className={classes.toolbarIcon}>
+            <IconButton onClick={handleDrawerClose}>
+              <ChevronLeftIcon />
+            </IconButton>
+          </div>
+          <Divider />
+          <List>
+            {renderRBAMenu(role)}
+          </List>
+          <Divider />
+          <List><HotelSettings optionSelected={menuOptionSelected} /></List>
+          <Selector menuName="Hotels" items={hotels} onSelectEntry={(value) => handleHotelSelection(value)} />
+        </Drawer>
+      </React.Fragment>
     )
   }
 

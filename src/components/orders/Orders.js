@@ -62,8 +62,6 @@ export default () => {
 
   return (
     <div>
-      //FIXME: Remove the hotel selector once authentication is enabled
-      <Selector menuName="Hotels" items={hotels} onSelectEntry={(value) => setHotel(value)} />
       <Paper square className={classes.root}>
         <Tabs
           value={value}

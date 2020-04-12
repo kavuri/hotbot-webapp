@@ -53,7 +53,7 @@ export const Auth0Provider = ({
           return u.json();
         }).then((user) => {
           return user;
-        })
+        });
 
         console.log('setting fulluser=', full_user);
         setUser(full_user);

@@ -4,7 +4,7 @@
  */
 'use strict';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import Typography from '@material-ui/core/Typography';
 
 import ChevronRightRoundedIcon from "@material-ui/icons/ChevronRightRounded";
@@ -15,51 +15,44 @@ import { MuiPickersUtilsProvider, KeyboardDatePicker } from "@material-ui/picker
 import { cyan, lightBlue, teal } from '@material-ui/core/colors';
 import Chip from '@material-ui/core/Chip';
 import MUIDataTable from "mui-datatables";
+import { KamAppContext } from '../KamAppContext';
 import moment from 'moment';
 import { useSnackbar } from 'notistack';
-import { isUndefined, isEmpty } from 'lodash';
 
-import { APICall } from '../../utils/API';
 import StatusButton from './StatusButton';
 
 export default (props) => {
-    const [hotel, setHotel] = useState(props.hotel);
-    const [tableState, setTableState] = useState({
-        page: 0,
-        count: 1,
-        isLoading: false,
-        data: []
-    });
+    const ctx = useContext(KamAppContext);
+    const [orders, setOrders] = useState(ctx.orders);
     const { enqueueSnackbar } = useSnackbar();
     const [selectedDate, setSelectedDate] = useState(moment(moment().subtract(1, 'day')));
     useEffect(() => {
-        setHotel(props.hotel);
-        getOrders();
-    }, []);
-
+        console.log('---+++inUseEffect:', ctx.orders);
+        ctx.getOrders(selectedDate);
+    }, [orders]);
 
     const handleDateChange = date => {
-        // console.log('-----Date change called=', date);
+        console.log('-----Date change called=', ctx);
         let dtClone = selectedDate.clone();
         dtClone = date;
         setSelectedDate(dtClone);
         // console.log('+++DATE SELECTED+++', selectedDate);
-        getOrders(date);
+        ctx.getOrders(date);
     };
 
     const moveRight = () => {
         let d = moment(selectedDate).add(1, 'day');
         setSelectedDate(d);
         // console.log('+++RIGHT+++', selectedDate);
-        getOrders(d);
+        ctx.getOrders(d);
     };
 
     const moveLeft = () => {
-        // setSelectedDate(moment(selectedDate).subtract(1, 'day'));
+        setSelectedDate(moment(selectedDate).subtract(1, 'day'));
         let d = moment(selectedDate).subtract(1, 'day');
         setSelectedDate(d);
-        // console.log('+++LEFT+++', selectedDate, d);
-        getOrders(d);
+        console.log('+++LEFT+++', selectedDate, d);
+        ctx.getOrders(d);
     }
 
     const columns = [
@@ -141,31 +134,12 @@ export default (props) => {
                 customBodyRender: (value, tableMeta, updateValue) => {
                     // console.log('^^^^value=', value, ',tableMeta=', tableMeta);
                     return (
-                        <StatusButton status={value} chip data={tableState.data} />
+                        <StatusButton status={value} chip data={orders} />
                     );
                 }
             }
         },
     ];
-
-    const getOrders = async (dt) => {
-        if (!tableState.isLoading) {
-            setTableState({ ...tableState, isLoading: true });
-            let d = isUndefined(dt) ? selectedDate : dt;
-
-            let orders = null;
-            try {
-                orders = await APICall('/order', { method: 'GET', keyValues: { hotel_id: hotel.id, live: false, selectedDate: d.toISOString() } });
-                // let orders = await allOrders(hotel, { page: tableState.page, status: undefined, selectedDate: d.toISOString() });
-                let modOrders = isUndefined(orders.data) || isEmpty(orders.data) ? [] : remapFields(orders.data);
-                console.log('modOrders=', modOrders);
-                setTableState({ ...tableState, data: modOrders, count: orders.total, isLoading: false });
-            } catch (error) {
-                setTableState({ ...tableState, isLoading: false });
-                enqueueSnackbar('Error getting orders. Try again', { variant: 'error' });
-            }
-        }
-    }
 
     /**
      * Remaps orders received from database to a format that the display table supports
@@ -173,6 +147,7 @@ export default (props) => {
      * @returns an array of remappied orders
      */
     function remapFields(arr) {
+        console.log('------#', arr)
         var res = arr.map(o => (
             {
                 ...o,
@@ -184,13 +159,6 @@ export default (props) => {
         ));
         return res;
     }
-
-    const changePage = async (page) => {
-        console.log('Got request to change to page:', page);
-        setTableState({ ...tableState, page: page });
-        console.log('%%% changing page=', tableState);
-        getOrders();
-    };
 
     const options = {
         filter: true,
@@ -249,7 +217,7 @@ export default (props) => {
                 title={<Typography variant="body2">
                     All Orders
                 </Typography>}
-                data={tableState.data}
+                data={remapFields(ctx.orders.data.allOnDate)}
                 columns={columns}
                 options={options}
             />

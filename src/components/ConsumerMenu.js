@@ -4,17 +4,19 @@
  */
 'use strict';
 
-import React from 'react';
+import React, { useContext } from 'react';
 import ListItem from '@material-ui/core/ListItem';
 import ListItemIcon from '@material-ui/core/ListItemIcon';
 import ListItemText from '@material-ui/core/ListItemText';
 import Badge from '@material-ui/core/Badge';
 import DashboardIcon from '@material-ui/icons/Dashboard';
 import ShoppingCartIcon from '@material-ui/icons/ShoppingCart';
-import SettingsIcon from '@material-ui/icons/Settings';
 import PeopleAltRoundedIcon from '@material-ui/icons/PeopleAltRounded';
+import { KamAppContext } from './KamAppContext';
 
 export default function ConsumerMenu(props) {
+
+    const ctx = useContext(KamAppContext);
 
     const handleOrdersOptionClick = () => {
         props.optionSelected('orders');
@@ -34,10 +36,10 @@ export default function ConsumerMenu(props) {
             </ListItem>
             <ListItem button>
                 <ListItemIcon>
-                    {/* //FIXME: Get the actual order count in the badge */}
-                    <Badge badgeContent={4} color="error"> <ShoppingCartIcon /></Badge>
+                    <ShoppingCartIcon />
+                    {/* <Badge badgeContent={ctx.orders.openOrderCount} color="error"> <ShoppingCartIcon /></Badge> */}
                 </ListItemIcon>
-                <ListItemText primary="Orders" onClick={handleOrdersOptionClick} />
+                <ListItemText primary="Orders" onClick={handleOrdersOptionClick} /><Badge badgeContent={ctx.orders.openOrderCount} color="error"></Badge>
             </ListItem>
             {/* <ListItem button>
                 <ListItemIcon>

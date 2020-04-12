@@ -19,26 +19,28 @@ import TestOrders from "./views/TestOrders";
 import Dashboard from './components/Dashoard';
 
 import Typography from '@material-ui/core/Typography';
+import { KamAppProvider } from "./components/KamAppContext";
 
-function App() {
+export default function App() {
+
   return (
     <div>
-      <Typography variant="h4" component="h1" gutterBottom>
-      </Typography>
-      <Router history={history}>
-        <Dashboard />
-        <Switch>
-          <Route path="/" exact />
-          {/* <Route path="/profile" component={Profile} /> */}
-          <PrivateRoute path="/profile" component={Profile} />
-          <PrivateRoute path="/devices" component={ExternalApi} />
-          {/* <Route path="/orders" component={Orders} /> */}
-          <PrivateRoute path="/orders" component={Orders} />
-          <PrivateRoute path="/testorders" component={TestOrders} />
-        </Switch>
-      </Router>
+      <KamAppProvider>
+        <Typography variant="h4" component="h1" gutterBottom>
+        </Typography>
+        <Router history={history}>
+          <Dashboard />
+          <Switch>
+            <Route path="/" exact />
+            {/* <Route path="/profile" component={Profile} /> */}
+            <PrivateRoute path="/profile" component={Profile} />
+            <PrivateRoute path="/devices" component={ExternalApi} />
+            {/* <Route path="/orders" component={Orders} /> */}
+            <PrivateRoute path="/orders" component={Orders} />
+            <PrivateRoute path="/testorders" component={TestOrders} />
+          </Switch>
+        </Router>
+      </KamAppProvider>
     </div>
   );
-}
-
-export default App;
+};

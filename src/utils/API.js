@@ -142,9 +142,10 @@ export const APICall = async (endpoint, options) => {
     return results;
 }
 
-export const orderListener = () => {
+export const orderListener = (hotel) => {
     // const eventSource = new EventSource(API_SERVER_URL + '/api/v1/order/listen?token=' + token);
     // const eventSource = new EventSource(API_SERVER_URL + '/api/v1/order/listen');
+    let id=isUndefined(hotel) ? '1' : hotel.hotel_id;
     const eventSource = new EventSource(API_SERVER_URL + '/order/testlisten');   //FIXME: Remove testlisten in production
     return eventSource;
 }

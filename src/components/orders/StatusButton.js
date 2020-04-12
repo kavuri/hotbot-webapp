@@ -61,13 +61,14 @@ var useStyles = makeStyles({
 const statusDispName = {
     'new': 'New ',
     'progress': 'Progress ',
-    'done': 'Completed',
+    'done': 'Done',
     'cant_serve': 'Cant Serve',
+    'cancelled': 'Cancelled'
 };
 const statusArr = [
     { s: 'new', name: 'New ' },
     { s: 'progress', name: 'Progress ' },
-    { s: 'done', name: 'Completed' },
+    { s: 'done', name: 'Done' },
     { s: 'cant_serve', name: 'Cant Serve' },
 ];
 
@@ -105,10 +106,12 @@ export default function StatusButton(props) {
     };
 
     const handleStatusChange = async () => {
+        console.log('%%% incoming data to change status=', data);
         // New status is in 'value', coming from 'handleChange'
         let order = null;
         try {
             order = await APICall('/order/' + data[0], { method: 'PATCH', body: { status: value } });
+            console.log('%%% updated order=', order);
         } catch (error) {
             // enqueueSnackbar('Error changing status. Try again', { variant: 'error' });
             //FIXME: Should something be done?
