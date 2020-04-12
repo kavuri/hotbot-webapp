@@ -93,7 +93,8 @@ export const KamAppProvider = ({ children }) => {
             value={{
                 orders,
                 getOrders,
-                setHotel
+                setHotel,
+                hotel
             }}
         >
             {children}

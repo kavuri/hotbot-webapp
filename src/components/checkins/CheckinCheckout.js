@@ -4,7 +4,7 @@
  */
 'use strict';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import { makeStyles } from '@material-ui/core/styles';
 import Paper from '@material-ui/core/Paper';
 import Tabs from '@material-ui/core/Tabs';
@@ -16,6 +16,7 @@ import { isEqual, isEmpty, isNull, isUndefined } from 'lodash';
 import Selector from '../Selector';
 import { APICall, getHotelRooms } from '../../utils/API';
 import Checkin from './Checkin';
+import { KamAppContext } from '../KamAppContext';
 
 const useStyles = makeStyles(theme => ({
   root: {
@@ -35,35 +36,20 @@ export default () => {
   const [notCheckedIn, setNotCheckedIn] = useState([]);
   const [loading, setLoading] = useState(false);
   const classes = useStyles();
+  const ctx = useContext(KamAppContext);
+
+  useEffect(() => {
+    getRooms();
+  });
 
   const handleChange = (event, newValue) => {
     setValue(newValue);
   };
 
-  useEffect(() => {
-    loadHotels();
-  }, []);
-
-  const loadHotels = async () => {
+  const getRooms = async () => {
     if (!loading) {
       setLoading(true);
-      let results = undefined, res;
-      try {
-        results = await APICall('/hotel', { method: 'GET' });
-        res = results.data.map((h) => { return { name: h.name, id: h.hotel_id, _id: h._id } });
-      } catch (error) {
-
-      }
-      setHotels(res);
-      setLoading(false);
-    }
-  }
-
-  const getRooms = async (hotel) => {
-    console.log('getting rooms...', hotel);
-    if (!loading) {
-      setLoading(true);
-      let results = await getHotelRooms(hotel);
+      let results = await getHotelRooms(ctx.hotel);
       if (results instanceof Error) {
         console.error('error in getHotelRooms:', results);
         //FIXME: Do something
@@ -87,8 +73,6 @@ export default () => {
 
   return (
     <div>
-      //FIXME: Remove the hotel selector once authentication is enabled
-      <Selector menuName="Hotels" items={hotels} onSelectEntry={getRooms} />
       <Paper square className={classes.root}>
         <Tabs
           value={value}
