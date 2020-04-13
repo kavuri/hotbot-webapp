@@ -14,7 +14,6 @@ import HistoryRoundedIcon from '@material-ui/icons/HistoryRounded';
 import { isEqual } from 'lodash';
 import { useSnackbar } from 'notistack';
 
-import Selector from '../Selector';
 import { APICall } from '../../utils/API';
 import LiveOrders from './LiveOrders';
 import History from './History';
@@ -31,34 +30,11 @@ const useStyles = makeStyles(theme => ({
 
 export default () => {
   const [value, setValue] = useState(0);
-  const [hotels, setHotels] = useState([]);
-  const [hotel, setHotel] = useState({});
-  const [loading, setLoading] = useState(false);
   const classes = useStyles();
 
   const handleChange = (event, newValue) => {
     setValue(newValue);
   };
-  const { enqueueSnackbar } = useSnackbar();
-
-  useEffect(() => {
-    loadHotels();
-  }, []);
-
-  const loadHotels = async () => {
-    if (!loading) {
-      setLoading(true);
-      let results = undefined, res;
-      try {
-        results = await APICall('/hotel', { method: 'GET' });
-        setLoading(false);
-        res = results.data.map((h) => { return { name: h.name, id: h.hotel_id, _id: h._id } });
-      } catch (error) {
-        enqueueSnackbar('Error getting hotels', {variant: 'error'});
-      }
-      setHotels(res);
-    }
-  }
 
   return (
     <div>
@@ -74,8 +50,8 @@ export default () => {
           <Tab icon={<ShoppingCartRoundedIcon fontSize="large" color="secondary" />} label="LIVE ORDERS" />
           <Tab icon={<HistoryRoundedIcon fontSize="large" color="primary" />} label="ORDER HISTORY" />
         </Tabs>
-        {isEqual(value, 0) && <LiveOrders hotel={hotel} />}
-        {isEqual(value, 1) && <History hotel={hotel} />}
+        {isEqual(value, 0) && <LiveOrders />}
+        {isEqual(value, 1) && <History />}
       </Paper>
     </div>
   );

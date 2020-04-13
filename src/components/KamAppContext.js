@@ -22,8 +22,8 @@ export const KamAppProvider = ({ children }) => {
 
     useEffect(() => {
         console.log('USE Effect invoked. Getting orders:', hotel);
-        getOrders(orders.reqDate, hotel);
         setHotel(hotel);
+        getOrders(orders.reqDate, hotel);
     }, [hotel]);
 
     useEffect(() => {

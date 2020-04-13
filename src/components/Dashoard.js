@@ -33,6 +33,7 @@ import AdminMenu from './AdminMenu';
 import ConsumerMenu from './ConsumerMenu';
 import Default from './Default';
 import HotelMgmt from './hotels/HotelMgmt';
+import Settings from './settings/Settings';
 
 import Selector from './Selector';
 import { useAuth0 } from "../react-auth0-spa";
@@ -152,7 +153,7 @@ export default function Dashboard() {
     'default': Default,
     'orders': Orders,
     'checkinCheckout': CheckinCheckout,
-    'settings': 'Settings',
+    'settings': Settings,
     'deviceMgmt': Devices,
     'hotels': HotelMgmt,
     'profile': 'Profile'

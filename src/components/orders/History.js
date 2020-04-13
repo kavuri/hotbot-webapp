@@ -78,7 +78,7 @@ export default (props) => {
             options: {
                 filter: true,
                 sort: true,
-                searchable: false,
+                searchable: true,
                 customBodyRender: (value, tableMeta, updateValue) => {
                     return <Chip size='medium' label={value} style={{ background: cyan[200] }} />
                 }
