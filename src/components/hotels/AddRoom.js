@@ -35,6 +35,7 @@ export default (props) => {
 
     const onSubmit = async values => {
         let obj = {
+            room_no: values.room_no,
             type: values.type
         };
 

@@ -171,6 +171,7 @@ export default (props) => {
   useEffect(() => {
     setFreeRooms(props.freeRooms);
     setAllotedRooms(props.allotedRooms);
+    console.log('--allotedRooms=', allotedRooms, ', freeRooms=',freeRooms);
   }, [props.freeRooms, props.allotedRooms]);
 
   const updateGuestName = (event) => {

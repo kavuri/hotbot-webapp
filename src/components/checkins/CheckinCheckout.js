@@ -11,10 +11,10 @@ import Tabs from '@material-ui/core/Tabs';
 import Tab from '@material-ui/core/Tab';
 import DirectionsWalkRoundedIcon from '@material-ui/icons/DirectionsWalkRounded';
 import HistoryRoundedIcon from '@material-ui/icons/HistoryRounded';
-import { isEqual, isEmpty, isNull, isUndefined } from 'lodash';
+import MUIDataTable from "mui-datatables";
+import { isEqual, isEmpty, has, concat, isUndefined } from 'lodash';
 
-import Selector from '../Selector';
-import { APICall, getHotelRooms } from '../../utils/API';
+import { APICall } from '../../utils/API';
 import Checkin from './Checkin';
 import { KamAppContext } from '../KamAppContext';
 
@@ -30,7 +30,6 @@ const useStyles = makeStyles(theme => ({
 
 export default () => {
   const [value, setValue] = useState(0);
-  const [hotels, setHotels] = useState([]);
   const [rooms, setRooms] = useState([]);
   const [checkedIn, setCheckedIn] = useState([]);
   const [notCheckedIn, setNotCheckedIn] = useState([]);
@@ -40,33 +39,35 @@ export default () => {
 
   useEffect(() => {
     getRooms();
-  });
+  }, [ctx.hotel]);
 
   const handleChange = (event, newValue) => {
     setValue(newValue);
   };
 
   const getRooms = async () => {
+    console.log('++getRooms:hotel=', ctx.hotel);
+    if (isEmpty(ctx.hotel)) return;
+
     if (!loading) {
       setLoading(true);
-      let results = await getHotelRooms(ctx.hotel);
-      if (results instanceof Error) {
-        console.error('error in getHotelRooms:', results);
-        //FIXME: Do something
-      } else {
-        let check_ins = [], non_check_ins = [];
-        for (var i = 0; i < results.length; i++) {
-          if (isNull(results[i].checkincheckout) || isUndefined(results[i].checkincheckout)) {
-            non_check_ins.push(results[i]);
-          } else {
-            check_ins.push(results[i]);
-          }
-        }
-        console.log('all rooms=', results, ',check_ins=', check_ins, ', non_checkins=', non_check_ins);
-        setCheckedIn(check_ins);
-        setNotCheckedIn(non_check_ins);
-        setRooms(results);
+      let results = [];
+      try {
+        results = await APICall('/room', { method: 'GET', keyValues: { hotel_id: ctx.hotel.id } });
+      } catch (error) {
+        console.log('error in getting hotel rooms:', error);
       }
+
+      console.log('All Rooms=', results);
+      let check_ins = [], non_check_ins = [];
+      for (var i = 0; i < results.length; i++) {
+        non_check_ins = !has(results[i], 'checkincheckout') || isUndefined(results[i].checkincheckout) ? concat(non_check_ins, results[i]) : non_check_ins;
+        check_ins = has(results[i], 'checkincheckout') && !isUndefined(results[i].checkincheckout) ? concat(check_ins, results[i]) : check_ins;
+      }
+      console.log('all rooms=', results, ',check_ins=', check_ins, ', non_checkins=', non_check_ins);
+      setCheckedIn(check_ins);
+      setNotCheckedIn(non_check_ins);
+      setRooms(results);
       setLoading(false);
     }
   }
