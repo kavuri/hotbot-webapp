@@ -7,7 +7,7 @@ import React, { useState, useEffect, useContext } from 'react';
 import Typography from '@material-ui/core/Typography';
 import {
     RadioGroup, Radio, FormControlLabel, FormControl, FormLabel, Grid, Paper, Checkbox,
-    TextField, TableRow, TableCell
+    TextField, TableRow, TableCell, MuiThemeProvider, createMuiTheme
 } from '@material-ui/core';
 import { makeStyles } from "@material-ui/core/styles";
 import ChipInput from 'material-ui-chip-input';
@@ -67,6 +67,27 @@ export default (props) => {
                 filter: true,
                 sort: true,
                 searchable: false,
+                filterType: 'custom',
+                filterOptions: {
+                    logic: (location, filters) => {
+                        if (filters.length) return !filters.includes(location);
+                        return false;
+                    },
+                    display: (filterList, onChange, index, column) => {
+                        return (
+                            <FormControl component="fieldset">
+                                <FormLabel component="legend">Availability</FormLabel>
+                                <RadioGroup row aria-label="available" name="available" value={filterList[index]} onChange={event => {
+                                    filterList[index] = event.target.value;
+                                    onChange(filterList[index], index, column);
+                                }} >
+                                    <FormControlLabel value={true} control={<Radio />} label="Yes" />
+                                    <FormControlLabel value={false} control={<Radio />} label="No" />
+                                </RadioGroup>
+                            </FormControl >
+                        );
+                    }
+                },
                 customBodyRender: (value, tableMeta, updateValue) => {
                     // console.log()
                     return (
@@ -118,7 +139,6 @@ export default (props) => {
     }
 
     const facilitySettings = (data) => {
-        console.log('---Facility setting data:', data);
         let location = node(data.name + '_location');
         let timings = node(data.name + '_timings');
         let price = node(data.name + '_price');
@@ -146,7 +166,6 @@ export default (props) => {
     }
 
     const policySettings = (data) => {
-        console.log('---Policy setting data:', data);
         return (
             <Paper variant="outlined" className={classes.control}>
                 <Grid item xs={12}>
@@ -157,7 +176,6 @@ export default (props) => {
     }
 
     const roomitemSettings = (data) => {
-        console.log('---Room setting data:', data);
         return (
             <Paper variant="outlined" className={classes.control}>
                 <Grid container spacing={3}>
@@ -254,7 +272,7 @@ export default (props) => {
                 size: "small"
             }
         },
-        onRowsExpand: (curExpanded, allExpanded) => console.log(curExpanded, allExpanded),
+        onRowsExpand: (curExpanded, allExpanded) => console.log('ROW EXPANDED:', curExpanded, allExpanded),
         onTableChange: (action, state) => {
             console.log('action=', action, 'state=', state);
             // Calculate the unservedOrderCount and set it
@@ -290,14 +308,12 @@ export default (props) => {
     };
 
     return (
-        <div>
-            <MUIDataTable
-                title={<Typography variant="body2"> </Typography>
-                }
-                data={entries}
-                columns={columns}
-                options={options}
-            />
-        </div>
+        <MUIDataTable
+            title={<Typography variant="body2"> </Typography>
+            }
+            data={entries}
+            columns={columns}
+            options={options}
+        />
     );
 }
