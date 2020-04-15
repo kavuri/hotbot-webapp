@@ -11,11 +11,15 @@ import {
 } from '@material-ui/core';
 import { makeStyles } from "@material-ui/core/styles";
 import ChipInput from 'material-ui-chip-input';
+import IconButton from "@material-ui/core/IconButton";
+import AddCircleRoundedIcon from '@material-ui/icons/AddCircleRounded';
 import MUIDataTable from "mui-datatables";
 
-import { has, isEqual } from 'lodash';
+import { useSnackbar } from 'notistack';
+import { has, isEqual, isNull, isEmpty } from 'lodash';
 import { KamAppContext } from '../KamAppContext';
 import { load, node } from './GraphOps';
+import { AddSetting, PolicySettings, FacilitySettings, MenuitemSettings, RoomitemSettings } from './AddSetting';
 
 const useStyles = makeStyles({
     control: {
@@ -27,9 +31,12 @@ const useStyles = makeStyles({
 
 export default (props) => {
     const [entries, setEntries] = useState([]);
+    const [addSettingFlag, setAddSettingFlag] = useState(false);
     const ctx = useContext(KamAppContext);  //FIXME: Remove ctx when auth is implemented
     const [hotel, setHotel] = useState(ctx.hotel);
     const classes = useStyles();
+
+    const { enqueueSnackbar } = useSnackbar();
 
     useEffect(() => {
         loadEntries();
@@ -39,6 +46,20 @@ export default (props) => {
         let rows = await load(ctx.hotel);
         console.log('data=', rows);
         setEntries(rows);
+    }
+
+    const handleAddSetting = () => {
+        setAddSettingFlag(true);
+    }
+
+    const addSettingToTable = (setting) => {
+        if (!isNull(setting) && !isEmpty(setting)) {  // This can happen if the dialog is opened and closed without adding data
+
+            enqueueSnackbar('Hotel saved', { variant: 'success' });
+        } else {
+            enqueueSnackbar('Error saving hotel', { variant: 'error' });
+        }
+        setAddSettingFlag(false);
     }
 
     const columns = [
@@ -130,130 +151,6 @@ export default (props) => {
 
     }
 
-    const handleOrderableChange = (data) => {
-
-    }
-
-    const handleHasCount = () => {
-
-    }
-
-    const facilitySettings = (data) => {
-        let location = node(data.name + '_location');
-        let timings = node(data.name + '_timings');
-        let price = node(data.name + '_price');
-        return (
-            <Paper variant="outlined" className={classes.control}>
-                <Grid container spacing={2}>
-                    <Grid item xs={12}>
-                        <TextField d="standard-number" fullWidth disabled={isEqual(data.a, false)} label='"Yes" Message' type="text" InputLabelProps={{ shrink: true }} defaultValue={data.msg.yes} />
-                    </Grid>
-                    <Grid item xs={12}>
-                        <TextField d="standard-number" fullWidth disabled={isEqual(data.a, true)} label='"No" Message' type="text" InputLabelProps={{ shrink: true }} defaultValue={data.msg.no} />
-                    </Grid>
-                </Grid>
-                <Grid item xs={12}>
-                    <TextField d="standard-number" fullWidth disabled={isEqual(data.a, false)} label='"Location" Message' type="text" InputLabelProps={{ shrink: true }} defaultValue={location.msg} />
-                </Grid>
-                <Grid item xs={12}>
-                    <TextField d="standard-number" fullWidth disabled={isEqual(data.a, false)} label='"Time" Message' type="text" InputLabelProps={{ shrink: true }} defaultValue={timings.msg} />
-                </Grid>
-                <Grid item xs={12}>
-                    <TextField d="standard-number" fullWidth disabled={isEqual(data.a, false)} label='"Price" Message' type="text" InputLabelProps={{ shrink: true }} defaultValue={price.msg} />
-                </Grid>
-            </Paper >
-        );
-    }
-
-    const policySettings = (data) => {
-        return (
-            <Paper variant="outlined" className={classes.control}>
-                <Grid item xs={12}>
-                    <TextField d="standard-number" fullWidth disabled={isEqual(data.a, false)} label='"No" Message' type="text" InputLabelProps={{ shrink: true }} defaultValue={data.msg} />
-                </Grid>
-            </Paper >
-        );
-    }
-
-    const roomitemSettings = (data) => {
-        return (
-            <Paper variant="outlined" className={classes.control}>
-                <Grid container spacing={3}>
-                    <Grid container>
-                        <Grid item xs={3}>
-                            <FormControl component="fieldset">
-                                <FormLabel component="legend">Orderable</FormLabel>
-                                <RadioGroup row defaultValue={data.o} aria-label="orderable" name="customized-radios" onChange={async (change) => { console.log(change); }} >
-                                    <FormControlLabel value={true} control={<Radio />} label="Yes" />
-                                    <FormControlLabel value={false} control={<Radio />} label="No" />
-                                </RadioGroup>
-                            </FormControl>
-                        </Grid>
-                        <Grid item xs={3}>
-                            <FormControlLabel control={<Checkbox checked={true} onChange={handleHasCount} inputProps={{ "aria-label": "primary checkbox" }} />} label="Has count" />
-                        </Grid>
-                        <Grid item xs={3}>
-                            <FormControl component="fieldset">
-                                <TextField d="standard-number" label="Limit" type="number" InputLabelProps={{ shrink: true }} defaultValue={has(data, 'limit') ? data.limit.count : ''} />
-                                <RadioGroup row defaultValue={has(data, 'limit') ? 'day' : 'stay'} aria-label="type" name="customized-radios" onChange={async (change) => { console.log(change); }}>
-                                    <FormControlLabel value='stay' control={<Radio />} label="Stay" />
-                                    <FormControlLabel value='day' control={<Radio />} label="Day" />
-                                </RadioGroup>
-                            </FormControl>
-                        </Grid>
-                    </Grid>
-                    <Grid item xs={12}>
-                        <TextField d="standard-number" fullWidth disabled={isEqual(data.a, false)} label='"Yes" Message' type="text" InputLabelProps={{ shrink: true }} defaultValue={data.msg.yes} />
-                    </Grid>
-                    <Grid item xs={12}>
-                        <TextField d="standard-number" fullWidth disabled={isEqual(data.a, true)} label='"No" Message' type="text" InputLabelProps={{ shrink: true }} defaultValue={data.msg.no} />
-                    </Grid>
-                </Grid>
-            </Paper >
-        )
-    }
-
-    const menuitemSettings = (data) => {
-        console.log('+++data=', data);
-        return (
-            <Paper variant="outlined" className={classes.control}>
-                <Grid container spacing={2}>
-                    <Grid container spacing={2}>
-                        <Grid item xs={6}>
-                            <FormControl component="fieldset">
-                                <FormLabel component="legend">Orderable</FormLabel>
-                                <RadioGroup row defaultValue={data.o} aria-label="orderable" name="customized-radios" onChange={async (change) => { console.log(change); }} >
-                                    <FormControlLabel value={true} control={<Radio />} label="Yes" />
-                                    <FormControlLabel value={false} control={<Radio />} label="No" />
-                                </RadioGroup>
-                            </FormControl>
-                        </Grid>
-                        <Grid item xs={6}>
-                            <FormControl component="fieldset">
-                                <FormLabel component="legend">Type</FormLabel>
-                                <RadioGroup row defaultValue={has(data, 'e') && isEqual(data.e, true) ? 'Eatable' : 'Drink'} aria-label="type" name="customized-radios" onChange={async (change) => { console.log(change); }}>
-                                    <FormControlLabel value="Eatable" control={<Radio />} label="Eatable" />
-                                    <FormControlLabel value="Drink" control={<Radio />} label="Drink" />
-                                </RadioGroup>
-                            </FormControl>
-                        </Grid>
-                    </Grid>
-                    <Grid container spacing={3}>
-                        <Grid item xs={3}>
-                            <FormControlLabel control={<Checkbox checked={true} onChange={handleHasCount} inputProps={{ "aria-label": "primary checkbox" }} />} label="Has count" />
-                        </Grid>
-                        <Grid item xs={3}>
-                            <TextField d="standard-number" label="Quantity" type="number" InputLabelProps={{ shrink: true }} defaultValue={data.quantity} />
-                        </Grid>
-                        <Grid item xs={3}>
-                            <TextField d="standard-number" label="Price" type="number" InputLabelProps={{ shrink: true }} defaultValue={data.price} />
-                        </Grid>
-                    </Grid>
-                </Grid>
-            </Paper >
-        );
-    }
-
     const options = {
         filter: true,
         selectableRows: false,
@@ -283,28 +180,38 @@ export default (props) => {
             }
         },
         renderExpandableRow: (rowData, rowMeta) => {
-            let render;
             console.log('++rowData=', rowData, ', +++rowMeta=', entries[rowMeta.dataIndex].type);
             let data = entries[rowMeta.dataIndex];
+            let setting;
             if (isEqual(entries[rowMeta.dataIndex].type, 'Facility')) {
-                render = facilitySettings(data);
+                setting = 'facility';
             } if (isEqual(entries[rowMeta.dataIndex].type, 'Policy')) {
-                render = policySettings(data);
+                setting = 'policy';
             } if (isEqual(entries[rowMeta.dataIndex].type, 'Menu')) {
-                console.log('Menu item...');
-                render = menuitemSettings(data);
+                setting = 'menuitem';
             } if (isEqual(entries[rowMeta.dataIndex].type, 'Room')) {
-                render = roomitemSettings(data);
+                setting = 'roomitem';
             }
             const colSpan = rowData.length + 1;
             return (
                 <TableRow>
                     <TableCell colSpan={colSpan}>
-                        {render}
+                        {isEqual(setting, 'policy') && <PolicySettings edit data={data} />}
+                        {isEqual(setting, 'facility') && <FacilitySettings edit data={data} />}
+                        {isEqual(setting, 'menuitem') && <MenuitemSettings edit data={data} />}
+                        {isEqual(setting, 'roomitem') && <RoomitemSettings edit data={data} />}
                     </TableCell>
                 </TableRow>
             );
-        }
+        },
+        customToolbar: () => (
+            <span>
+                <IconButton key={addSettingFlag} onClick={handleAddSetting}>
+                    <AddCircleRoundedIcon />
+                </IconButton>
+                {isEqual(addSettingFlag, true) && <AddSetting onSettingAdded={addSettingToTable} />}
+            </span >
+        ),
     };
 
     return (
