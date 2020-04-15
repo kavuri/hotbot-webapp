@@ -40,6 +40,10 @@ export const load = async (hotel) => {  //FIXME: Remove hotel from args when aut
                 n.name = nodes[i];
                 // console.log('synonyms=', g.children(nodes[i]));
                 n.synonyms = isUndefined(g.children(nodes[i])) || isEmpty(g.children(nodes[i])) ? [] : g.children(nodes[i]);
+                n.a = isEqual(n.a, true) ? 'Yes' : 'No';
+                if (has(n, 'o')) {
+                    n.o = isEqual(n.o, true) ? 'Yes' : 'No';
+                }
                 data.push(n);
             }
         }
@@ -58,14 +62,28 @@ export const node = (name) => {
 /**
  * Saves the graph to the server
  */
-export const save = async () => {
+export const createFaciliy = async (facility) => {
+    if (isEmpty(facility)) {
+        throw new Error('invalid facility object:', facility);
+    }
+
+    g.setNode(facility.name, facility); //FIXME: Remove the 'name' attr from the facility object
+    if (facility.synonyms) {
+        facility.synonyms.map((s) => {
+            g.setParet(s, facility.name);
+        })
+    }
+
+    console.log('creaed node=', g.node(facility.name), '++,hotel_id=', g.graph(), '++graph=', graphlib.json.write(g));
     let res;
     try {
-        res = await APICall('/graph', { method: 'PUT', body: graphlib.json.write(g) });
+        res = await APICall('/graph', { method: 'PUT', body: {graph: JSON.stringify(graphlib.json.write(g))}, keyValues: { hotel_id: g.graph() } });
+        console.log('graph written:', res)
     } catch (error) {
         console.log('error saving graph:', error);
         throw error;
     }
+    return facility;    //FIXME:
 }
 
 export const entries = () => {

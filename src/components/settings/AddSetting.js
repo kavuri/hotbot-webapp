@@ -7,19 +7,21 @@
 import React, { useState } from 'react';
 import {
     RadioGroup, Radio, FormControlLabel, FormControl, FormLabel, Grid, Paper, Checkbox,
-    Dialog, Typography, Button, CssBaseline, TextField, FormGroup, IconButton
+    Dialog, Typography, Button, CssBaseline, FormGroup, IconButton
 } from '@material-ui/core/';
 
 import DialogContent from '@material-ui/core/DialogContent';
 import DialogActions from '@material-ui/core/DialogActions';
 import { makeStyles } from "@material-ui/core/styles";
 import SettingsRoundedIcon from '@material-ui/icons/SettingsRounded';
-import { isUndefined, isEqual, has } from 'lodash';
+import { isUndefined, isEqual, has, remove, concat } from 'lodash';
 import ChipInput from 'material-ui-chip-input';
 import SaveRoundedIcon from '@material-ui/icons/SaveRounded';
+import { Form, Field } from 'react-final-form';
+import { TextField } from 'final-form-material-ui';
 
 import { APICall } from '../../utils/API';
-import { load, node } from './GraphOps';
+import { node, createFaciliy } from './GraphOps';
 
 const useStyles = makeStyles((theme) => ({
     control: {
@@ -37,21 +39,7 @@ const handleHasCountChange = () => {
 }
 
 export const FacilitySettings = (props) => {
-    const handleAddSynonym = (chip) => {
-
-    }
-
-    const handleDeleteSynonym = (chip, index) => {
-
-    }
-
-    const saveFacility = () => {
-
-    }
-
-    const classes = useStyles();
-
-    console.log('FacilitySetting::', props);
+    const [edit, setEdit] = useState(props.edit);
     let location, timings, price;
     if (has(props, 'data')) {
         location = node(props.data.name + '_location');
@@ -59,61 +47,174 @@ export const FacilitySettings = (props) => {
         price = node(props.data.name + '_price');
     }
 
+    const [facility, setFacility] = useState(
+        has(props, 'data') ?
+            {
+                name: props.data.name,
+                a: props.data.a,
+                o: props.data.o,
+                synonyms: props.data.synonyms,
+                msg: { yes: props.data.msg.yes, no: props.data.msg.no },
+                location: location,
+                timings: timings,
+                price: price
+            } :
+            { name: '', a: '', o: '', synonyms: [], msg: { yes: '', no: '' }, location: { msg: '' }, timings: { msg: '' }, price: { msg: '' } }
+    );
+
+    const handleAddSynonym = (chip) => {
+        setFacility({ ...facility, synonyms: concat(facility.synonyms, chip) });
+    }
+
+    const handleDeleteSynonym = (chip, index) => {
+        setFacility({ ...facility, synonyms: facility.synonyms.splice(index, 1) });
+    }
+
+    const initialValues = () => {
+        console.log('initialValues=', facility);
+        return facility;
+    }
+
+    const validate = values => {
+        const errors = {};
+        // const errors = { msg: { yes: {}, no: {} }, location: { msg: {} }, timings: { msg: {} }, price: { msg: {} } };
+        console.log('validate:', edit, values, errors);
+
+        console.log('validating fields');
+        if (!values.name) {
+            errors.name = 'Required';
+        }
+        if (!values.a) {
+            errors.a = 'Required';
+        }
+        if (!values.o) {
+            errors.o = 'Required';
+        }
+        if (!values.msg_yes) {
+            errors.msg_yes = 'Required';
+        }
+        if (!values.msg_no) {
+            errors.msg_no = 'Required';
+        }
+        if (!values.location_msg) {
+            errors.location_msg = 'Required';
+        }
+        if (!values.timings_msg) {
+            errors.timings_msg = 'Required';
+        }
+        if (!values.price_msg) {
+            errors.price_msg = 'Required';
+        }
+
+        return errors;
+    }
+
+    const saveFacility = async values => {
+        console.log('saveFacility');
+        let f = {
+            name: values.name,
+            a: isEqual(values.a, 'Yes') ? true : false,
+            o: isEqual(values.o, 'Yes') ? true : false,
+            synonyms: facility.synonyms,
+            msg: values.msg,
+            location: values.location,
+            timings: values.timings,
+            price: values.price
+        };
+
+        let res = null;
+        try {
+            res = await createFaciliy(f);
+        } catch (error) {
+            console.log('error in creating facility:', error);
+        }
+        props.onFacilitySaved(res);
+    };
+
+    const classes = useStyles();
+
+    console.log('FacilitySetting::', props);
     return (
-        <Grid container direction="row" justify="center" alignItems="center">
-            <Grid item xs={12}>
-                <IconButton aria-label="save" className={classes.margin} onClick={saveFacility} >
-                    <SaveRoundedIcon color="secondary" />
-                </IconButton>
-            </Grid>
-            <Grid item xs={12}>
-                <Paper variant="outlined" className={classes.control} >
-                    <Grid container spacing={2} direction="column" justify="center" alignItems="stretch">
-                        {
-                            !has(props, 'data') &&
-                            <Grid container spacing={3} direction="row" justify="center" alignItems="stretch">
-                                <Grid item xs={6}>
-                                    <TextField d="standard-number" required label='Name' type="text" InputLabelProps={{ shrink: true }} />
-                                </Grid>
-                                <Grid item xs={6}>
-                                    <FormControl component="fieldset">
-                                        <FormLabel component="legend">Available</FormLabel>
-                                        <RadioGroup required row aria-label="available" name="available" value={true} onChange={async (change) => { console.log('available=', change); }} >
-                                            <FormControlLabel value={true} control={<Radio />} label="Yes" />
-                                            <FormControlLabel value={false} control={<Radio />} label="No" />
-                                        </RadioGroup>
-                                    </FormControl>
+        <Form
+            onSubmit={saveFacility}
+            validate={validate}
+            initialValues={initialValues()}
+            render={({ handleSubmit, submitting, pristine, values }) => (
+                <form onSubmit={handleSubmit} noValidate>
+                    <Grid container direction="row" justify="center" alignItems="center">
+                        <Grid item xs={12}>
+                            <IconButton aria-label="save" variant="contained" color="primary" type="submit" disabled={submitting} className={classes.margin} >
+                                <SaveRoundedIcon color="secondary" />
+                            </IconButton>
+                        </Grid>
+                        <Grid item xs={12}>
+                            <Paper variant="outlined" className={classes.control} >
+                                <Grid container spacing={2} direction="column" justify="center" alignItems="stretch">
+                                    {
+                                        !isEqual(edit, true) &&
+                                        <Grid container spacing={3} direction="row" justify="space-around" alignItems="center">
+                                            <Grid item xs={3}>
+                                                <Field required name="name" component={TextField} type="text" label="Name" />
+                                            </Grid>
+                                            <Grid item xs={3}>
+                                                <FormLabel component="legend">Availability</FormLabel>
+                                                <Grid container direction="row" justify="center" alignItems="center">
+                                                    <Grid item xs={6}>
+                                                        <FormLabel component="legend">Yes</FormLabel>
+                                                        <Field name="a" component="input" type="radio" value="Yes" />
+                                                    </Grid>
+                                                    <Grid item xs={6}>
+                                                        <FormLabel component="legend">No</FormLabel>
+                                                        <Field name="a" component="input" type="radio" value="No" />
+                                                    </Grid>
+                                                </Grid>
+                                            </Grid>
+                                            <Grid item xs={3}>
+                                                <FormLabel component="legend">Orderabble</FormLabel>
+                                                <Grid container direction="row" justify="center" alignItems="center">
+                                                    <Grid item xs={6}>
+                                                        <FormLabel component="legend">Yes</FormLabel>
+                                                        <Field name="o" component="input" type="radio" value="Yes" />
+                                                    </Grid>
+                                                    <Grid item xs={6}>
+                                                        <FormLabel component="legend">No</FormLabel>
+                                                        <Field name="o" component="input" type="radio" value="No" />
+                                                    </Grid>
+                                                </Grid>
+                                            </Grid>
+                                            <Grid item xs={12}>
+                                                <FormLabel component="legend">Synonyms</FormLabel>
+                                                <ChipInput
+                                                    fullWidth
+                                                    allowDuplicates={false}
+                                                    onAdd={(chip) => handleAddSynonym(chip)}
+                                                    onDelete={(chip, index) => handleDeleteSynonym(chip, index)}
+                                                />
+                                            </Grid>
+                                        </Grid>
+                                    }
+                                    <Grid item xs={12}>
+                                        <Field required fullWidth name="msg_yes" component={TextField} type="text" label='"Yes" Message' />
+                                    </Grid>
+                                    <Grid item xs={12}>
+                                        <Field required fullWidth name="msg_no" component={TextField} type="text" label='"No" Message' />
+                                    </Grid>
                                 </Grid>
                                 <Grid item xs={12}>
-                                    <FormLabel component="legend">Synonyms</FormLabel>
-                                    <ChipInput
-                                        fullWidth
-                                        allowDuplicates={false}
-                                        onAdd={(chip) => handleAddSynonym(chip)}
-                                        onDelete={(chip, index) => handleDeleteSynonym(chip, index)}
-                                    />
+                                    <Field required fullWidth name="location_msg" component={TextField} type="text" label='"Location" Message' />
                                 </Grid>
-                            </Grid>
-                        }
-                        <Grid item xs={12}>
-                            <TextField d="standard-number" fullWidth label='"Yes" Message' type="text" InputLabelProps={{ shrink: true }} defaultValue={!has(props, 'data') ? '' : props.data.msg.yes} />
+                                <Grid item xs={12}>
+                                    <Field required fullWidth name="timings_msg" component={TextField} type="text" label='"Timing" Message' />
+                                </Grid>
+                                <Grid item xs={12}>
+                                    <Field required fullWidth name="price_msg" component={TextField} type="text" label='"Price" Message' />
+                                </Grid>
+                            </Paper >
                         </Grid>
-                        <Grid item xs={12}>
-                            <TextField d="standard-number" fullWidth label='"No" Message' type="text" InputLabelProps={{ shrink: true }} defaultValue={!has(props, 'data') ? '' : props.data.msg.no} />
-                        </Grid>
                     </Grid>
-                    <Grid item xs={12}>
-                        <TextField d="standard-number" fullWidth label='"Location" Message' type="text" InputLabelProps={{ shrink: true }} defaultValue={!has(props, 'data') ? '' : location.msg} />
-                    </Grid>
-                    <Grid item xs={12}>
-                        <TextField d="standard-number" fullWidth label='"Time" Message' type="text" InputLabelProps={{ shrink: true }} defaultValue={!has(props, 'data') ? '' : timings.msg} />
-                    </Grid>
-                    <Grid item xs={12}>
-                        <TextField d="standard-number" fullWidth label='"Price" Message' type="text" InputLabelProps={{ shrink: true }} defaultValue={!has(props, 'data') ? '' : price.msg} />
-                    </Grid>
-                </Paper >
-            </Grid>
-        </Grid>
+                </form>
+            )}
+        />
     );
 }
 
@@ -353,7 +454,6 @@ export const MenuitemSettings = (props) => {
 
 export const AddSetting = (props) => {
     const [open, setOpen] = useState(true);
-    const [hotel, setHotel] = useState(props.hotel);
     const [setting, setSetting] = useState('');
 
     const handleSettingChange = (event) => {
@@ -361,29 +461,9 @@ export const AddSetting = (props) => {
         setSetting(event.target.value);
     };
 
-    const handleClose = () => {
-        props.onSettingAdded(null); // This would reset the flag to open the dialog
+    const handleClose = (result) => {
+        props.onSettingAdded(result); // This would reset the flag to open the dialog
         setOpen(false);
-    };
-
-    const onSubmit = async values => {
-        let obj = {
-            room_no: values.room_no,
-            type: values.type
-        };
-
-        let result = null;
-        {/* try {
-            if (edit) {
-                result = await APICall('/room/' + room._id, { method: 'PATCH', body: obj });
-            } else {
-                result = await APICall('/room', { method: 'POST', body: obj, keyValues: { hotel_id: hotel.hotel_id } });
-            }
-        } catch (error) {
-            //FIXME: Do something?
-        } */}
-        setOpen(false);
-        props.onSettingAdded(result);
     };
 
     return (
@@ -405,7 +485,7 @@ export const AddSetting = (props) => {
                         </FormControl>
                     </Grid>
                     {isEqual(setting, 'policy') && <PolicySettings />}
-                    {isEqual(setting, 'facility') && <FacilitySettings />}
+                    {isEqual(setting, 'facility') && <FacilitySettings onFacilitySaved={handleClose} />}
                     {isEqual(setting, 'menuitem') && <MenuitemSettings />}
                     {isEqual(setting, 'roomitem') && <RoomitemSettings />}
                 </div>

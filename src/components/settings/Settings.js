@@ -6,8 +6,7 @@
 import React, { useState, useEffect, useContext } from 'react';
 import Typography from '@material-ui/core/Typography';
 import {
-    RadioGroup, Radio, FormControlLabel, FormControl, FormLabel, Grid, Paper, Checkbox,
-    TextField, TableRow, TableCell, MuiThemeProvider, createMuiTheme
+    RadioGroup, Radio, FormControlLabel, FormControl, TextField, TableRow, TableCell, 
 } from '@material-ui/core';
 import { makeStyles } from "@material-ui/core/styles";
 import ChipInput from 'material-ui-chip-input';
@@ -88,34 +87,39 @@ export default (props) => {
                 filter: true,
                 sort: true,
                 searchable: false,
-                filterType: 'custom',
-                filterOptions: {
-                    logic: (location, filters) => {
-                        if (filters.length) return !filters.includes(location);
-                        return false;
-                    },
-                    display: (filterList, onChange, index, column) => {
-                        return (
-                            <FormControl component="fieldset">
-                                <FormLabel component="legend">Availability</FormLabel>
-                                <RadioGroup row aria-label="available" name="available" value={filterList[index]} onChange={event => {
-                                    filterList[index] = event.target.value;
-                                    onChange(filterList[index], index, column);
-                                }} >
-                                    <FormControlLabel value={true} control={<Radio />} label="Yes" />
-                                    <FormControlLabel value={false} control={<Radio />} label="No" />
-                                </RadioGroup>
-                            </FormControl >
-                        );
-                    }
-                },
+                // filterType: 'custom',
+                // filterOptions: {
+                //     logic: (location, filters) => {
+                //         console.log('+++filters=', filters, '+++location=', location, ',+++typeof=',typeof filters);
+                //         if (filters.length) return !filters.includes(location);
+                //         return false;
+                //     },
+                //     display: (filterList, onChange, index, column) => {
+                //         return (
+                //             <FormControl component="fieldset">
+                //                 <FormLabel component="legend">Availability</FormLabel>
+                //                 <RadioGroup row aria-label="available" name="available" value={boolMap[filterList[index]]} onChange={event => {
+                //                     filterList[index] = event.target.value;
+                //                     console.log('+++onChange=', event.target.value, ',---', filterList[index], '---', index);
+                //                     onChange(filterList[index], index, column);
+                //                 }} >
+                //                     <FormControlLabel value='yes' control={<Radio />} label="Yes" />
+                //                     <FormControlLabel value='no' control={<Radio />} label="No" />
+                //                 </RadioGroup>
+                //             </FormControl >
+                //         );
+                //     }
+                // },
                 customBodyRender: (value, tableMeta, updateValue) => {
-                    // console.log()
                     return (
                         <FormControl component="fieldset">
-                            <RadioGroup row aria-label="available" name="available" value={entries[tableMeta.rowIndex].a} onChange={async (change) => { console.log('available=', change); }} >
-                                <FormControlLabel value={true} control={<Radio />} label="Yes" />
-                                <FormControlLabel value={false} control={<Radio />} label="No" />
+                            <RadioGroup row aria-label="available" name="available" value={value} onChange={
+                                (event) => {
+                                    entries[tableMeta.rowIndex].a = event.target.value;
+                                    updateValue(event.target.value);
+                                }} >
+                                <FormControlLabel value='Yes' control={<Radio />} label="Yes" />
+                                <FormControlLabel value='No' control={<Radio />} label="No" />
                             </RadioGroup>
                         </FormControl>
                     );
@@ -163,6 +167,7 @@ export default (props) => {
         viewColumns: false,
         expandableRows: true,
         pagination: true,
+        caseSensitive: false,
         setTableProps: () => {
             return {
                 padding: "default",
