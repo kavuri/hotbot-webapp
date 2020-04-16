@@ -6,7 +6,7 @@
 import React, { useState, useEffect, useContext } from 'react';
 import Typography from '@material-ui/core/Typography';
 import {
-    RadioGroup, Radio, FormControlLabel, FormControl, TextField, TableRow, TableCell, 
+    RadioGroup, Radio, FormControlLabel, FormControl, TextField, TableRow, TableCell,
 } from '@material-ui/core';
 import { makeStyles } from "@material-ui/core/styles";
 import ChipInput from 'material-ui-chip-input';
@@ -15,9 +15,9 @@ import AddCircleRoundedIcon from '@material-ui/icons/AddCircleRounded';
 import MUIDataTable from "mui-datatables";
 
 import { useSnackbar } from 'notistack';
-import { has, isEqual, isNull, isEmpty } from 'lodash';
+import { has, isEqual, isNull, isEmpty, pullAt } from 'lodash';
 import { KamAppContext } from '../KamAppContext';
-import { load, node } from './GraphOps';
+import { load, deleteSynonym, addSynonym } from './GraphOps';
 import { AddSetting, PolicySettings, FacilitySettings, MenuitemSettings, RoomitemSettings } from './AddSetting';
 
 const useStyles = makeStyles({
@@ -136,24 +136,26 @@ export default (props) => {
                 customBodyRender: (value, tableMeta, updateValue) => {
                     // console.log(tableMeta);
                     return (
-                        <ChipInput value={entries[tableMeta.rowIndex].synonyms}
+                        <ChipInput value={value}
                             allowDuplicates={false}
-                            onAdd={(chip) => handleAddSynonym(chip)}
-                            onDelete={(chip, index) => handleDeleteSynonym(chip, index)}
+                            onAdd={async (chip) => {
+                                console.log('^^tableMea=', tableMeta[tableMeta.rowIndex], tableMeta);
+                                await addSynonym(tableMeta.rowData[0], chip, hotel);
+                                value.push(chip);
+                                updateValue(value);
+                                console.log('synonym::', value);
+                            }}
+                            onDelete={async (chip, index) => {
+                                await deleteSynonym(tableMeta.rowData[0], chip, hotel);
+                                pullAt(value, index);
+                                updateValue(value);
+                            }}
                         />
                     );
                 }
             }
         }
     ];
-
-    const handleAddSynonym = (chip) => {
-
-    }
-
-    const handleDeleteSynonym = (chip, index) => {
-
-    }
 
     const options = {
         filter: true,
@@ -214,7 +216,7 @@ export default (props) => {
                 <IconButton key={addSettingFlag} onClick={handleAddSetting}>
                     <AddCircleRoundedIcon />
                 </IconButton>
-                {isEqual(addSettingFlag, true) && <AddSetting onSettingAdded={addSettingToTable} />}
+                {isEqual(addSettingFlag, true) && <AddSetting hotel={hotel} onSettingAdded={addSettingToTable} />}
             </span >
         ),
     };

@@ -20,8 +20,7 @@ import SaveRoundedIcon from '@material-ui/icons/SaveRounded';
 import { Form, Field } from 'react-final-form';
 import { TextField } from 'final-form-material-ui';
 
-import { APICall } from '../../utils/API';
-import { node, createFaciliy } from './GraphOps';
+import { createItem, deleteSynonym, addSynonym, updateItem } from './GraphOps';
 
 const useStyles = makeStyles((theme) => ({
     control: {
@@ -40,12 +39,7 @@ const handleHasCountChange = () => {
 
 export const FacilitySettings = (props) => {
     const [edit, setEdit] = useState(props.edit);
-    let location, timings, price;
-    if (has(props, 'data')) {
-        location = node(props.data.name + '_location');
-        timings = node(props.data.name + '_timings');
-        price = node(props.data.name + '_price');
-    }
+    const [hotel, setHotel] = useState(props.hotel);
 
     const [facility, setFacility] = useState(
         has(props, 'data') ?
@@ -54,19 +48,22 @@ export const FacilitySettings = (props) => {
                 a: props.data.a,
                 o: props.data.o,
                 synonyms: props.data.synonyms,
-                msg: { yes: props.data.msg.yes, no: props.data.msg.no },
-                location: location,
-                timings: timings,
-                price: price
+                msg_yes: props.data.msg.yes,
+                msg_no: props.data.msg.no,
+                location_msg: props.data.location.msg,
+                timings_msg: props.data.timings.msg,
+                price_msg: props.data.price.msg
             } :
-            { name: '', a: '', o: '', synonyms: [], msg: { yes: '', no: '' }, location: { msg: '' }, timings: { msg: '' }, price: { msg: '' } }
+            { name: '', a: '', o: '', synonyms: [], msg_yes: '', msg_no: '', location_msg: '', timings_msg: '', price_msg: '' }
     );
 
     const handleAddSynonym = (chip) => {
+        console.log('handleAddSynonym:', chip);
         setFacility({ ...facility, synonyms: concat(facility.synonyms, chip) });
     }
 
     const handleDeleteSynonym = (chip, index) => {
+        console.log('handleDeleteSynonym:', chip, index);
         setFacility({ ...facility, synonyms: facility.synonyms.splice(index, 1) });
     }
 
@@ -110,21 +107,21 @@ export const FacilitySettings = (props) => {
     }
 
     const saveFacility = async values => {
-        console.log('saveFacility');
+        console.log('saveFacility:', facility);
         let f = {
             name: values.name,
             a: isEqual(values.a, 'Yes') ? true : false,
             o: isEqual(values.o, 'Yes') ? true : false,
             synonyms: facility.synonyms,
-            msg: values.msg,
-            location: values.location,
-            timings: values.timings,
-            price: values.price
+            msg: { yes: values.msg_yes, no: values.msg_no },
+            location: { msg: values.location_msg },
+            timings: { msg: values.timings_msg },
+            price: { msg: values.price_msg }
         };
 
         let res = null;
         try {
-            res = await createFaciliy(f);
+            res = await createItem(f, hotel);
         } catch (error) {
             console.log('error in creating facility:', error);
         }
@@ -455,6 +452,7 @@ export const MenuitemSettings = (props) => {
 export const AddSetting = (props) => {
     const [open, setOpen] = useState(true);
     const [setting, setSetting] = useState('');
+    const [hotel, setHotel] = useState(props.hotel);
 
     const handleSettingChange = (event) => {
         console.log(event.target.value);
@@ -484,10 +482,10 @@ export const AddSetting = (props) => {
                             </RadioGroup>
                         </FormControl>
                     </Grid>
-                    {isEqual(setting, 'policy') && <PolicySettings />}
-                    {isEqual(setting, 'facility') && <FacilitySettings onFacilitySaved={handleClose} />}
-                    {isEqual(setting, 'menuitem') && <MenuitemSettings />}
-                    {isEqual(setting, 'roomitem') && <RoomitemSettings />}
+                    {isEqual(setting, 'policy') && <PolicySettings hotel={hotel} />}
+                    {isEqual(setting, 'facility') && <FacilitySettings onFacilitySaved={handleClose} hotel={hotel} />}
+                    {isEqual(setting, 'menuitem') && <MenuitemSettings hotel={hotel} />}
+                    {isEqual(setting, 'roomitem') && <RoomitemSettings hotel={hotel} />}
                 </div>
             </DialogContent>
             <DialogActions>
