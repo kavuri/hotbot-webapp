@@ -53,7 +53,7 @@ export default (props) => {
 
     const addSettingToTable = (setting) => {
         if (!isNull(setting) && !isEmpty(setting)) {  // This can happen if the dialog is opened and closed without adding data
-
+            // setEntries(concat(entries, setting));
             enqueueSnackbar('Hotel saved', { variant: 'success' });
         } else {
             enqueueSnackbar('Error saving hotel', { variant: 'error' });
@@ -138,12 +138,15 @@ export default (props) => {
                     return (
                         <ChipInput value={value}
                             allowDuplicates={false}
+                            placeholder="Type synonym and press enter"
                             onAdd={async (chip) => {
-                                console.log('^^tableMea=', tableMeta[tableMeta.rowIndex], tableMeta);
+                                if (chip.length < 3) {
+                                    enqueueSnackbar('Minimum length of 3 characters required', { variant: 'error' });
+                                    return;
+                                }
                                 await addSynonym(tableMeta.rowData[0], chip, hotel);
                                 value.push(chip);
                                 updateValue(value);
-                                console.log('synonym::', value);
                             }}
                             onDelete={async (chip, index) => {
                                 await deleteSynonym(tableMeta.rowData[0], chip, hotel);
@@ -178,7 +181,7 @@ export default (props) => {
         },
         onRowsExpand: (curExpanded, allExpanded) => console.log('ROW EXPANDED:', curExpanded, allExpanded),
         onTableChange: (action, state) => {
-            console.log('action=', action, 'state=', state);
+            // console.log('action=', action, 'state=', state);
             // Calculate the unservedOrderCount and set it
             switch (action) {
                 case 'changePage':

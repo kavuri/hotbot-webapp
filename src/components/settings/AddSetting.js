@@ -14,9 +14,10 @@ import DialogContent from '@material-ui/core/DialogContent';
 import DialogActions from '@material-ui/core/DialogActions';
 import { makeStyles } from "@material-ui/core/styles";
 import SettingsRoundedIcon from '@material-ui/icons/SettingsRounded';
-import { isUndefined, isEqual, has, remove, concat } from 'lodash';
+import { isUndefined, isEqual, has, pullAt, concat } from 'lodash';
 import ChipInput from 'material-ui-chip-input';
 import SaveRoundedIcon from '@material-ui/icons/SaveRounded';
+import { useSnackbar } from 'notistack';
 import { Form, Field } from 'react-final-form';
 import { TextField } from 'final-form-material-ui';
 
@@ -40,41 +41,39 @@ const handleHasCountChange = () => {
 export const FacilitySettings = (props) => {
     const [edit, setEdit] = useState(props.edit);
     const [hotel, setHotel] = useState(props.hotel);
-
+    const { enqueueSnackbar } = useSnackbar();
+    const [synonyms, setSynonyms] = useState(isEqual(edit, true) ? props.data.synonyms : []);
     const [facility, setFacility] = useState(
         has(props, 'data') ?
             {
                 name: props.data.name,
                 a: props.data.a,
                 o: props.data.o,
-                synonyms: props.data.synonyms,
                 msg_yes: props.data.msg.yes,
                 msg_no: props.data.msg.no,
                 location_msg: props.data.location.msg,
                 timings_msg: props.data.timings.msg,
                 price_msg: props.data.price.msg
             } :
-            { name: '', a: '', o: '', synonyms: [], msg_yes: '', msg_no: '', location_msg: '', timings_msg: '', price_msg: '' }
+            { name: '', a: '', o: '', msg_yes: '', msg_no: '', location_msg: '', timings_msg: '', price_msg: '' }
     );
 
     const handleAddSynonym = (chip) => {
-        console.log('handleAddSynonym:', chip);
-        setFacility({ ...facility, synonyms: concat(facility.synonyms, chip) });
+        console.log('+++', facility);
+        if (chip.length < 3) {
+            enqueueSnackbar('Minimum length of 3 characters required', { variant: 'error' });
+            return;
+        }
+        setSynonyms(concat(synonyms, chip));
     }
 
     const handleDeleteSynonym = (chip, index) => {
-        console.log('handleDeleteSynonym:', chip, index);
-        setFacility({ ...facility, synonyms: facility.synonyms.splice(index, 1) });
-    }
-
-    const initialValues = () => {
-        console.log('initialValues=', facility);
-        return facility;
+        pullAt(synonyms, index);
+        setSynonyms(synonyms);
     }
 
     const validate = values => {
         const errors = {};
-        // const errors = { msg: { yes: {}, no: {} }, location: { msg: {} }, timings: { msg: {} }, price: { msg: {} } };
         console.log('validate:', edit, values, errors);
 
         console.log('validating fields');
@@ -110,9 +109,10 @@ export const FacilitySettings = (props) => {
         console.log('saveFacility:', facility);
         let f = {
             name: values.name,
+            f: true,
             a: isEqual(values.a, 'Yes') ? true : false,
             o: isEqual(values.o, 'Yes') ? true : false,
-            synonyms: facility.synonyms,
+            synonyms: synonyms,
             msg: { yes: values.msg_yes, no: values.msg_no },
             location: { msg: values.location_msg },
             timings: { msg: values.timings_msg },
@@ -130,12 +130,11 @@ export const FacilitySettings = (props) => {
 
     const classes = useStyles();
 
-    console.log('FacilitySetting::', props);
     return (
         <Form
             onSubmit={saveFacility}
             validate={validate}
-            initialValues={initialValues()}
+            initialValues={facility}
             render={({ handleSubmit, submitting, pristine, values }) => (
                 <form onSubmit={handleSubmit} noValidate>
                     <Grid container direction="row" justify="center" alignItems="center">
@@ -183,7 +182,9 @@ export const FacilitySettings = (props) => {
                                                 <FormLabel component="legend">Synonyms</FormLabel>
                                                 <ChipInput
                                                     fullWidth
+                                                    placeholder="Type synonym and press enter"
                                                     allowDuplicates={false}
+                                                    value={synonyms}
                                                     onAdd={(chip) => handleAddSynonym(chip)}
                                                     onDelete={(chip, index) => handleDeleteSynonym(chip, index)}
                                                 />
