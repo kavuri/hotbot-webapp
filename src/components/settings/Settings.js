@@ -17,7 +17,7 @@ import MUIDataTable from "mui-datatables";
 import { useSnackbar } from 'notistack';
 import { has, isEqual, isNull, isEmpty, pullAt } from 'lodash';
 import { KamAppContext } from '../KamAppContext';
-import { load, deleteSynonym, addSynonym } from './GraphOps';
+import { APICall } from '../../utils/API';
 import { AddSetting, PolicySettings, FacilitySettings, MenuitemSettings, RoomitemSettings } from './AddSetting';
 
 const useStyles = makeStyles({
@@ -42,9 +42,38 @@ export default (props) => {
     }, [hotel]);
 
     const loadEntries = async () => {
-        let rows = await load(ctx.hotel);
-        console.log('data=', rows);
-        setEntries(rows);
+        let data = [];
+        try {
+            let res = await APICall('/item', { method: 'GET', keyValues: { hotel_id: hotel.id } });
+
+            // Create a map of the data
+            for (var i = 0; i < res.length; i++) {
+                let n = res[i];
+                if (has(n, 'f') || has(n, 'p') || has(n, 'm') || has(n, 'ri')) {
+                    if (has(n, 'f') && isEqual(n.f, true)) {
+                        n.type = 'Facility';
+                    } else if (has(n, 'p') && isEqual(n.p, true)) {
+                        n.type = 'Policy';
+                    } else if (has(n, 'm') && isEqual(n.m, true)) {
+                        n.type = 'Menu';
+                    } else if (has(n, 'ri') && isEqual(n.ri, true)) {
+                        n.type = 'Room';
+                    }
+                    // console.log('synonyms=', g.children(nodes[i]));
+                    n.a = isEqual(n.a, true) ? 'Yes' : 'No';
+                    if (has(n, 'o')) {
+                        n.o = isEqual(n.o, true) ? 'Yes' : 'No';
+                    }
+                    data.push(n);
+                }
+            }
+            console.log('length=', data.length);
+        } catch (error) {
+            console.log('error in fetching hotel settings:', error);
+            throw error;
+        }
+
+        setEntries(data);
     }
 
     const handleAddSetting = () => {
@@ -111,10 +140,12 @@ export default (props) => {
                 //     }
                 // },
                 customBodyRender: (value, tableMeta, updateValue) => {
+                    // console.log('^^^value=', value, '^^^tableMeta=', tableMeta);
                     return (
                         <FormControl component="fieldset">
                             <RadioGroup row aria-label="available" name="available" value={value} onChange={
-                                (event) => {
+                                async (event) => {
+                                    await APICall('/item/', { method: 'PUT', body: { name: tableMeta.rowData[0], a: isEqual(event.target.value, 'Yes') ? true : false }, keyValues: { hotel_id: hotel.id } });
                                     entries[tableMeta.rowIndex].a = event.target.value;
                                     updateValue(event.target.value);
                                 }} >
@@ -144,12 +175,12 @@ export default (props) => {
                                     enqueueSnackbar('Minimum length of 3 characters required', { variant: 'error' });
                                     return;
                                 }
-                                await addSynonym(tableMeta.rowData[0], chip, hotel);
+                                await APICall('/item/synonym', { method: 'POST', body: { parent: tableMeta.rowData[0], synonym: chip }, keyValues: { hotel_id: hotel.id } });
                                 value.push(chip);
                                 updateValue(value);
                             }}
                             onDelete={async (chip, index) => {
-                                await deleteSynonym(tableMeta.rowData[0], chip, hotel);
+                                await APICall('/item/synonym', { method: 'DELETE', body: { parent: tableMeta.rowData[0], synonym: chip }, keyValues: { hotel_id: hotel.id } });
                                 pullAt(value, index);
                                 updateValue(value);
                             }}
@@ -159,6 +190,10 @@ export default (props) => {
             }
         }
     ];
+
+    const handleClose = (result) => {
+        enqueueSnackbar('Updated', { variant: 'success' });
+    };
 
     const options = {
         filter: true,
@@ -206,10 +241,10 @@ export default (props) => {
             return (
                 <TableRow>
                     <TableCell colSpan={colSpan}>
-                        {isEqual(setting, 'policy') && <PolicySettings edit data={data} />}
-                        {isEqual(setting, 'facility') && <FacilitySettings edit data={data} />}
-                        {isEqual(setting, 'menuitem') && <MenuitemSettings edit data={data} />}
-                        {isEqual(setting, 'roomitem') && <RoomitemSettings edit data={data} />}
+                        {isEqual(setting, 'policy') && <PolicySettings onItemSaved={handleClose} hotel={hotel} edit data={data} />}
+                        {isEqual(setting, 'facility') && <FacilitySettings onItemSaved={handleClose} hotel={hotel} edit data={data} />}
+                        {isEqual(setting, 'menuitem') && <MenuitemSettings onItemSaved={handleClose} hotel={hotel} edit data={data} />}
+                        {isEqual(setting, 'roomitem') && <RoomitemSettings onItemSaved={handleClose} hotel={hotel} edit data={data} />}
                     </TableCell>
                 </TableRow>
             );
