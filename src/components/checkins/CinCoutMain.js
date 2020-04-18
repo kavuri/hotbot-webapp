@@ -11,11 +11,10 @@ import Tabs from '@material-ui/core/Tabs';
 import Tab from '@material-ui/core/Tab';
 import DirectionsWalkRoundedIcon from '@material-ui/icons/DirectionsWalkRounded';
 import HistoryRoundedIcon from '@material-ui/icons/HistoryRounded';
-import MUIDataTable from "mui-datatables";
-import { isEqual, isEmpty, has, concat, isUndefined } from 'lodash';
+import { isEqual, isEmpty, has, concat, isUndefined, isNull } from 'lodash';
 
 import { APICall } from '../../utils/API';
-import Checkin from './Checkin';
+import LiveCheckinCheckout from './LiveCheckinCheckout';
 import { KamAppContext } from '../KamAppContext';
 
 const useStyles = makeStyles(theme => ({
@@ -31,8 +30,8 @@ const useStyles = makeStyles(theme => ({
 export default () => {
   const [value, setValue] = useState(0);
   const [rooms, setRooms] = useState([]);
-  const [checkedIn, setCheckedIn] = useState([]);
-  const [notCheckedIn, setNotCheckedIn] = useState([]);
+  const [freeRooms, setFreeRooms] = useState([]);
+  const [allotedRooms, setAllotedRooms] = useState([]);
   const [loading, setLoading] = useState(false);
   const classes = useStyles();
   const ctx = useContext(KamAppContext);
@@ -59,14 +58,12 @@ export default () => {
       }
 
       console.log('All Rooms=', results);
-      let check_ins = [], non_check_ins = [];
-      for (var i = 0; i < results.length; i++) {
-        non_check_ins = !has(results[i], 'checkincheckout') || isUndefined(results[i].checkincheckout) ? concat(non_check_ins, results[i]) : non_check_ins;
-        check_ins = has(results[i], 'checkincheckout') && !isUndefined(results[i].checkincheckout) ? concat(check_ins, results[i]) : check_ins;
-      }
-      console.log('all rooms=', results, ',check_ins=', check_ins, ', non_checkins=', non_check_ins);
-      setCheckedIn(check_ins);
-      setNotCheckedIn(non_check_ins);
+      let frs = [], alrs = [];
+      frs = results.filter((r) => { return isNull(r.checkincheckout) });
+      alrs = results.filter((r) => { return !isNull(r.checkincheckout) });
+      console.log('^^^frs=', frs, '---alrs=', alrs);
+      setFreeRooms(frs);
+      setAllotedRooms(alrs);
       setRooms(results);
       setLoading(false);
     }
@@ -86,7 +83,7 @@ export default () => {
           <Tab icon={<DirectionsWalkRoundedIcon fontSize="large" color="secondary" />} label="CHECKIN-CHECKOUT" />
           <Tab icon={<HistoryRoundedIcon fontSize="large" color="primary" />} label="HISTORY" />
         </Tabs>
-        {isEqual(value, 0) && <Checkin freeRooms={notCheckedIn} allotedRooms={checkedIn} />}
+        {isEqual(value, 0) && <LiveCheckinCheckout freeRooms={freeRooms} allotedRooms={allotedRooms} />}
         {/* {isEqual(value, 1) && <Checkout allotedRooms={checkedIn} />} */}
       </Paper>
     </div>

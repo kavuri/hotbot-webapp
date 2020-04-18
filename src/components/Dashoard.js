@@ -27,7 +27,6 @@ import { useSnackbar } from 'notistack';
 
 import Orders from './orders/Orders';
 import Devices from './devices/Devices';
-import CheckinCheckout from './checkins/CheckinCheckout';
 import HotelSettings from './HotelSettings';
 import AdminMenu from './AdminMenu';
 import ConsumerMenu from './ConsumerMenu';
@@ -39,6 +38,7 @@ import Selector from './Selector';
 import { useAuth0 } from "../react-auth0-spa";
 import { APICall } from '../utils/API';
 import { KamAppContext } from './KamAppContext';
+import CinCoutMain from './checkins/CinCoutMain';
 
 function Copyright() {
   return (
@@ -152,7 +152,7 @@ export default function Dashboard() {
   const menuComponentMap = {
     'default': Default,
     'orders': Orders,
-    'checkinCheckout': CheckinCheckout,
+    'checkinCheckout': CinCoutMain,
     'settings': Settings,
     'deviceMgmt': Devices,
     'hotels': HotelMgmt,
