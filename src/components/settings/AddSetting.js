@@ -14,7 +14,7 @@ import DialogContent from '@material-ui/core/DialogContent';
 import DialogActions from '@material-ui/core/DialogActions';
 import { makeStyles } from "@material-ui/core/styles";
 import SettingsRoundedIcon from '@material-ui/icons/SettingsRounded';
-import { isUndefined, isEqual, has, pullAt, concat } from 'lodash';
+import { isEmpty, isEqual, has, pullAt, concat } from 'lodash';
 import ChipInput from 'material-ui-chip-input';
 import SaveRoundedIcon from '@material-ui/icons/SaveRounded';
 import { useSnackbar } from 'notistack';
@@ -129,7 +129,7 @@ export const FacilitySettings = (props) => {
         } catch (error) {
             console.log('error in creating facility:', error);
         }
-        props.onItemSaved(res);
+        props.onItemSaved(f);
     };
 
     const classes = useStyles();
@@ -285,7 +285,7 @@ export const PolicySettings = (props) => {
         } catch (error) {
             console.log('error in creating facility:', error);
         }
-        props.onItemSaved(res);
+        props.onItemSaved(p);
     };
 
     const classes = useStyles();
@@ -359,7 +359,7 @@ export const RoomitemSettings = (props) => {
             {
                 name: props.data.name,
                 a: props.data.a,
-                c: props.data.c,
+                c: [props.data.c],
                 o: props.data.o,
                 price: props.data.price,
                 count: props.data.limit.count,
@@ -367,7 +367,7 @@ export const RoomitemSettings = (props) => {
                 msg_yes: props.data.msg.yes,
                 msg_no: props.data.msg.no,
             } :
-            { name: '', a: '', o: '', price:'', c: '', count: '', per: '', msg_yes: '', msg_no: '' }
+            { name: '', a: true, o: true, price: '', c: '', count: '', per: '', msg_yes: '', msg_no: '' }
     );
     const { enqueueSnackbar } = useSnackbar();
 
@@ -425,6 +425,7 @@ export const RoomitemSettings = (props) => {
             ri: true,
             a: isEqual(values.a, 'Yes') ? true : false,
             o: isEqual(values.o, 'Yes') ? true : false,
+            c: isEmpty(values.c) ? false : true,
             price: values.price,
             synonyms: synonyms,
             limit: { count: values.count, per: values.per },
@@ -441,7 +442,7 @@ export const RoomitemSettings = (props) => {
         } catch (error) {
             console.log('error in creating facility:', error);
         }
-        props.onItemSaved(res);
+        props.onItemSaved(ri);
     };
 
     const classes = useStyles();
@@ -496,13 +497,6 @@ export const RoomitemSettings = (props) => {
                                     }
                                     <Grid container direction="row" justify="space-around" alignItems="center" >
                                         <Grid item xs={3}>
-                                            <Field required name="price" component={TextField} type="number" label="Price" />
-                                        </Grid>
-                                        <Grid item xs={3}>
-                                            <FormLabel component="legend">Has Count</FormLabel>
-                                            <Field name="c" component="input" type="checkbox" value={false} />{' '}
-                                        </Grid>
-                                        <Grid item xs={3}>
                                             <FormLabel component="legend">Orderable</FormLabel>
                                             <Grid container direction="row" justify="center" alignItems="center">
                                                 <Grid item xs={6}>
@@ -516,7 +510,14 @@ export const RoomitemSettings = (props) => {
                                             </Grid>
                                         </Grid>
                                         <Grid item xs={3}>
-                                            <Field required name="count" component={TextField} type="number" label="Limit" />
+                                            <Field required name="price" component={TextField} type="number" label="Price" />
+                                        </Grid>
+                                        <Grid item xs={3}>
+                                            <FormLabel component="legend">Has Count</FormLabel>
+                                            <Field name="c" component="input" type="checkbox" value={true} />{' '}
+                                        </Grid>
+                                        <Grid item xs={3}>
+                                            <Field required name="count" component={TextField} parse={parseInt} type="number" label="Limit" />
                                             <FormLabel component="legend">Per</FormLabel>
                                             <Grid container direction="row" justify="center" alignItems="center">
                                                 <Grid item xs={6}>
@@ -547,90 +548,188 @@ export const RoomitemSettings = (props) => {
 }
 
 export const MenuitemSettings = (props) => {
-    const handleAddSynonym = (chip) => {
+    const [edit, setEdit] = useState(props.edit);
+    const [hotel, setHotel] = useState(props.hotel);
+    const [synonyms, setSynonyms] = useState(isEqual(edit, true) ? props.data.synonyms : []);
+    const [menuitem, setMenuitem] = useState(
+        has(props, 'data') ?
+            {
+                name: props.data.name,
+                a: props.data.a,
+                o: props.data.o,
+                c: [props.data.c],
+                mtype: props.data.mtype,
+                price: props.data.price,
+                qty: props.data.qty
+            } :
+            { name: '', a: true, o: true, price: '', c: '', mtype: '', qty: '' }
+    );
 
+    const { enqueueSnackbar } = useSnackbar();
+
+    const handleAddSynonym = (chip) => {
+        if (chip.length < 3) {
+            enqueueSnackbar('Minimum length of 3 characters required', { variant: 'error' });
+            return;
+        }
+        setSynonyms(concat(synonyms, chip));
     }
 
     const handleDeleteSynonym = (chip, index) => {
-
+        pullAt(synonyms, index);
+        setSynonyms(synonyms);
     }
 
-    const saveMenuitem = () => {
+    const validate = values => {
+        {/* console.log('^^^validating:', typeof values.qty, values.price) */}
+        const errors = {};
 
+        if (!values.name) {
+            errors.name = 'Required';
+        }
+        if (!values.a) {
+            errors.a = 'Required';
+        }
+        if (!values.o) {
+            errors.o = 'Required';
+        }
+        if (!values.c) {
+            errors.c = 'Required';
+        }
+        if (!values.price) {
+            errors.price = 'Required';
+        }
+        if (!values.mtype) {
+            errors.mtype = 'Required';
+        }
+        if (!values.qty) {
+            errors.qty = 'Required';
+        }
+
+        return errors;
     }
+
+    const saveMenuitem = async values => {
+        console.log('+++saveMenuitem:', values, '++', synonyms, '++', props.data, '--typeof', typeof values.price, typeof values.qty);
+        let m = {
+            name: values.name,
+            m: true,
+            a: isEqual(values.a, 'Yes') ? true : false,
+            o: isEqual(values.o, 'Yes') ? true : false,
+            c: isEmpty(values.c) ? false : true,
+            mtype: values.mtype,
+            price: values.price,
+            synonyms: synonyms,
+            qty: values.qty
+        };
+
+        let res = null;
+        try {
+            if (edit) {
+                res = await APICall('/item', { method: 'PUT', body: m, keyValues: { hotel_id: hotel.id } });
+            } else {
+                res = await APICall('/item', { method: 'POST', body: m, keyValues: { hotel_id: hotel.id } });
+            }
+        } catch (error) {
+            console.log('error in creating facility:', error);
+        }
+        props.onItemSaved(m);
+    };
 
     const classes = useStyles();
-    console.log('+++data=', props);
     return (
-        <Grid container direction="row" justify="center" alignItems="center">
-            <Grid item xs={12}>
-                <IconButton aria-label="save" className={classes.margin} onClick={saveMenuitem} >
-                    <SaveRoundedIcon color="secondary" />
-                </IconButton>
-            </Grid>
-            <Grid item xs={12}>
-                <Paper variant="outlined" className={classes.control} >
-                    <Grid container spacing={2} direction="row" justify="center" alignItems="center">
-                        {
-                            !has(props, 'data') &&
-                            <Grid container spacing={3} direction="row" justify="center" alignItems="stretch">
-                                <Grid item xs={6}>
-                                    <TextField d="standard-number" required label='Name' type="text" InputLabelProps={{ shrink: true }} />
-                                </Grid>
-                                <Grid item xs={6}>
-                                    <FormControl component="fieldset">
-                                        <FormLabel component="legend">Available</FormLabel>
-                                        <RadioGroup required row aria-label="available" name="available" value={true} onChange={async (change) => { console.log('available=', change); }} >
-                                            <FormControlLabel value={true} control={<Radio />} label="Yes" />
-                                            <FormControlLabel value={false} control={<Radio />} label="No" />
-                                        </RadioGroup>
-                                    </FormControl>
-                                </Grid>
-                                <Grid item xs={12}>
-                                    <FormLabel component="legend">Synonyms</FormLabel>
-                                    <ChipInput
-                                        fullWidth
-                                        allowDuplicates={false}
-                                        onAdd={(chip) => handleAddSynonym(chip)}
-                                        onDelete={(chip, index) => handleDeleteSynonym(chip, index)}
-                                    />
-                                </Grid>
-                            </Grid>
-                        }
-                        <Grid container direction="row" justify="space-around" alignItems="center" >
-                            <Grid item xs={3}>
-                                <FormControlLabel control={<Checkbox checked={true} onChange={handleHasCountChange} inputProps={{ "aria-label": "primary checkbox" }} />} label="Has count" />
-                            </Grid>
-                            <Grid item xs={3}>
-                                <FormControl component="fieldset">
-                                    <FormLabel component="legend">Orderable</FormLabel>
-                                    <RadioGroup row defaultValue={isUndefined(props.data) ? '' : props.data.o} aria-label="orderable" name="customized-radios" onChange={async (change) => { console.log(change); }} >
-                                        <FormControlLabel value={true} control={<Radio />} label="Yes" />
-                                        <FormControlLabel value={false} control={<Radio />} label="No" />
-                                    </RadioGroup>
-                                </FormControl>
-                            </Grid>
-
-                            <Grid item xs={3}>
-                                <FormControl component="fieldset">
-                                    <FormLabel component="legend">Type</FormLabel>
-                                    <RadioGroup row defaultValue={isUndefined(props.data) ? '' : (has(props.data, 'e') && isEqual(props.data.e, true) ? 'Eatable' : 'Drink')} aria-label="type" name="customized-radios" onChange={async (change) => { console.log(change); }}>
-                                        <FormControlLabel value="Eatable" control={<Radio />} label="Eatable" />
-                                        <FormControlLabel value="Drink" control={<Radio />} label="Drink" />
-                                    </RadioGroup>
-                                </FormControl>
-                            </Grid>
+        <Form
+            onSubmit={saveMenuitem}
+            validate={validate}
+            initialValues={menuitem}
+            render={({ handleSubmit, submitting, pristine, values }) => (
+                <form onSubmit={handleSubmit} noValidate>
+                    <Grid container direction="row" justify="center" alignItems="center">
+                        <Grid item xs={12}>
+                            <IconButton aria-label="save" variant="contained" color="primary" type="submit" disabled={submitting} className={classes.margin} >
+                                <SaveRoundedIcon color="secondary" />
+                            </IconButton>
                         </Grid>
-                        <Grid item xs={6}>
-                            <TextField d="standard-number" label="Quantity" type="number" InputLabelProps={{ shrink: true }} defaultValue={isUndefined(props.data) ? '' : props.data.quantity} />
-                        </Grid>
-                        <Grid item xs={6}>
-                            <TextField d="standard-number" label="Price" type="number" InputLabelProps={{ shrink: true }} defaultValue={isUndefined(props.data) ? '' : props.data.price} />
+                        <Grid item xs={12}>
+                            <Paper variant="outlined" className={classes.control} >
+                                <Grid container spacing={2} direction="column" justify="center" alignItems="stretch">
+                                    {
+                                        !isEqual(edit, true) &&
+                                        <Grid container spacing={2} direction="row" justify="center" alignItems="stretch">
+                                            <Grid item xs={6}>
+                                                <Field required name="name" component={TextField} type="text" label="Name" />
+                                            </Grid>
+                                            <Grid item xs={6}>
+                                                <FormLabel component="legend">Availability</FormLabel>
+                                                <Grid container direction="row" justify="center" alignItems="center">
+                                                    <Grid item xs={6}>
+                                                        <FormLabel component="legend">Yes</FormLabel>
+                                                        <Field name="a" component="input" type="radio" value="Yes" />
+                                                    </Grid>
+                                                    <Grid item xs={6}>
+                                                        <FormLabel component="legend">No</FormLabel>
+                                                        <Field name="a" component="input" type="radio" value="No" />
+                                                    </Grid>
+                                                </Grid>
+                                            </Grid>
+                                            <Grid item xs={12}>
+                                                <FormLabel component="legend">Synonyms</FormLabel>
+                                                <ChipInput
+                                                    fullWidth
+                                                    placeholder="Type synonym and press enter"
+                                                    allowDuplicates={false}
+                                                    value={synonyms}
+                                                    onAdd={(chip) => handleAddSynonym(chip)}
+                                                    onDelete={(chip, index) => handleDeleteSynonym(chip, index)}
+                                                />
+                                            </Grid>
+                                        </Grid>
+                                    }
+                                    <Grid container direction="row" justify="space-around" alignItems="center" >
+                                        <Grid item xs={3}>
+                                            <FormLabel component="legend">Orderable</FormLabel>
+                                            <Grid container direction="row" justify="center" alignItems="center">
+                                                <Grid item xs={6}>
+                                                    <FormLabel component="legend">Yes</FormLabel>
+                                                    <Field name="o" component="input" type="radio" value="Yes" />
+                                                </Grid>
+                                                <Grid item xs={6}>
+                                                    <FormLabel component="legend">No</FormLabel>
+                                                    <Field name="o" component="input" type="radio" value="No" />
+                                                </Grid>
+                                            </Grid>
+                                        </Grid>
+                                        <Grid item xs={3}>
+                                            <FormLabel component="legend">Type</FormLabel>
+                                            <Grid container direction="row" justify="center" alignItems="center">
+                                                <Grid item xs={6}>
+                                                    <FormLabel component="legend">Eatable</FormLabel>
+                                                    <Field name="mtype" component="input" type="radio" value="e" />
+                                                </Grid>
+                                                <Grid item xs={6}>
+                                                    <FormLabel component="legend">Drink</FormLabel>
+                                                    <Field name="mtype" component="input" type="radio" value="d" />
+                                                </Grid>
+                                            </Grid>
+                                        </Grid>
+                                        <Grid item xs={3}>
+                                            <FormLabel component="legend">Has Count</FormLabel>
+                                            <Field name="c" component="input" type="checkbox" value={true} />
+                                        </Grid>
+                                        <Grid item xs={6}>
+                                            <Field required name="qty" component={TextField} type="number" parse={parseInt} label="Quantity" />
+                                        </Grid>
+                                        <Grid item xs={6}>
+                                            <Field required name="price" component={TextField} type="number" parse={parseInt} label="Price" />
+                                        </Grid>
+                                    </Grid>
+                                </Grid>
+                            </Paper >
                         </Grid>
                     </Grid>
-                </Paper >
-            </Grid>
-        </Grid>
+                </form>
+            )}
+        />
     );
 }
 
@@ -645,7 +744,7 @@ export const AddSetting = (props) => {
     };
 
     const handleClose = (result) => {
-        props.onSettingAdded(result); // This would reset the flag to open the dialog
+        props.onSettingCreated(result); // This would reset the flag to open the dialog
         setOpen(false);
     };
 
