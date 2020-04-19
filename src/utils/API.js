@@ -82,20 +82,6 @@ export const deregisterDevice = async (device) => {
     return result;
 }
 
-export const checkinGuest = async (room, guestData) => {
-    console.log('guest details=', guestData)
-    let results = await fetch(
-        API_SERVER_URL + '/room/' + room.room_no +
-        '/checkin?hotel_id=' + room.hotel_id,
-        { method: 'POST', body: JSON.stringify(guestData), headers: headers })
-        .then(res => res.json())
-        .then((results) => {
-            return results;
-        })
-        .catch((error) => { return error; })
-    return results;
-}
-
 export const checkoutGuest = async (room) => {
     let results = await fetch(
         API_SERVER_URL + '/room/' + room.room_no +

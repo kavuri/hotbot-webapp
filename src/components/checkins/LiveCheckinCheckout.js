@@ -6,12 +6,6 @@
 
 import React, { useState, useEffect } from 'react';
 import { makeStyles } from '@material-ui/core/styles';
-import Table from '@material-ui/core/Table';
-import TableBody from '@material-ui/core/TableBody';
-import TableCell from '@material-ui/core/TableCell';
-import TableContainer from '@material-ui/core/TableContainer';
-import TableHead from '@material-ui/core/TableHead';
-import TableRow from '@material-ui/core/TableRow';
 import IconButton from '@material-ui/core/IconButton';
 import DirectionsWalkRoundedIcon from '@material-ui/icons/DirectionsWalkRounded';
 import ExitToAppRoundedIcon from '@material-ui/icons/ExitToAppRounded';
@@ -30,10 +24,10 @@ import TextField from '@material-ui/core/TextField';
 import MuiPhoneNumber from 'material-ui-phone-number';
 import MUIDataTable from "mui-datatables";
 import { useSnackbar } from 'notistack';
+import moment from 'moment';
+import { concat, remove, isEqual } from 'lodash';
 
-import { concat, remove } from 'lodash';
-
-import { checkoutGuest, APICall } from '../../utils/API';
+import { APICall } from '../../utils/API';
 import { useRef } from 'react';
 
 const useStyles = makeStyles((theme) => ({
@@ -48,92 +42,6 @@ const useStyles = makeStyles((theme) => ({
     fontWeight: theme.typography.fontWeightRegular,
   },
 }));
-
-export const ConfirmationDialog = (props) => {
-  const actionFun = useRef(props.actionFun);
-  const message = useRef(props.message);
-  const [open, setOpen] = useState(true);
-  console.log('confirmationdialog:open=', open, '---', message, '---', actionFun, '+++', props)
-
-  const handleClose = () => {
-    setOpen(false);
-  }
-
-  return (
-    <Dialog
-      open={open}
-      onClose={handleClose}
-      aria-labelledby="alert-dialog-title"
-      aria-describedby="alert-dialog-description"
-    >
-      <DialogTitle id="alert-dialog-title">{message.current.header}</DialogTitle>
-      <DialogContent>
-        <DialogContentText id="alert-dialog-description">{message.current.description}</DialogContentText>
-      </DialogContent>
-      <DialogActions>
-        <Button onClick={handleClose} color="primary"> No </Button>
-        <Button onClick={actionFun.current} color="primary" autoFocus> Yes </Button>
-      </DialogActions>
-    </Dialog>
-  )
-}
-
-export const CheckoutGuest = (props) => {
-  console.log('GuestCheckout:', props);
-  const [room, setRoom] = useState(props.room);
-  const [loading, setLoading] = useState(false);
-  const [open, setOpen] = React.useState(false);
-
-  const classes = useStyles();
-  const handleClickOpen = () => {
-    setOpen(true);
-  };
-
-  const handleClose = () => {
-    setOpen(false);
-  };
-
-  useEffect(() => {
-    setRoom(props.room);
-  }, [props.room]);
-
-  const handleCheckout = async () => {
-    if (!loading) {
-      setLoading(true);
-      let result = await checkoutGuest(room);
-      setLoading(false);
-      if (result instanceof Error) {
-        // FIXME: Do something
-      } else {
-        setOpen(false);
-        props.onGuestCheckout(result);
-      }
-    }
-  }
-
-  return (
-    <div>
-      <IconButton aria-label="delete" className={classes.margin} onClick={handleClickOpen} >
-        <ExitToAppRoundedIcon fontSize="inherit" color="action" />
-      </IconButton>
-      <Dialog
-        open={open}
-        onClose={handleClose}
-        aria-labelledby="alert-dialog-title"
-        aria-describedby="alert-dialog-description"
-      >
-        <DialogTitle id="alert-dialog-title">{"Guest Checkout"}</DialogTitle>
-        <DialogContent>
-          <DialogContentText id="alert-dialog-description"> Confirm check-out of {room.checkincheckout.guestName}? </DialogContentText>
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={handleClose} color="primary"> No </Button>
-          <Button onClick={handleCheckout} color="primary" autoFocus> Yes </Button>
-        </DialogActions>
-      </Dialog>
-    </div>
-  )
-}
 
 export default (props) => {
   const classes = useStyles();
@@ -157,13 +65,10 @@ export default (props) => {
   const updateGuestName = (event) => {
     console.log('setting guest name=', event.target.value)
     setCheckinDetails({ ...checkinDetails, guestName: event.target.value });
-    // setGuestData({ guestName: event.target.value });
-    // guestData.guestName = event.target.value;
   }
 
   const updatePhoneNumber = (value) => {
     setCheckinDetails({ ...checkinDetails, guestNumber: value });
-    // guestData.guestNumber = value;
   }
 
   const removeCheckinEntry = (checkin) => {
@@ -180,32 +85,72 @@ export default (props) => {
     setFreeRooms(fr);
   }
 
-  const handleCheckin = async () => {
-    // if (!loading) {
-    // setLoading(true);
-    console.log('+++checking in guest:', checkinDetails);
+  const handleCheckin = async (e, room) => {
     let body = {
       guestName: checkinDetails.guestName,
       guestNumber: checkinDetails.guestNumber
     };
     let result = null;
     try {
-      result = await APICall('/room/' + checkinDetails.room.room_no + '/checkin', { method: 'POST', body: body, keyValues: { hotel_id: checkinDetails.room.hotel_id } });
+      result = await APICall('/room/' + room.room_no + '/checkin', { method: 'POST', body: body, keyValues: { hotel_id: room.hotel_id } });
       enqueueSnackbar('guest ' + body.guestName + ' checked in', { variant: 'success' });
       removeCheckinEntry(result);
     } catch (error) {
       enqueueSnackbar('Error checking in guest ' + body.guestName, { variant: 'error' });
     }
     setAskForConfirmation(false);
-    // setLoading(false);
-    // }
   }
 
-  const openConfirmationDialog = (event, room) => {
-    console.log('------opening confirmation dialog:', event.target.value, room);
-    setCheckinDetails({ ...checkinDetails, room: room });
-    setAskForConfirmation(true);
+  const handleCheckout = async (e, room) => {
+    let result = null;
+    try {
+      result = await APICall('/room/' + room.room_no + '/checkout', { method: 'POST', keyValues: { hotel_id: room.hotel_id } });
+      enqueueSnackbar('guest ' + room.checkincheckout.guestName + ' checked out from room ' + room.room_no, { variant: 'success' });
+      removeCheckoutEntry(result);
+    } catch (error) {
+      enqueueSnackbar('Error checking out guest ' + room.checkincheckout.guestName, { variant: 'error' });
+    }
+    setAskForConfirmation(false);
   }
+
+  const ConfirmationDialog = (props) => {
+    const actionFun = useRef(props.actionFun);
+    const message = useRef(props.message);
+    const dialogType = useRef(props.dialogType);
+    const [open, setOpen] = useState(false);
+
+    const handleClose = () => {
+      setOpen(false);
+    }
+
+    return (
+      <div>
+        {(dialogType.current == 'checkin') &&
+          <IconButton aria-label="delete" className={classes.margin} onClick={() => setOpen(true)} >
+            <DirectionsWalkRoundedIcon fontSize="inherit" color="secondary" />
+          </IconButton>}
+        {(dialogType.current == 'checkout') &&
+          <IconButton aria-label="checkout" className={classes.margin} onClick={() => setOpen(true)} >
+            <ExitToAppRoundedIcon fontSize="inherit" color="secondary" />
+          </IconButton>}
+        <Dialog
+          open={open}
+          onClose={handleClose}
+          aria-labelledby="alert-dialog-title"
+          aria-describedby="alert-dialog-description"
+        >
+          <DialogTitle id="alert-dialog-title">{message.current.header}</DialogTitle>
+          <DialogContent>
+            <DialogContentText id="alert-dialog-description">{message.current.description}</DialogContentText>
+          </DialogContent>
+          <DialogActions>
+            <Button onClick={handleClose} color="primary"> No </Button>
+            <Button onClick={actionFun.current} color="primary" autoFocus> Yes </Button>
+          </DialogActions>
+        </Dialog>
+      </div>
+    )
+  };
 
   const freeRoomColumns = [
     {
@@ -269,21 +214,88 @@ export default (props) => {
         sort: true,
         searchable: true,
         customBodyRender: (value, tableMeta, updateValue) => {
-          console.log('^^^^value=', value, ',tableMeta=', tableMeta);
           return (
-            <div>
-              <IconButton aria-label="delete" className={classes.margin} onClick={e => openConfirmationDialog(e, freeRooms[tableMeta.rowIndex])} >
-                <DirectionsWalkRoundedIcon fontSize="inherit" color="secondary" />
-              </IconButton>
-              {askForConfirmation && <ConfirmationDialog key={new Date()} room={freeRooms[tableMeta.rowIndex]} actionFun={handleCheckin} message={{ header: 'Check-in confirmation', description: 'Check-in guest ' + checkinDetails.guestName }} />}
-            </div>
+            <ConfirmationDialog
+              dialogType='checkout'
+              actionFun={(e) => handleCheckin(e, freeRooms[tableMeta.rowIndex])}
+              message={{ header: 'Check-in confirmation', description: 'Check-in guest "' + checkinDetails.guestName + '" to room "' + freeRooms[tableMeta.rowIndex].room_no + '"?' }}
+            />
           );
         }
       }
     },
   ];
 
-  const freeRoomOptions = {
+  const allotedRoomColumns = [
+    {
+      name: "_id",
+      options: {
+        display: false,
+        filter: false
+      }
+    },
+    {
+      name: "room_no",
+      label: "Room",
+      options: {
+        filter: true,
+        sort: true,
+        searchable: true
+      }
+    },
+    {
+      name: "checkincheckout.guestName",
+      label: "Guest Name",
+      options: {
+        filter: false,
+        sort: false,
+        searchable: true,
+      }
+    },
+    {
+      name: "checkincheckout.guestNumber",
+      label: "Guest Number",
+      options: {
+        filter: false,
+        sort: false,
+        searchable: true,
+      }
+    },
+    {
+      name: "checkincheckout.checkin",
+      label: "Checkin Time",
+      options: {
+        filter: false,
+        sort: true,
+        searchable: false,
+        customBodyRender: (value, tablbeMeta, updateValue) => {
+          return (
+            <span>{moment(value).format('MMMM Do YYYY, h:mm a')}</span>
+          )
+        }
+      }
+    },
+    {
+      name: "checkout",
+      label: "Check Out",
+      options: {
+        filter: true,
+        sort: true,
+        searchable: true,
+        customBodyRender: (value, tableMeta, updateValue) => {
+          return (
+            <ConfirmationDialog
+              dialogType='checkout'
+              actionFun={(e) => handleCheckout(e, allotedRooms[tableMeta.rowIndex])}
+              message={{ header: 'Check-out confirmation', description: 'Check-out guest "' + allotedRooms[tableMeta.rowIndex].checkincheckout.guestName + '" from room "' + allotedRooms[tableMeta.rowIndex].room_no + '"?' }}
+            />
+          );
+        }
+      }
+    },
+  ];
+
+  const options = {
     filter: true,
     selectableRows: false,
     filterType: 'checkbox',
@@ -308,55 +320,28 @@ export default (props) => {
           {/* <Typography className={classes.heading}>Check-in</Typography> */}
         </ExpansionPanelSummary>
         <ExpansionPanelDetails>
-          <div>
-            <MUIDataTable
-              title={<Typography variant="body2"> Check-in Guests </Typography>}
-              data={freeRooms}
-              columns={freeRoomColumns}
-              options={freeRoomOptions}
-            /></div>
+          <MUIDataTable
+            title={<Typography variant="body2"> Check-in Guests </Typography>}
+            data={freeRooms}
+            columns={freeRoomColumns}
+            options={options}
+          />
         </ExpansionPanelDetails>
       </ExpansionPanel>
 
-      {/* 
-      <ExpansionPanel defaultExpanded>
-        <ExpansionPanelSummary
-          expandIcon={<ExpandMoreIcon />}
-          aria-controls="panel1a-content"
-          id="panel1a-header"
-        >
-          <Typography className={classes.heading}>Check-Out</Typography>
+      <ExpansionPanel defaultExpanded >
+        <ExpansionPanelSummary expandIcon={<ExpandMoreIcon />} aria-controls="panel1a-content" id="panel1a-header" >
+          {/* <Typography className={classes.heading}>Check-in</Typography> */}
         </ExpansionPanelSummary>
         <ExpansionPanelDetails>
-          <TableContainer >
-            <Table className={classes.table} size="small" aria-label="a dense table">
-              <TableHead>
-                <TableRow>
-                  <TableCell>Room</TableCell>
-                  <TableCell align="right">Guest Name</TableCell>
-                  <TableCell align="right">Guest Phone</TableCell>
-                  <TableCell align="right">Checked-in Date</TableCell>
-                  <TableCell align="right">Checkout</TableCell>
-                </TableRow>
-              </TableHead>
-              <TableBody>
-                {allotedRooms.map((row) => (
-                  <TableRow key={row.room_no}>
-                    <TableCell component="th" scope="row">
-                      {row.room_no}
-                    </TableCell>
-                    <TableCell align="right">{row.checkincheckout.guestName}</TableCell>
-                    <TableCell align="right">{row.checkincheckout.guestNumber}</TableCell>
-                    <TableCell align="right">{new Date(row.checkincheckout.checkin).toDateString()}, {new Date(row.checkincheckout.checkin).toLocaleTimeString('en-US', { hour12: true })}</TableCell>
-                    <TableCell align="right"><CheckoutGuest room={row} onGuestCheckout={removeCheckoutEntry} /></TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </TableContainer>
+          <MUIDataTable
+            title={<Typography variant="body2"> Check-out Guests </Typography>}
+            data={allotedRooms}
+            columns={allotedRoomColumns}
+            options={options}
+          />
         </ExpansionPanelDetails>
-      </ExpansionPanel> */}
-
+      </ExpansionPanel>
     </div>
   );
 }
