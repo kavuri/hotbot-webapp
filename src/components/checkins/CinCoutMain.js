@@ -16,6 +16,7 @@ import { isEqual, isEmpty, has, concat, isUndefined, isNull } from 'lodash';
 import { APICall } from '../../utils/API';
 import LiveCheckinCheckout from './LiveCheckinCheckout';
 import { KamAppContext } from '../KamAppContext';
+import HistoryCheckinCheckout from './HistoryCheckinCheckout';
 
 const useStyles = makeStyles(theme => ({
   root: {
@@ -84,7 +85,7 @@ export default () => {
           <Tab icon={<HistoryRoundedIcon fontSize="large" color="primary" />} label="HISTORY" />
         </Tabs>
         {isEqual(value, 0) && <LiveCheckinCheckout freeRooms={freeRooms} allotedRooms={allotedRooms} />}
-        {/* {isEqual(value, 1) && <Checkout allotedRooms={checkedIn} />} */}
+        {isEqual(value, 1) && <HistoryCheckinCheckout />}
       </Paper>
     </div>
   );
