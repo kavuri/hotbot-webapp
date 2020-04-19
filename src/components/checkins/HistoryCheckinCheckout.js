@@ -41,7 +41,7 @@ export default (props) => {
   const allCheckinCheckouts = async () => {
     let result = null;
     try {
-      result = await APICall('/room/checkincheckouts', { method: 'GET', keyValues: { hotel_id: "1" } });
+      result = await APICall('/checkincheckout', { method: 'GET', keyValues: { hotel_id: "1" } });
       setCheckincheckouts(result);
     } catch (error) {
       enqueueSnackbar('Error fetching data ', { variant: 'error' });
