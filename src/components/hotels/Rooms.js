@@ -68,7 +68,7 @@ export default (props) => {
             let rooms = null;
             try {
                 rooms = await APICall('/room', { method: 'GET', keyValues: { hotel_id: hotel.hotel_id } });
-                setTableState({ ...tableState, data: rooms.data, count: rooms.total, isLoading: false });
+                setTableState({ ...tableState, data: rooms, count: rooms.total, isLoading: false });
             } catch (error) {
                 setTableState({ ...tableState, isLoading: false });
                 enqueueSnackbar('Unable to get rooms', { variant: 'error' });
