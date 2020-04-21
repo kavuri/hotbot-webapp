@@ -29,7 +29,6 @@ export default (props) => {
   const [checkincheckouts, setCheckincheckouts] = useState([]);
 
   const { APICall } = useKamAppCtx();
-
   const { enqueueSnackbar } = useSnackbar();
 
   useEffect(() => {

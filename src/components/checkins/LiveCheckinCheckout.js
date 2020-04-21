@@ -24,9 +24,10 @@ import MuiPhoneNumber from 'material-ui-phone-number';
 import MUIDataTable from "mui-datatables";
 import { useSnackbar } from 'notistack';
 import moment from 'moment';
-import { concat, remove, isEqual } from 'lodash';
+import { concat, remove } from 'lodash';
 
-import { APICall } from '../../utils/API';
+import { useKamAppCtx } from '../KamAppContext';
+
 import { useRef } from 'react';
 
 const useStyles = makeStyles((theme) => ({
@@ -53,6 +54,7 @@ export default (props) => {
     guestNumber: ''
   });
 
+  const { APICall } = useKamAppCtx();
   const { enqueueSnackbar } = useSnackbar();
 
   useEffect(() => {

@@ -10,11 +10,10 @@ import Tabs from '@material-ui/core/Tabs';
 import Tab from '@material-ui/core/Tab';
 import DirectionsWalkRoundedIcon from '@material-ui/icons/DirectionsWalkRounded';
 import HistoryRoundedIcon from '@material-ui/icons/HistoryRounded';
-import { isEqual, isEmpty, has, concat, isUndefined, isNull } from 'lodash';
+import { isEqual, isEmpty, isNull } from 'lodash';
 
-import { APICall } from '../../utils/API';
 import LiveCheckinCheckout from './LiveCheckinCheckout';
-import { KamAppContext } from '../KamAppContext';
+import { useKamAppCtx } from '../KamAppContext';
 import HistoryCheckinCheckout from './HistoryCheckinCheckout';
 
 const useStyles = makeStyles(theme => ({
@@ -34,25 +33,22 @@ export default () => {
   const [allotedRooms, setAllotedRooms] = useState([]);
   const [loading, setLoading] = useState(false);
   const classes = useStyles();
-  const ctx = useContext(KamAppContext);
+  const { APICall } = useKamAppCtx();
 
   useEffect(() => {
     getRooms();
-  }, [ctx.hotel]);
+  }, [rooms]);
 
   const handleChange = (event, newValue) => {
     setValue(newValue);
   };
 
   const getRooms = async () => {
-    console.log('++getRooms:hotel=', ctx.hotel);
-    if (isEmpty(ctx.hotel)) return;
-
     if (!loading) {
       setLoading(true);
       let results = [];
       try {
-        results = await APICall('/room', { method: 'GET', keyValues: { hotel_id: ctx.hotel.id } });
+        results = await APICall('/room', { method: 'GET' });
       } catch (error) {
         console.log('error in getting hotel rooms:', error);
       }
