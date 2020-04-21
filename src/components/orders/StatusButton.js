@@ -19,8 +19,8 @@ import CheckCircleRoundedIcon from '@material-ui/icons/CheckCircleRounded';
 import Chip from '@material-ui/core/Chip';
 import { isEqual, isUndefined } from 'lodash';
 
-import { APICall } from '../../utils/API';
-
+import { useSnackbar } from 'notistack';
+import { useKamAppCtx } from '../KamAppContext';
 // We can inject some CSS into the DOM.
 var useStyles = makeStyles({
     button: {
@@ -76,7 +76,9 @@ export default function StatusButton(props) {
     const [open, setOpen] = useState(false);
     const [data, setData] = useState(props.data);
     const [chip, setChip] = useState(props.chip);   // This is for display in History. In LiveOrders, display is a button
-    // const { enqueueSnackbar } = useSnackbar();
+    const { enqueueSnackbar } = useSnackbar();
+    const { APICall } = useKamAppCtx();
+
     useEffect(() => {
         setStatus(isUndefined(props.status) ? '' : props.status);
         setData(props.data);
@@ -111,8 +113,7 @@ export default function StatusButton(props) {
             order = await APICall('/order/' + data[0], { method: 'PATCH', body: { status: value } });
             console.log('%%% updated order=', order);
         } catch (error) {
-            // enqueueSnackbar('Error changing status. Try again', { variant: 'error' });
-            //FIXME: Should something be done?
+            enqueueSnackbar('Error changing status. Try again', { variant: 'error' });
         }
         setStatus(value);
         props.onStatusUpdated(value);

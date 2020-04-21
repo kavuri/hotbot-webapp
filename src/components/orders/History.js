@@ -18,32 +18,32 @@ import { KamAppContext } from '../KamAppContext';
 import moment from 'moment';
 import { useSnackbar } from 'notistack';
 
+import { useKamAppCtx } from '../KamAppContext';
 import StatusButton from './StatusButton';
 
 export default (props) => {
-    const ctx = useContext(KamAppContext);
-    const [orders, setOrders] = useState(ctx.orders);
+    const { getOrders, orders } = useKamAppCtx();
     const { enqueueSnackbar } = useSnackbar();
     const [selectedDate, setSelectedDate] = useState(moment(moment().subtract(1, 'day')));
     useEffect(() => {
-        console.log('---+++inUseEffect:', ctx.orders);
-        ctx.getOrders(selectedDate);
-    }, [orders]);
+        console.log('---+++inUseEffect:', orders);
+        getOrders(selectedDate);
+    }, []);
 
     const handleDateChange = date => {
-        console.log('-----Date change called=', ctx);
+        console.log('-----Date change called=');
         let dtClone = selectedDate.clone();
         dtClone = date;
         setSelectedDate(dtClone);
         // console.log('+++DATE SELECTED+++', selectedDate);
-        ctx.getOrders(date);
+        getOrders(date);
     };
 
     const moveRight = () => {
         let d = moment(selectedDate).add(1, 'day');
         setSelectedDate(d);
         // console.log('+++RIGHT+++', selectedDate);
-        ctx.getOrders(d);
+        getOrders(d);
     };
 
     const moveLeft = () => {
@@ -51,7 +51,7 @@ export default (props) => {
         let d = moment(selectedDate).subtract(1, 'day');
         setSelectedDate(d);
         console.log('+++LEFT+++', selectedDate, d);
-        ctx.getOrders(d);
+        getOrders(d);
     }
 
     const columns = [
@@ -216,7 +216,7 @@ export default (props) => {
                 title={<Typography variant="body2">
                     All Orders
                 </Typography>}
-                data={remapFields(ctx.orders.data.allOnDate)}
+                data={remapFields(orders.data.allOnDate)}
                 columns={columns}
                 options={options}
             />

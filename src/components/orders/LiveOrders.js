@@ -14,17 +14,11 @@ import StatusButton from './StatusButton';
 import { cyan } from '@material-ui/core/colors';
 import Chip from '@material-ui/core/Chip';
 
-import { KamAppContext } from '../KamAppContext';
+import { useKamAppCtx } from '../KamAppContext';
 
 export default (props) => {
-    const ctx = useContext(KamAppContext);
-    const [orders, setOrders] = useState(ctx.orders);
-
+    const { getOrders, orders } = useKamAppCtx();
     const { enqueueSnackbar } = useSnackbar();
-
-    useEffect(() => {
-        ctx.getOrders(moment());
-    }, [orders]);
 
     const columns = [
         {
@@ -107,17 +101,15 @@ export default (props) => {
                     // console.log('^^^^value=', value, ',tableMeta=', tableMeta);
                     return (
                         <StatusButton status={value} chip={false} data={tableMeta.rowData} onStatusUpdated={async (newStatus) => {
-                            {/* console.log('###***###neStatus=', newStatus, tableMeta); */}
-                            let idx = findIndex(ctx.orders.data.allOpen, { _id: tableMeta.rowData[0] });
-                            {/* console.log('---idx=', idx, '---', ctx.orders.data.allOpen, ',---', tableMeta.rowData[0]); */}
+                            let idx = findIndex(orders.data.allOpen, { _id: tableMeta.rowData[0] });
                             if (!isEqual(idx, -1)) {
-                                console.log('updating ctx.orders')
-                                ctx.orders.data.allOpen[idx].curr_status.status = newStatus;
+                                console.log('updating orders')
+                                orders.data.allOpen[idx].curr_status.status = newStatus;
                             }
-                            idx = findIndex(ctx.orders.data.allOnDate, { _id: tableMeta.rowData[0] });
+                            idx = findIndex(orders.data.allOnDate, { _id: tableMeta.rowData[0] });
                             console.log('+++idx=', idx);
                             if (!isEqual(idx, -1)) {
-                                ctx.orders.data.allOnDate[idx].curr_status.status = newStatus;
+                                orders.data.allOnDate[idx].curr_status.status = newStatus;
                             }
                             updateValue(newStatus);
                         }
@@ -182,7 +174,7 @@ export default (props) => {
                     {/* All Orders */}
                 </Typography>
                 }
-                data={remapFields(unionWith(ctx.orders.data.allOnDate, ctx.orders.data.allOpen, isEqual))}
+                data={remapFields(unionWith(orders.data.allOnDate, orders.data.allOpen, isEqual))}
                 columns={columns}
                 options={options}
             />
