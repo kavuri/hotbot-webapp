@@ -13,26 +13,21 @@ import { useAuth0 } from "../react-auth0-spa";
 export const KamAppContext = React.createContext();
 export const useKamAppCtx = () => useContext(KamAppContext);
 export const KamAppProvider = ({ children }) => {
-    const [loading, setLoading] = useState(true);
     const [orders, setOrders] = useState({
         openOrderCount: 0,
         reqDate: new Date(),  //Get today's orders by default
         data: []
     });
-    const [hotel, setHotel] = useState({});
     const [token, setToken] = useState(null);
     const [incomingOrder, setIncomingOrder] = useState({});
-    const { user, isAuthenticated, getTokenSilently } = useAuth0();
+    const { user, getTokenSilently } = useAuth0();
 
     useEffect(() => {
-        console.log('USE Effect invoked. Getting orders:', hotel);
         console.log('--dumping useAuth:', user, '--useAuth:')
-        // console.log('^^^Checking auth:', user, isAuthenticated);
         if (!isNull(user) && !isUndefined(user)) {
             getToken();
         }
-        setHotel(hotel);
-        getOrders(orders.reqDate, hotel);
+        getOrders(orders.reqDate);
     }, [user, token]);
 
     async function getToken() {
@@ -41,7 +36,7 @@ export const KamAppProvider = ({ children }) => {
     }
 
     useEffect(() => {
-        const listener = orderListener();
+        const listener = orderListener(token);
 
         listener.onopen = () => console.log('---Connection opened---');
         listener.onerror = () => console.log('---Event source connection error--- ');
@@ -107,17 +102,14 @@ export const KamAppProvider = ({ children }) => {
     /**
      * Gets all orders on the requested date
      * @param {*} reqDate 
-     * @param {*} hotel 
      */
-    const getOrders = async (reqDate) => {  //FIXME: Remove hotel once auth is implemented
-        console.log('++Getting all orders for ', reqDate, orders, hotel);
-        // setHotel(hotel);
+    const getOrders = async (reqDate) => {
+        console.log('++Getting all orders for ', reqDate, orders);
         let res = null;
         try {
             console.log('before API call:', reqDate);
-            res = await APICall('/order', { method: 'GET', keyValues: { hotel_id: hotel.id, reqDate: moment(reqDate).toISOString() } });
+            res = await APICall('/order', { method: 'GET', keyValues: { reqDate: moment(reqDate).toISOString() } });
             console.log('after API call:', res);
-            // orders = await APICall('/order', { method: 'GET', keyValues: { hotel_id: hotel.id, live: true, selectedDate: new Date().toISOString() } });
             setOrders({ data: res, reqDate: reqDate, openOrderCount: res.allOpen.length });
             console.log('^^^', res);
         } catch (error) {
@@ -131,8 +123,6 @@ export const KamAppProvider = ({ children }) => {
             value={{
                 orders,
                 getOrders,
-                setHotel,
-                hotel,
                 APICall
             }}
         >

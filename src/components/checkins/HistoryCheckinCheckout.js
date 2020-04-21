@@ -9,11 +9,7 @@ import Typography from '@material-ui/core/Typography';
 import MUIDataTable from "mui-datatables";
 import { useSnackbar } from 'notistack';
 import moment from 'moment';
-import { concat, remove, isEqual } from 'lodash';
 import { useKamAppCtx } from '../KamAppContext';
-
-// import { APICall } from '../../utils/API';
-import { useRef } from 'react';
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -43,7 +39,7 @@ export default (props) => {
   const allCheckinCheckouts = async () => {
     let result = null;
     try {
-      result = await APICall('/checkincheckout', { method: 'GET', keyValues: { hotel_id: "1" } });
+      result = await APICall('/checkincheckout', { method: 'GET' });
       setCheckincheckouts(result);
     } catch (error) {
       enqueueSnackbar('Error fetching data ', { variant: 'error' });
