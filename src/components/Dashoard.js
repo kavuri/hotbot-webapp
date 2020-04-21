@@ -31,6 +31,7 @@ import HotelSettings from './HotelSettings';
 import AdminMenu from './AdminMenu';
 import ConsumerMenu from './ConsumerMenu';
 import Default from './Default';
+import Profile from './Profile';
 import HotelMgmt from './hotels/HotelMgmt';
 import Settings from './settings/Settings';
 
@@ -156,7 +157,7 @@ export default function Dashboard() {
     'settings': Settings,
     'deviceMgmt': Devices,
     'hotels': HotelMgmt,
-    'profile': 'Profile'
+    'profile': Profile
   };
   const checkUserRole = () => {
     console.log('checking user role...')
@@ -165,7 +166,7 @@ export default function Dashboard() {
     }
     console.log('user is not null', role)
     if ((isNull(role) || isUndefined(role)) && !isUndefined(user)) {
-      setRole(user.app_metadata.role);
+      // setRole(user.app_metadata.role);
     }
   }
   checkUserRole();  // Checks the user role on page open

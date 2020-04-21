@@ -12,9 +12,16 @@ import Badge from '@material-ui/core/Badge';
 import DashboardIcon from '@material-ui/icons/Dashboard';
 import ShoppingCartIcon from '@material-ui/icons/ShoppingCart';
 import PeopleAltRoundedIcon from '@material-ui/icons/PeopleAltRounded';
+import PeopleIcon from '@material-ui/icons/People';
+import ExitToAppIcon from '@material-ui/icons/ExitToApp';
+
+import { Link } from "react-router-dom";
+import { useAuth0 } from "../react-auth0-spa";
+
 import { KamAppContext } from './KamAppContext';
 
 export default function ConsumerMenu(props) {
+    const { logout } = useAuth0();
 
     const ctx = useContext(KamAppContext);
 
@@ -24,6 +31,14 @@ export default function ConsumerMenu(props) {
 
     const handleCheckinCheckoutMgmtOptionClick = () => {
         props.optionSelected('checkinCheckout');
+    }
+
+    const handleProfileOptionClick = () => {
+        props.optionSelected('profile');
+    }
+
+    const handleLogoutOptionClick = () => {
+        props.optionSelected('logout');
     }
 
     return (
@@ -52,6 +67,19 @@ export default function ConsumerMenu(props) {
                     <PeopleAltRoundedIcon />
                 </ListItemIcon>
                 <ListItemText primary="Checkin-Checkout" onClick={handleCheckinCheckoutMgmtOptionClick} />
+            </ListItem>
+            <ListItem component={Link} to="/profile" button>
+                <ListItemIcon>
+                    <PeopleIcon />
+                </ListItemIcon>
+                <ListItemText primary="Profile" onClick={handleProfileOptionClick} />
+            </ListItem>
+
+            <ListItem button onClick={() => logout()}>
+                <ListItemIcon>
+                    <ExitToAppIcon />
+                </ListItemIcon>
+                <ListItemText primary="Logout" onClick={handleLogoutOptionClick} />
             </ListItem>
         </div>
     )
