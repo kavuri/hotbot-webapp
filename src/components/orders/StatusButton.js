@@ -4,7 +4,6 @@
  */
 
 import React, { useState, useEffect } from 'react';
-import PropTypes from 'prop-types';
 import clsx from 'clsx';
 import Button from '@material-ui/core/Button';
 import { makeStyles } from '@material-ui/core/styles';
@@ -19,7 +18,6 @@ import FormControlLabel from '@material-ui/core/FormControlLabel';
 import CheckCircleRoundedIcon from '@material-ui/icons/CheckCircleRounded';
 import Chip from '@material-ui/core/Chip';
 import { isEqual, isUndefined } from 'lodash';
-// import { useSnackbar } from 'notistack';
 
 import { APICall } from '../../utils/API';
 

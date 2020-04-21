@@ -2,7 +2,6 @@
  * Unauthorized copying of this file, via any medium is strictly prohibited
  * Proprietary and confidential
  */
-'use strict';
 
 import React, { useState, useEffect } from 'react';
 import Typography from '@material-ui/core/Typography';

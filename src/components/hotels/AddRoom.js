@@ -2,13 +2,12 @@
  * Unauthorized copying of this file, via any medium is strictly prohibited
  * Proprietary and confidential
  */
-'use strict';
 
 import React, { useState } from 'react';
 import Dialog from '@material-ui/core/Dialog';
 import DialogContent from '@material-ui/core/DialogContent';
 import { Form, Field } from 'react-final-form';
-import { TextField, Select } from 'final-form-material-ui';
+import { TextField } from 'final-form-material-ui';
 import DialogActions from '@material-ui/core/DialogActions';
 import {
     Typography,

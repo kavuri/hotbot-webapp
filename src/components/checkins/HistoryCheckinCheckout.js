@@ -2,7 +2,6 @@
  * Unauthorized copying of this file, via any medium is strictly prohibited
  * Proprietary and confidential
  */
-'use strict';
 
 import React, { useState, useEffect } from 'react';
 import { makeStyles } from '@material-ui/core/styles';
@@ -11,8 +10,9 @@ import MUIDataTable from "mui-datatables";
 import { useSnackbar } from 'notistack';
 import moment from 'moment';
 import { concat, remove, isEqual } from 'lodash';
+import { useKamAppCtx } from '../KamAppContext';
 
-import { APICall } from '../../utils/API';
+// import { APICall } from '../../utils/API';
 import { useRef } from 'react';
 
 const useStyles = makeStyles((theme) => ({
@@ -31,6 +31,8 @@ const useStyles = makeStyles((theme) => ({
 export default (props) => {
   const classes = useStyles();
   const [checkincheckouts, setCheckincheckouts] = useState([]);
+
+  const { APICall } = useKamAppCtx();
 
   const { enqueueSnackbar } = useSnackbar();
 

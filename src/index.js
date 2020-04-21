@@ -14,6 +14,7 @@ import * as serviceWorker from "./serviceWorker";
 import { Auth0Provider } from "./react-auth0-spa";
 import config from "./auth_config.json";
 import history from "./utils/history";
+import { KamAppProvider } from "./components/KamAppContext";
 
 
 // A function that routes the user to the right place
@@ -37,7 +38,9 @@ ReactDOM.render(
         audience={config.audience}
         onRedirectCallback={onRedirectCallback}
       >
-        <App />
+        <KamAppProvider>
+          <App />
+        </KamAppProvider>
       </Auth0Provider>,
     </SnackbarProvider>
   </ThemeProvider>,

@@ -3,13 +3,15 @@
  * Proprietary and confidential
  */
 
-import React, { useState, useEffect } from "react";
-import { APICall, orderListener } from '../utils/API';
-import { isEqual, isEmpty, findIndex, countBy } from 'lodash';
+import React, { useState, useEffect, useContext } from "react";
+import { orderListener } from '../utils/API';
+import { API_SERVER_URL } from '../Config';
+import { isEqual, isEmpty, findIndex, isNull, isUndefined, join } from 'lodash';
 import moment from "moment";
 
+import { useAuth0 } from "../react-auth0-spa";
 export const KamAppContext = React.createContext();
-
+export const useKamAppCtx = () => useContext(KamAppContext);
 export const KamAppProvider = ({ children }) => {
     const [loading, setLoading] = useState(true);
     const [orders, setOrders] = useState({
@@ -18,13 +20,25 @@ export const KamAppProvider = ({ children }) => {
         data: []
     });
     const [hotel, setHotel] = useState({});
+    const [token, setToken] = useState(null);
     const [incomingOrder, setIncomingOrder] = useState({});
+    const { user, isAuthenticated, getTokenSilently } = useAuth0();
 
     useEffect(() => {
         console.log('USE Effect invoked. Getting orders:', hotel);
+        console.log('--dumping useAuth:', user, '--useAuth:')
+        // console.log('^^^Checking auth:', user, isAuthenticated);
+        if (!isNull(user) && !isUndefined(user)) {
+            getToken();
+        }
         setHotel(hotel);
         getOrders(orders.reqDate, hotel);
-    }, [hotel]);
+    }, [user, token]);
+
+    async function getToken() {
+        let tkn = await getTokenSilently();
+        setToken(tkn);
+    }
 
     useEffect(() => {
         const listener = orderListener();
@@ -67,6 +81,30 @@ export const KamAppProvider = ({ children }) => {
     }, [incomingOrder]);
 
     /**
+     * One method to rule them all
+     * @param {*} endpoint 
+     * @param {*} keyValues, e.g.: [{'hotel_id': '1'}, {'group_id':'2'}]
+     * @param {*} method 
+     * @param {*} body 
+     */
+    const APICall = async (endpoint, options) => {
+        console.log('+++endpoint=', endpoint, ', options=', options);
+        const headers = { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token };
+        let query = !isUndefined(options.keyValues) ? join(Object.keys(options.keyValues).map(key => { let s = key + '=' + options.keyValues[key]; return s; }), '&') : undefined;
+        console.log('APICall query=:', query);
+        let URL = API_SERVER_URL + endpoint + (!isUndefined(query) ? '?' + query : '');
+        let results = await fetch(URL, { method: options.method, body: JSON.stringify(options.body), headers: headers })
+            .then(response => {
+                if (!response.ok) throw response;
+                return response.json();
+            })
+            .then(results => { return results; })
+            .catch((error) => { throw error; })
+
+        return results;
+    }
+
+    /**
      * Gets all orders on the requested date
      * @param {*} reqDate 
      * @param {*} hotel 
@@ -94,7 +132,8 @@ export const KamAppProvider = ({ children }) => {
                 orders,
                 getOrders,
                 setHotel,
-                hotel
+                hotel,
+                APICall
             }}
         >
             {children}

@@ -25,7 +25,6 @@ export default function App() {
 
   return (
     <div>
-      <KamAppProvider>
         <Typography variant="h4" component="h1" gutterBottom>
         </Typography>
         <Router history={history}>
@@ -40,7 +39,6 @@ export default function App() {
             <PrivateRoute path="/testorders" component={TestOrders} />
           </Switch>
         </Router>
-      </KamAppProvider>
     </div>
   );
 };

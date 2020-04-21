@@ -1,3 +1,8 @@
+/* Copyright (C) Kamamishu Pvt. Ltd. - All Rights Reserved
+ * Unauthorized copying of this file, via any medium is strictly prohibited
+ * Proprietary and confidential
+ */
+
 import React, { useState, useEffect } from 'react';
 import { makeStyles } from '@material-ui/core/styles';
 import InputLabel from '@material-ui/core/InputLabel';
@@ -5,7 +10,7 @@ import MenuItem from '@material-ui/core/MenuItem';
 import FormControl from '@material-ui/core/FormControl';
 import Select from '@material-ui/core/Select';
 
-import { isEmpty, isUndefined, isNull } from 'lodash';
+import { isEmpty, isUndefined, } from 'lodash';
 
 const useStyles = makeStyles(theme => ({
     formControl: {

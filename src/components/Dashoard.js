@@ -2,7 +2,6 @@
  * Unauthorized copying of this file, via any medium is strictly prohibited
  * Proprietary and confidential
  */
-'use strict';
 
 import React, { useContext } from 'react';
 import clsx from 'clsx';
@@ -28,7 +27,6 @@ import { useSnackbar } from 'notistack';
 import Orders from './orders/Orders';
 import Devices from './devices/Devices';
 import HotelSettings from './HotelSettings';
-import AdminMenu from './AdminMenu';
 import ConsumerMenu from './ConsumerMenu';
 import Default from './Default';
 import Profile from './Profile';

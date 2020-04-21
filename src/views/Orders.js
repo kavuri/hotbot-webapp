@@ -18,25 +18,25 @@ const ExternalApi = () => {
   const callApi = async () => {
     try {
       const token = await getTokenSilently();
-console.log('token=',token, user)
+      console.log('token=', token, user)
 
       if (!listening) {
-         const events = new EventSource("http://localhost:3000/api/v1/order/listen?token="+token);
+        const events = new EventSource("http://localhost:3000/api/v1/order/listen?token=" + token);
 
-         var responseData;
-         events.onmessage = (event) => {
-            console.log('got data=', event);
-            responseData = JSON.parse(event.data);
-            //setNests((nests) => nests.concat(responseData));
-         }
-         setListening(true);
+        var responseData;
+        events.onmessage = (event) => {
+          console.log('got data=', event);
+          responseData = JSON.parse(event.data);
+          //setNests((nests) => nests.concat(responseData));
+        }
+        setListening(true);
       }
       //setListening(true);
 
       setShowResult(true);
       setApiMessage(responseData);
     } catch (error) {
-console.log('error=',error);
+      console.log('error=', error);
       console.error(error);
     }
   };

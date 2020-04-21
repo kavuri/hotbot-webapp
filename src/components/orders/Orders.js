@@ -2,7 +2,6 @@
  * Unauthorized copying of this file, via any medium is strictly prohibited
  * Proprietary and confidential
  */
-'use strict';
 
 import React, { useState, useEffect } from 'react';
 import { makeStyles } from '@material-ui/core/styles';
@@ -12,9 +11,7 @@ import Tab from '@material-ui/core/Tab';
 import ShoppingCartRoundedIcon from '@material-ui/icons/ShoppingCartRounded';
 import HistoryRoundedIcon from '@material-ui/icons/HistoryRounded';
 import { isEqual } from 'lodash';
-import { useSnackbar } from 'notistack';
 
-import { APICall } from '../../utils/API';
 import LiveOrders from './LiveOrders';
 import History from './History';
 

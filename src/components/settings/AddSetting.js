@@ -2,12 +2,11 @@
  * Unauthorized copying of this file, via any medium is strictly prohibited
  * Proprietary and confidential
  */
-'use strict';
 
 import React, { useState } from 'react';
 import {
-    RadioGroup, Radio, FormControlLabel, FormControl, FormLabel, Grid, Paper, Checkbox,
-    Dialog, Typography, Button, CssBaseline, FormGroup, IconButton
+    RadioGroup, Radio, FormControlLabel, FormControl, FormLabel, Grid, Paper, 
+    Dialog, Typography, Button, CssBaseline, IconButton
 } from '@material-ui/core/';
 
 import DialogContent from '@material-ui/core/DialogContent';
@@ -33,10 +32,6 @@ const useStyles = makeStyles((theme) => ({
         margin: theme.spacing(2, 0),
     },
 }));
-
-const handleHasCountChange = () => {
-
-}
 
 export const FacilitySettings = (props) => {
     const [edit, setEdit] = useState(props.edit);
