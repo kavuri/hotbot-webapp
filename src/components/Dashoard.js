@@ -35,10 +35,7 @@ import Profile from './Profile';
 import HotelMgmt from './hotels/HotelMgmt';
 import Settings from './settings/Settings';
 
-import Selector from './Selector';
 import { useAuth0 } from "../react-auth0-spa";
-import { APICall } from '../utils/API';
-import { KamAppContext } from './KamAppContext';
 import CinCoutMain from './checkins/CinCoutMain';
 
 function Copyright() {
@@ -138,16 +135,9 @@ export default function Dashboard() {
   const classes = useStyles();
   const [open, setOpen] = React.useState(true);
   const [role, setRole] = React.useState(null);
-  const [loading, setLoading] = React.useState(false);
   const [ComponentToRender, setComponentToRender] = React.useState(Default);
-  const [hotels, setHotels] = React.useState([]);
-
-  const ctx = useContext(KamAppContext);
-
-  const { enqueueSnackbar } = useSnackbar();
 
   React.useEffect(() => {
-    loadHotels();
   }, []);
 
   const menuComponentMap = {
@@ -198,26 +188,6 @@ export default function Dashboard() {
     }
   }
 
-  const loadHotels = async () => {
-    if (!loading) {
-      setLoading(true);
-      let results = undefined, res;
-      try {
-        results = await APICall('/hotel', { method: 'GET' });
-        setLoading(false);
-        res = results.data.map((h) => { return { name: h.name, id: h.hotel_id, _id: h._id } });
-      } catch (error) {
-        enqueueSnackbar('Error getting hotels', { variant: 'error' });
-      }
-      setHotels(res);
-    }
-  }
-
-  const handleHotelSelection = (hotel) => {
-    console.log('hotel=', hotel, ',context=', ctx);
-    ctx.setHotel(hotel);
-  }
-
   const renderSideMenu = () => {
     return (
       <React.Fragment>
@@ -239,7 +209,6 @@ export default function Dashboard() {
           </List>
           <Divider />
           <List><HotelSettings optionSelected={menuOptionSelected} /></List>
-          <Selector menuName="Hotels" items={hotels} onSelectEntry={(value) => handleHotelSelection(value)} />
         </Drawer>
       </React.Fragment>
     )
