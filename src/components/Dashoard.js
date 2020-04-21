@@ -138,7 +138,11 @@ export default function Dashboard() {
   const [ComponentToRender, setComponentToRender] = React.useState(Default);
 
   React.useEffect(() => {
-  }, []);
+    if (!isNull(user) && !isUndefined(user)) {
+      console.log('+++user=', user);
+      setRole(user.app_metadata.role);
+    }
+  }, [user]);
 
   const menuComponentMap = {
     'default': Default,
@@ -149,17 +153,6 @@ export default function Dashboard() {
     'hotels': HotelMgmt,
     'profile': Profile
   };
-  const checkUserRole = () => {
-    console.log('checking user role...')
-    if (isNull(user) || isUndefined(user)) {
-      return;
-    }
-    console.log('user is not null', role)
-    if ((isNull(role) || isUndefined(role)) && !isUndefined(user)) {
-      // setRole(user.app_metadata.role);
-    }
-  }
-  checkUserRole();  // Checks the user role on page open
 
   const handleDrawerOpen = () => {
     setOpen(true);
@@ -173,19 +166,6 @@ export default function Dashboard() {
     const ComponentToRender = menuComponentMap[option];
     setComponentToRender(<ComponentToRender />);
     console.log('option selected=', option, ComponentToRender);
-  }
-
-  const renderRBAMenu = (role) => {
-    role = 'consumer'
-    // role = 'admin'
-    if (role === 'admin') {
-      // Set the intial screen as hotels
-      return <AdminMenu optionSelected={menuOptionSelected} />
-    } else if (role === 'consumer') {
-      return <ConsumerMenu optionSelected={menuOptionSelected} />
-    } else if (isUndefined(role)) {
-      return null;
-    }
   }
 
   const renderSideMenu = () => {
@@ -205,10 +185,10 @@ export default function Dashboard() {
           </div>
           <Divider />
           <List>
-            {renderRBAMenu(role)}
+            <ConsumerMenu optionSelected={menuOptionSelected} />
           </List>
           <Divider />
-          <List><HotelSettings optionSelected={menuOptionSelected} /></List>
+          {isEqual(role, 'admin') && <List><HotelSettings optionSelected={menuOptionSelected} /></List> }
         </Drawer>
       </React.Fragment>
     )
