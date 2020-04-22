@@ -11,11 +11,11 @@ import ChevronLeftRoundedIcon from "@material-ui/icons/ChevronLeftRounded";
 import IconButton from "@material-ui/core/IconButton";
 import MomentUtils from '@date-io/moment';
 import { MuiPickersUtilsProvider, KeyboardDatePicker } from "@material-ui/pickers";
-import { cyan, lightBlue, teal } from '@material-ui/core/colors';
+import { cyan } from '@material-ui/core/colors';
 import Chip from '@material-ui/core/Chip';
 import MUIDataTable from "mui-datatables";
-import { KamAppContext } from '../KamAppContext';
 import moment from 'moment';
+import { isUndefined } from 'lodash';
 import { useSnackbar } from 'notistack';
 
 import { useKamAppCtx } from '../KamAppContext';
@@ -147,7 +147,7 @@ export default (props) => {
      */
     function remapFields(arr) {
         console.log('------#', arr)
-        var res = arr.map(o => (
+        var res = !isUndefined(arr) ? arr.map(o => (
             {
                 ...o,
                 checkincheckout: o.checkincheckout[0],
@@ -155,7 +155,7 @@ export default (props) => {
                 statusChangeTime: moment(o.curr_status.created).format('MMMM Do YYYY, h:mm A'),
                 newStatus: ''
             }
-        ));
+        )) : [];
         return res;
     }
 
