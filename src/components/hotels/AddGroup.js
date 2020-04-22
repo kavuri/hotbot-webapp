@@ -18,10 +18,14 @@ import {
 import { Form, Field } from 'react-final-form';
 import HomeWorkRoundedIcon from '@material-ui/icons/HomeWorkRounded';
 
-import { APICall } from '../../utils/API';
+import { useSnackbar } from 'notistack';
+import { useKamAppCtx } from '../KamAppContext';
 
 export default (props) => {
     const [open, setOpen] = useState(true);
+
+    const { APICall } = useKamAppCtx();
+    const { enqueueSnackbar } = useSnackbar();
 
     const onSubmit = async values => {
         let obj = {
@@ -33,7 +37,7 @@ export default (props) => {
         try {
             hotelGroup = await APICall('/hotelGroup', { method: 'POST', body: obj });
         } catch (error) {
-            //FIXME: Should something be done here?
+            enqueueSnackbar('Error creating hotel group. Please try again', { variant: 'error' });
         }
         setOpen(false);
         props.onGroupAdded(hotelGroup);

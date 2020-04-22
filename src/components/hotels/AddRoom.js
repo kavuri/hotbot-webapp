@@ -19,13 +19,17 @@ import {
 import HomeRoundedIcon from '@material-ui/icons/HomeRounded';
 import { isUndefined } from 'lodash';
 
-import { APICall } from '../../utils/API';
+import { useSnackbar } from 'notistack';
+import { useKamAppCtx } from '../KamAppContext';
 
 export default (props) => {
     const [open, setOpen] = useState(true);
     const [hotel, setHotel] = useState(props.hotel);
     const [room, setRoom] = useState(props.room);
     const [edit, setEdit] = useState(props.edit);
+
+    const { APICall } = useKamAppCtx();
+    const { enqueueSnackbar } = useSnackbar();
 
     const handleClose = () => {
         props.onRoomAdded(null); // This would reset the flag to open the dialog
@@ -46,7 +50,7 @@ export default (props) => {
                 result = await APICall('/room', { method: 'POST', body: obj, keyValues: { hotel_id: hotel.hotel_id } });
             }
         } catch (error) {
-            //FIXME: Do something?
+            enqueueSnackbar('Error updating rooms', { variant: 'error' });
         }
         setOpen(false);
         props.onRoomAdded(result);

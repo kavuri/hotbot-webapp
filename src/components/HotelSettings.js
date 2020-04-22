@@ -3,7 +3,7 @@
  * Proprietary and confidential
  */
 
-import React, { useState, useContext } from 'react';
+import React from 'react';
 import ListItem from '@material-ui/core/ListItem';
 import ListItemIcon from '@material-ui/core/ListItemIcon';
 import ListItemText from '@material-ui/core/ListItemText';
@@ -12,28 +12,7 @@ import SettingsApplicationsRoundedIcon from '@material-ui/icons/SettingsApplicat
 import MobileScreenShareRoundedIcon from '@material-ui/icons/MobileScreenShareRounded';
 import HomeWorkRoundedIcon from '@material-ui/icons/HomeWorkRounded';
 
-import { useSnackbar } from 'notistack';
-
-import Selector from './Selector';
-import { useKamAppCtx } from './KamAppContext';
-import { useAuth0 } from "../react-auth0-spa";
-
 export default function ProfileMenu(props) {
-    const [hotels, setHotels] = React.useState([]);
-    const { APICall, setHotel } = useKamAppCtx();
-    const { loading, isAuthenticated } = useAuth0();
-
-    const { enqueueSnackbar } = useSnackbar();
-
-    React.useEffect(() => {
-        console.log('++isAuthenticated=', isAuthenticated);
-        if (isAuthenticated) loadHotels();
-    }, [isAuthenticated]);
-
-    if (loading || !isAuthenticated) {
-        return <div>Loading...</div>;
-    }
-
     const handleSettingsOptionClick = () => {
         props.optionSelected('settings');
     }
@@ -44,20 +23,6 @@ export default function ProfileMenu(props) {
 
     const handleHotelsOptionClick = () => {
         props.optionSelected('hotels');
-    }
-
-    const loadHotels = async () => {
-        // setLoading(true);
-        let results = undefined, res;
-        try {
-            results = await APICall('/hotel', { method: 'GET' });
-            res = results.data.map((h) => { return { name: h.name, id: h.hotel_id, _id: h._id } });
-            console.log('---hotels=', res);
-            setHotels(res);
-            // setLoading(false);
-        } catch (error) {
-            enqueueSnackbar('Error getting hotels', { variant: 'error' });
-        }
     }
 
     return (
@@ -81,7 +46,7 @@ export default function ProfileMenu(props) {
                 </ListItemIcon>
                 <ListItemText primary="Hotels" onClick={handleHotelsOptionClick} />
             </ListItem>
-            <Selector menuName="Hotels" items={hotels} onSelectEntry={(value) => setHotel(value)} />
+            {/* <Selector menuName="Hotels" items={hotels} onSelectEntry={(value) => setHotel(value)} /> */}
         </div>
     )
 }

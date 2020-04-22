@@ -10,10 +10,10 @@ import IconButton from "@material-ui/core/IconButton";
 import AddCircleRoundedIcon from '@material-ui/icons/AddCircleRounded';
 import EditRoundedIcon from '@material-ui/icons/EditRounded';
 import MUIDataTable from "mui-datatables";
-import { useSnackbar } from 'notistack';
 import { concat, isEqual, isNull, findIndex } from 'lodash';
 
-import { APICall } from '../../utils/API';
+import { useSnackbar } from 'notistack';
+import { useKamAppCtx } from '../KamAppContext';
 import AddRoom from './AddRoom';
 
 export default (props) => {
@@ -27,6 +27,7 @@ export default (props) => {
         data: [['Loading...']]
     });
     const { enqueueSnackbar } = useSnackbar();
+    const { APICall } = useKamAppCtx();
 
     useEffect(() => {
         getRooms();
@@ -67,7 +68,7 @@ export default (props) => {
             setTableState({ ...tableState, isLoading: true });
             let rooms = null;
             try {
-                rooms = await APICall('/room', { method: 'GET', keyValues: { hotel_id: hotel.hotel_id } });
+                rooms = await APICall('/room/admin', { method: 'GET', keyValues: { hotel_id: hotel.hotel_id } });
                 setTableState({ ...tableState, data: rooms, count: rooms.total, isLoading: false });
             } catch (error) {
                 setTableState({ ...tableState, isLoading: false });

@@ -28,7 +28,6 @@ export default function App() {
       <Typography variant="h4" component="h1" gutterBottom>
       </Typography>
       <Router history={history}>
-        <Dashboard />
         <Switch>
           <PrivateRoute path="/" exact component={Dashboard} />
           {/* <Route path="/" exact /> */}

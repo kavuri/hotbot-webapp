@@ -13,8 +13,8 @@ import EditRoundedIcon from '@material-ui/icons/EditRounded';
 import { isEqual, isNull, concat, join, isEmpty, findIndex, isUndefined } from 'lodash';
 
 import { useSnackbar } from 'notistack';
+import { useKamAppCtx } from '../KamAppContext';
 
-import { APICall } from '../../utils/API';
 import AddHotel from './AddHotel';
 
 export default (props) => {
@@ -28,6 +28,7 @@ export default (props) => {
         data: [['Loading...']]
     });
     const { enqueueSnackbar } = useSnackbar();
+    const { APICall } = useKamAppCtx();
 
     useEffect(() => {
         setGroup(isNull(props.group) ? '' : props.group);

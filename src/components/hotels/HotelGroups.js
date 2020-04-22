@@ -9,9 +9,10 @@ import IconButton from "@material-ui/core/IconButton";
 import AddCircleRoundedIcon from '@material-ui/icons/AddCircleRounded';
 import MUIDataTable from "mui-datatables";
 import { concat, isEqual, isNull } from 'lodash';
-import { useSnackbar } from 'notistack';
 
-import { APICall } from '../../utils/API';
+import { useSnackbar } from 'notistack';
+import { useKamAppCtx } from '../KamAppContext';
+
 import AddGroup from './AddGroup';
 
 export default (props) => {
@@ -24,6 +25,7 @@ export default (props) => {
         data: [['Loading...']]
     });
     const { enqueueSnackbar } = useSnackbar();
+    const { APICall } = useKamAppCtx();
 
     useEffect(() => {
         getHotelGroups();

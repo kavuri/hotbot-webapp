@@ -74,7 +74,7 @@ export default (props) => {
         res = results.data.map((h) => { return { name: h.name, id: h.hotel_id, _id: h._id } });
         setHotels(res);
       } catch (error) {
-        // FIXME: Do something
+        enqueueSnackbar('Error fetching hotels', { variant: 'error' });
       }
     }
   }
@@ -95,14 +95,6 @@ export default (props) => {
     }
   }
 
-  const fixDevice = (device) => {
-    setDevice(device);
-  }
-
-  const fixRoom = (room) => {
-    setRoom(room);
-  }
-
   const handleAssign = async () => {
     console.log('device=', device, ',hotel=', hotel, ',room=', room);
     if (!loading) {
@@ -121,13 +113,13 @@ export default (props) => {
     <Grid container className={classes.root} spacing={2} >
       <Grid container className={classes.root} spacing={3} direction="row" justify="center" alignItems="center" >
         <Grid item xs>
-          <Selector menuName="Devices" items={unassignedDevices} onSelectEntry={fixDevice} />
+          <Selector menuName="Devices" items={unassignedDevices} onSelectEntry={(device) => setDevice(device)} />
         </Grid>
         <Grid item xs>
           <Selector menuName="Hotels" items={hotels} onSelectEntry={getRooms} />
         </Grid>
         <Grid item xs>
-          <Selector menuName="Rooms" items={rooms} onSelectEntry={fixRoom} />
+          <Selector menuName="Rooms" items={rooms} onSelectEntry={(room) => setRoom(room)} />
         </Grid>
       </Grid>
       <Grid item xs={12}  >

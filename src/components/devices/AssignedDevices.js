@@ -22,9 +22,10 @@ import DialogTitle from '@material-ui/core/DialogTitle';
 import FormControlLabel from '@material-ui/core/FormControlLabel';
 import Switch from '@material-ui/core/Switch';
 
-import { isNull, isUndefined, remove } from 'lodash';
+import { isNull, isUndefined, remove, isEqual } from 'lodash';
 
-import { APICall, changeDeviceStatus, deregisterDevice } from '../../utils/API';
+import { useSnackbar } from 'notistack';
+import { useKamAppCtx } from '../KamAppContext';
 import Selector from '../Selector';
 
 const useStyles = makeStyles((theme) => ({
@@ -49,6 +50,9 @@ export const DeviceStateChange = (props) => {
     inactive: { name: 'Inactive', dialogMsg: 'Confirm activation of device? Kamamishu will be live for use' }
   });
 
+  const { enqueueSnackbar } = useSnackbar();
+  const { APICall } = useKamAppCtx();
+
   const handleChange = (event) => {
     // setState({ ...state, [event.target.name]: event.target.checked });
     setOpen(true);
@@ -60,18 +64,23 @@ export const DeviceStateChange = (props) => {
   };
 
   const changeStatus = async () => {
-    if (!loading) {
-      setLoading(true);
-      let result = await changeDeviceStatus(state, device);
-      setLoading(false);
-      if (result instanceof Error) {
-        //FIXME: Do something
-      } else {
-        setDevice(result);
-        setState(result.status);
-        setOpen(false);
-        props.onDeviceStateChange(result);
+    let results = null;
+    try {
+      let URL_PATH = '';
+      if (isEqual(state, 'active')) {
+        // Deactivate the device
+        URL_PATH = '/device/' + device.device_id + '/deactivate';
+      } else if (isEqual(state, 'inactive')) {
+        // activate the device
+        URL = '/device/' + device.device_id + '/activate';
       }
+      results = await APICall(URL_PATH, { method: 'POST', keyValues: { hotel_id: device.hotel } });
+      setDevice(results);
+      setState(results.status);
+      setOpen(false);
+      props.onDeviceStateChange(results);
+    } catch (error) {
+      enqueueSnackbar('Error changing device status', { variant: 'error' });
     }
   }
 
@@ -102,6 +111,8 @@ export const DeregisterDevice = (props) => {
   const [loading, setLoading] = useState(false);
   const [open, setOpen] = React.useState(false);
 
+  const { APICall } = useKamAppCtx();
+  const { enqueueSnackbar } = useSnackbar();
   useEffect(() => {
     setDevice(props.device);
   }, [props.device]);
@@ -117,17 +128,14 @@ export const DeregisterDevice = (props) => {
 
   const handleDeregister = async () => {
     console.log('###deegister device=', device);
-    if (!loading) {
-      setLoading(true);
-      let result = await deregisterDevice(device);
-      setLoading(false);
-      if (result instanceof Error) {
-        //FIXME: Do something
-      } else {
-        setDevice(result);
-        setOpen(false);
-        props.onDeviceDeregister(result);
-      }
+    let results = null;
+    try {
+      results = await APICall('/device/' + device.device_id + '/deregister', { method: 'POST', keyValues: { hotel_id: device.hotel_id, room_no: device.room_no } });
+      setDevice(results);
+      setOpen(false);
+      props.onDeviceDeregister(results);
+    } catch (error) {
+      enqueueSnackbar('Error device deregistration', { variant: 'error' });
     }
   }
 
@@ -162,6 +170,8 @@ export default (props) => {
   const [loading, setLoading] = useState(false);
   const [hotels, setHotels] = useState([]);
 
+  const { APICall } = useKamAppCtx();
+  const { enqueueSnackbar } = useSnackbar();
   useEffect(() => {
     loadHotels();
   }, []);
@@ -190,7 +200,7 @@ export default (props) => {
         res = results.data.map((h) => { return { name: h.name, id: h.hotel_id, _id: h._id } });
         setHotels(res);
       } catch (error) {
-        //FIXME: Show alert
+        enqueueSnackbar('Error loading hotels. Try again', { variant: 'error' });
       }
     }
   }
@@ -214,7 +224,7 @@ export default (props) => {
         }
         setAssignedDevices(assigned);
       } catch (error) {
-        //FIXME: Show alert
+        enqueueSnackbar('Error getting devices. Try again', { variant: 'error' });
       }
     }
   }

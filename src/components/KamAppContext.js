@@ -4,7 +4,6 @@
  */
 
 import React, { useState, useEffect, useContext } from "react";
-import { orderListener } from '../utils/API';
 import { API_SERVER_URL } from '../Config';
 import { isEqual, isEmpty, findIndex, isNull, isUndefined, join } from 'lodash';
 import moment from "moment";
@@ -26,7 +25,7 @@ export const KamAppProvider = ({ children }) => {
     useEffect(() => {
         console.log('--dumping useAuth:', user, '--useAuth:')
         if (!isNull(user) && !isUndefined(user)) {
-            getToken();
+            // getToken();
             if (isEqual(user.app_metadata.role, 'consumer')) {
                 getOrders(orders.reqDate);
             }
@@ -35,14 +34,14 @@ export const KamAppProvider = ({ children }) => {
 
     async function getToken() {
         let tkn = await getTokenSilently();
-        console.log('###got token=', tkn);
+        // console.log('###got token=', tkn);
         setToken(tkn);
     }
 
     useEffect(() => {
         if (!isNull(user) && !isUndefined(user) && isEqual(user.app_metadata.role, 'consumer')) {
 
-            const listener = orderListener(token);
+            const listener = new EventSource(API_SERVER_URL + '/order/listen?token=' + token);
 
             listener.onopen = () => console.log('---Connection opened---');
             listener.onerror = () => console.log('---Event source connection error--- ');

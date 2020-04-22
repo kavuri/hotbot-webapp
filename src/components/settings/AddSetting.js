@@ -20,7 +20,7 @@ import { useSnackbar } from 'notistack';
 import { Form, Field } from 'react-final-form';
 import { TextField } from 'final-form-material-ui';
 
-import { APICall } from '../../utils/API';
+import { useKamAppCtx } from '../KamAppContext';
 
 const useStyles = makeStyles((theme) => ({
     control: {
@@ -52,6 +52,8 @@ export const FacilitySettings = (props) => {
             } :
             { name: '', a: '', o: '', msg_yes: '', msg_no: '', location_msg: '', timings_msg: '', price_msg: '' }
     );
+
+    const { APICall } = useKamAppCtx();
 
     const handleAddSynonym = (chip) => {
         console.log('+++', facility);
@@ -229,6 +231,7 @@ export const PolicySettings = (props) => {
             { name: '', a: '', msg: '' }
     );
     const { enqueueSnackbar } = useSnackbar();
+    const { APICall } = useKamAppCtx();
 
     const handleAddSynonym = (chip) => {
         if (chip.length < 3) {
@@ -365,6 +368,7 @@ export const RoomitemSettings = (props) => {
             { name: '', a: true, o: true, price: '', c: '', count: '', per: '', msg_yes: '', msg_no: '' }
     );
     const { enqueueSnackbar } = useSnackbar();
+    const { APICall } = useKamAppCtx();
 
     const handleAddSynonym = (chip) => {
         if (chip.length < 3) {
@@ -561,6 +565,7 @@ export const MenuitemSettings = (props) => {
     );
 
     const { enqueueSnackbar } = useSnackbar();
+    const { APICall } = useKamAppCtx();
 
     const handleAddSynonym = (chip) => {
         if (chip.length < 3) {
@@ -733,6 +738,7 @@ export const AddSetting = (props) => {
     const [setting, setSetting] = useState('');
     const [hotel, setHotel] = useState(props.hotel);
 
+    const { APICall } = useKamAppCtx();
     const handleSettingChange = (event) => {
         console.log(event.target.value);
         setSetting(event.target.value);

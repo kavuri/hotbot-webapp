@@ -21,7 +21,9 @@ import {
 import HomeWorkRoundedIcon from '@material-ui/icons/HomeWorkRounded';
 import { isUndefined } from 'lodash';
 
-import { APICall } from '../../utils/API';
+import { useSnackbar } from 'notistack';
+import { useKamAppCtx } from '../KamAppContext';
+
 import { states, cities } from './statesAndCities';
 
 export default (props) => {
@@ -30,6 +32,9 @@ export default (props) => {
     const [hotel, setHotel] = useState(props.hotel);
     const [edit, setEdit] = useState(props.edit);
     const [selectedState, setSelectedState] = useState(undefined);
+
+    const { APICall } = useKamAppCtx();
+    const { enqueueSnackbar } = useSnackbar();
 
     const handleClose = () => {
         props.onHotelAdded(null); // This would reset the flag to open the dialog
@@ -69,7 +74,7 @@ export default (props) => {
             }
         } catch (err) {
             console.log('API error:', err);
-            //FIXME: Should something be done here?
+            enqueueSnackbar('Error updating hotel', { variant: 'error' });
         }
         setOpen(false);
         props.onHotelAdded(result);

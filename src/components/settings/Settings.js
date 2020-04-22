@@ -15,19 +15,21 @@ import MUIDataTable from "mui-datatables";
 
 import { useSnackbar } from 'notistack';
 import { has, isEqual, concat, isNull, pullAt } from 'lodash';
-import { KamAppContext } from '../KamAppContext';
-import { APICall } from '../../utils/API';
 import { AddSetting, PolicySettings, FacilitySettings, MenuitemSettings, RoomitemSettings } from './AddSetting';
+import { useKamAppCtx } from '../KamAppContext';
+import Selector from '../Selector';
 
 export default (props) => {
     const [entries, setEntries] = useState([]);
     const [addSettingFlag, setAddSettingFlag] = useState(false);
-    const ctx = useContext(KamAppContext);  //FIXME: Remove ctx when auth is implemented
-    const [hotel, setHotel] = useState(ctx.hotel);
+    const [hotels, setHotels] = React.useState([]);
+    const [hotel, setHotel] = React.useState({});
 
     const { enqueueSnackbar } = useSnackbar();
+    const { APICall } = useKamAppCtx();
 
     useEffect(() => {
+        loadHotels();
         loadEntries();
     }, [hotel]);
 
@@ -43,6 +45,20 @@ export default (props) => {
         }
 
         setEntries(data);
+    }
+
+    const loadHotels = async () => {
+        // setLoading(true);
+        let results = undefined, res;
+        try {
+            results = await APICall('/hotel', { method: 'GET' });
+            res = results.data.map((h) => { return { name: h.name, id: h.hotel_id, _id: h._id } });
+            console.log('---hotels=', res);
+            setHotels(res);
+            // setLoading(false);
+        } catch (error) {
+            enqueueSnackbar('Error getting hotels', { variant: 'error' });
+        }
     }
 
     function remapFields(arr) {
@@ -147,7 +163,7 @@ export default (props) => {
                             <RadioGroup row aria-label="available" name="available" value={value} onChange={
                                 async (event) => {
                                     let newValue = event.target.value;
-                                    console.log('^^^event=',event.target.value, '---value=',value);
+                                    console.log('^^^event=', event.target.value, '---value=', value);
                                     await APICall('/item/', { method: 'PUT', body: { name: tableMeta.rowData[0], a: isEqual(event.target.value, 'Yes') ? true : false }, keyValues: { hotel_id: hotel.id } });
                                     console.log('+++changed event=', newValue);
                                     entries[tableMeta.rowIndex].a = newValue;
@@ -255,12 +271,15 @@ export default (props) => {
     };
 
     return (
-        <MUIDataTable
-            title={<Typography variant="body2"> </Typography>
-            }
-            data={entries}
-            columns={columns}
-            options={options}
-        />
+        <React.Fragment>
+            <Selector menuName="Hotels" items={hotels} onSelectEntry={(hotel) => setHotel(hotel)} />
+            <MUIDataTable
+                title={<Typography variant="body2"> </Typography>
+                }
+                data={entries}
+                columns={columns}
+                options={options}
+            />
+        </React.Fragment>
     );
 }
