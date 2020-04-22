@@ -16,13 +16,11 @@ import ExitToAppIcon from '@material-ui/icons/ExitToApp';
 
 import { Link } from "react-router-dom";
 import { useAuth0 } from "../react-auth0-spa";
-
-import { KamAppContext } from './KamAppContext';
+import { useKamAppCtx } from './KamAppContext';
 
 export default function ConsumerMenu(props) {
     const { logout } = useAuth0();
-
-    const ctx = useContext(KamAppContext);
+    const { orders } = useKamAppCtx();
 
     const handleOrdersOptionClick = () => {
         props.optionSelected('orders');
@@ -51,9 +49,9 @@ export default function ConsumerMenu(props) {
             <ListItem button>
                 <ListItemIcon>
                     <ShoppingCartIcon />
-                    {/* <Badge badgeContent={ctx.orders.openOrderCount} color="error"> <ShoppingCartIcon /></Badge> */}
                 </ListItemIcon>
-                <ListItemText primary="Orders" onClick={handleOrdersOptionClick} /><Badge badgeContent={ctx.orders.openOrderCount} color="error"></Badge>
+                <ListItemText primary="Orders" onClick={handleOrdersOptionClick} />
+                <Badge badgeContent={orders.openOrderCount} color="error"></Badge>
             </ListItem>
             {/* <ListItem button>
                 <ListItemIcon>
@@ -73,7 +71,6 @@ export default function ConsumerMenu(props) {
                 </ListItemIcon>
                 <ListItemText primary="Profile" onClick={handleProfileOptionClick} />
             </ListItem>
-
             <ListItem button onClick={() => logout()}>
                 <ListItemIcon>
                     <ExitToAppIcon />

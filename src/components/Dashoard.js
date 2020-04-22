@@ -26,7 +26,7 @@ import { useSnackbar } from 'notistack';
 
 import Orders from './orders/Orders';
 import Devices from './devices/Devices';
-import HotelSettings from './HotelSettings';
+import HotelSettingsMenu from './HotelSettingsMenu';
 import ConsumerMenu from './ConsumerMenu';
 import Default from './Default';
 import Profile from './Profile';
@@ -186,7 +186,7 @@ export default function Dashboard() {
             {isEqual(role, 'consumer') && <ConsumerMenu optionSelected={menuOptionSelected} />}
           </List>
           <Divider />
-          {isEqual(role, 'admin') && <List><HotelSettings optionSelected={menuOptionSelected} /></List>}
+          {isEqual(role, 'admin') && <List><HotelSettingsMenu optionSelected={menuOptionSelected} /></List>}
         </Drawer>
       </React.Fragment>
     )

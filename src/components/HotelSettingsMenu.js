@@ -11,8 +11,13 @@ import ListSubheader from '@material-ui/core/ListSubheader';
 import SettingsApplicationsRoundedIcon from '@material-ui/icons/SettingsApplicationsRounded';
 import MobileScreenShareRoundedIcon from '@material-ui/icons/MobileScreenShareRounded';
 import HomeWorkRoundedIcon from '@material-ui/icons/HomeWorkRounded';
+import ExitToAppIcon from '@material-ui/icons/ExitToApp';
+
+import { useAuth0 } from "../react-auth0-spa";
 
 export default function ProfileMenu(props) {
+    const { logout } = useAuth0();
+
     const handleSettingsOptionClick = () => {
         props.optionSelected('settings');
     }
@@ -23,6 +28,10 @@ export default function ProfileMenu(props) {
 
     const handleHotelsOptionClick = () => {
         props.optionSelected('hotels');
+    }
+
+    const handleLogoutOptionClick = () => {
+        props.optionSelected('logout');
     }
 
     return (
@@ -46,7 +55,12 @@ export default function ProfileMenu(props) {
                 </ListItemIcon>
                 <ListItemText primary="Hotels" onClick={handleHotelsOptionClick} />
             </ListItem>
-            {/* <Selector menuName="Hotels" items={hotels} onSelectEntry={(value) => setHotel(value)} /> */}
+            <ListItem button onClick={() => logout()}>
+                <ListItemIcon>
+                    <ExitToAppIcon />
+                </ListItemIcon>
+                <ListItemText primary="Logout" onClick={handleLogoutOptionClick} />
+            </ListItem>
         </div>
     )
 }
