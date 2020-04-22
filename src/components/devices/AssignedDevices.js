@@ -72,13 +72,14 @@ export const DeviceStateChange = (props) => {
         URL_PATH = '/device/' + device.device_id + '/deactivate';
       } else if (isEqual(state, 'inactive')) {
         // activate the device
-        URL = '/device/' + device.device_id + '/activate';
+        URL_PATH = '/device/' + device.device_id + '/activate';
       }
-      results = await APICall(URL_PATH, { method: 'POST', keyValues: { hotel_id: device.hotel } });
+      results = await APICall(URL_PATH, { method: 'POST', keyValues: { hotel_id: device.hotel_id } });
       setDevice(results);
       setState(results.status);
       setOpen(false);
       props.onDeviceStateChange(results);
+      enqueueSnackbar('Device activated', { variant: 'success' });
     } catch (error) {
       enqueueSnackbar('Error changing device status', { variant: 'error' });
     }
@@ -134,6 +135,7 @@ export const DeregisterDevice = (props) => {
       setDevice(results);
       setOpen(false);
       props.onDeviceDeregister(results);
+      enqueueSnackbar('Device de-registared', { variant: 'success' });
     } catch (error) {
       enqueueSnackbar('Error device deregistration', { variant: 'error' });
     }

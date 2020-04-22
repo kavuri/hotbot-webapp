@@ -84,7 +84,7 @@ export default (props) => {
       setLoading(true);
       let results = null;
       try {
-        results = await APICall('/hotel/' + hotel.id, { method: 'GET' });
+        results = await APICall('/room/', { method: 'GET', keyValues: { hotel_id: hotel.id } });
         let allRooms = results.map((r) => { return { name: r.room_no + ', ' + r.type, id: r.room_no, _id: r._id } })
         setRooms(allRooms);
         setHotel(hotel);
@@ -99,13 +99,19 @@ export default (props) => {
     console.log('device=', device, ',hotel=', hotel, ',room=', room);
     if (!loading) {
       setLoading(true);
-      let results = await APICall('/device/' + device.id + '/register', { method: 'POST', keyValues: { hotel_id: hotel.id, room_no: room.id } });
+      let results = null;
+      try {
+        results = await APICall('/device/' + device.id + '/register', { method: 'POST', keyValues: { hotel_id: hotel.id, room_no: room.id } });
+        remove(unassignedDevices, { id: device.id });
+        remove(hotels, { id: hotel.id });
+        remove(rooms, { id: room.id });
+        props.deviceRegistered(device);
+        setLoading(false);
 
-      remove(unassignedDevices, { id: device.id });
-      remove(hotels, { id: hotel.id });
-      remove(rooms, { id: room.id });
-      props.deviceRegistered(device);
-      setLoading(false);
+        enqueueSnackbar('Device assigned to room in hotel', { variant: 'success' });
+      } catch (error) {
+        enqueueSnackbar('Error assigning device to room', { variant: 'error' });
+      }
     }
   }
 
