@@ -27,6 +27,7 @@ import { useSnackbar } from 'notistack';
 import Orders from './orders/Orders';
 import Devices from './devices/Devices';
 import HotelSettingsMenu from './HotelSettingsMenu';
+import AlexaCertMenu from './AlexaCertMenu';
 import ConsumerMenu from './ConsumerMenu';
 import Default from './Default';
 import Profile from './Profile';
@@ -187,6 +188,7 @@ export default function Dashboard() {
           </List>
           <Divider />
           {isEqual(role, 'admin') && <List><HotelSettingsMenu optionSelected={menuOptionSelected} /></List>}
+          {isEqual(role, 'alexacert') && <List><AlexaCertMenu optionSelected={menuOptionSelected} /></List>}
         </Drawer>
       </React.Fragment>
     )

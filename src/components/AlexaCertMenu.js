@@ -3,22 +3,23 @@
  * Proprietary and confidential
  */
 
-import React, { useContext } from 'react';
+import React from 'react';
 import ListItem from '@material-ui/core/ListItem';
 import ListItemIcon from '@material-ui/core/ListItemIcon';
 import ListItemText from '@material-ui/core/ListItemText';
-import Badge from '@material-ui/core/Badge';
-import DashboardIcon from '@material-ui/icons/Dashboard';
-import ShoppingCartIcon from '@material-ui/icons/ShoppingCart';
-import PeopleAltRoundedIcon from '@material-ui/icons/PeopleAltRounded';
-import PeopleIcon from '@material-ui/icons/People';
+import ListSubheader from '@material-ui/core/ListSubheader';
+import MobileScreenShareRoundedIcon from '@material-ui/icons/MobileScreenShareRounded';
 import ExitToAppIcon from '@material-ui/icons/ExitToApp';
-
+import PeopleIcon from '@material-ui/icons/People';
+import ShoppingCartIcon from '@material-ui/icons/ShoppingCart';
+import Badge from '@material-ui/core/Badge';
+import PeopleAltRoundedIcon from '@material-ui/icons/PeopleAltRounded';
 import { Link } from "react-router-dom";
+
 import { useAuth0 } from "../react-auth0-spa";
 import { useKamAppCtx } from './KamAppContext';
 
-export default function ConsumerMenu(props) {
+export default function ProfileMenu(props) {
     const { logout } = useAuth0();
     const { orders } = useKamAppCtx();
 
@@ -38,14 +39,12 @@ export default function ConsumerMenu(props) {
         props.optionSelected('logout');
     }
 
+    const handleDeviceMgmtOptionClick = () => {
+        props.optionSelected('deviceMgmt');
+    }
+
     return (
         <div>
-            <ListItem button>
-                <ListItemIcon>
-                    <DashboardIcon />
-                </ListItemIcon>
-                <ListItemText primary="Dashboard" />
-            </ListItem>
             <ListItem button>
                 <ListItemIcon>
                     <ShoppingCartIcon />
@@ -64,6 +63,13 @@ export default function ConsumerMenu(props) {
                     <PeopleIcon />
                 </ListItemIcon>
                 <ListItemText primary="Profile" onClick={handleProfileOptionClick} />
+            </ListItem>
+            <ListSubheader inset>Hotel Settings</ListSubheader>
+            <ListItem button>
+                <ListItemIcon>
+                    <MobileScreenShareRoundedIcon />
+                </ListItemIcon>
+                <ListItemText primary="Device Management" onClick={handleDeviceMgmtOptionClick} />
             </ListItem>
             <ListItem button onClick={() => logout()}>
                 <ListItemIcon>
