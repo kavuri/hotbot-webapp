@@ -24,7 +24,7 @@ import MuiPhoneNumber from 'material-ui-phone-number';
 import MUIDataTable from "mui-datatables";
 import { useSnackbar } from 'notistack';
 import moment from 'moment';
-import { concat, remove } from 'lodash';
+import { concat, remove, isEmpty } from 'lodash';
 
 import { useKamAppCtx } from '../KamAppContext';
 
@@ -45,8 +45,8 @@ const useStyles = makeStyles((theme) => ({
 
 export default (props) => {
   const classes = useStyles();
-  const [freeRooms, setFreeRooms] = useState(props.freeRooms);
-  const [allotedRooms, setAllotedRooms] = useState(props.allotedRooms);
+  const [freeRooms, setFreeRooms] = useState([]);
+  const [allotedRooms, setAllotedRooms] = useState([]);
   const [askForConfirmation, setAskForConfirmation] = useState(false);
   const [checkinDetails, setCheckinDetails] = useState({
     room: {},
@@ -126,11 +126,11 @@ export default (props) => {
 
     return (
       <div>
-        {(dialogType.current == 'checkin') &&
+        {(dialogType.current === 'checkin') &&
           <IconButton aria-label="delete" className={classes.margin} onClick={() => setOpen(true)} >
             <DirectionsWalkRoundedIcon fontSize="inherit" color="secondary" />
           </IconButton>}
-        {(dialogType.current == 'checkout') &&
+        {(dialogType.current === 'checkout') &&
           <IconButton aria-label="checkout" className={classes.margin} onClick={() => setOpen(true)} >
             <ExitToAppRoundedIcon fontSize="inherit" color="secondary" />
           </IconButton>}

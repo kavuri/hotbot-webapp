@@ -32,11 +32,11 @@ export default function App() {
           <PrivateRoute path="/" exact component={Dashboard} />
           {/* <Route path="/" exact /> */}
           {/* <Route path="/profile" component={Profile} /> */}
-          <PrivateRoute path="/profile" component={Profile} />
-          <PrivateRoute path="/devices" component={ExternalApi} />
+          {/* <PrivateRoute path="/profile" component={Profile} /> */}
+          {/* <PrivateRoute path="/devices" component={ExternalApi} /> */}
           {/* <Route path="/orders" component={Orders} /> */}
-          <PrivateRoute path="/orders" component={Orders} />
-          <PrivateRoute path="/testorders" component={TestOrders} />
+          {/* <PrivateRoute path="/orders" component={Orders} /> */}
+          {/* <PrivateRoute path="/testorders" component={TestOrders} /> */}
         </Switch>
       </Router>
     </div>

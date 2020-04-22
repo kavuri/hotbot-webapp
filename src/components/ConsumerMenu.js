@@ -59,7 +59,8 @@ export default function ConsumerMenu(props) {
                 </ListItemIcon>
                 <ListItemText primary="Checkin-Checkout" onClick={handleCheckinCheckoutMgmtOptionClick} />
             </ListItem>
-            <ListItem component={Link} to="/profile" button>
+            {/* <ListItem component={Link} to="/profile" button> */}
+            <ListItem button>
                 <ListItemIcon>
                     <PeopleIcon />
                 </ListItemIcon>

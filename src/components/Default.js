@@ -5,11 +5,12 @@
 'use strict';
 
 import React from 'react';
+import { Typography } from '@material-ui/core';
 
 export default function Default() {
     return (
         <React.Fragment>
-            <div>Default page...</div>
+            <Typography variant="h3">Welcome to Kamamishu</Typography>
         </React.Fragment>
     )
 }
