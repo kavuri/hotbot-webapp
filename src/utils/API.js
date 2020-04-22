@@ -10,46 +10,6 @@ import { isEqual, isUndefined, has, join } from 'lodash';
 const headers = { 'Content-Type': 'application/json' };
 // { 'Content-Type': 'application/json', 'authorization': 'Bearer ' + token.access_token }
 
-export const allUnassignedDevices = async () => {
-    let allItems = await fetch(API_SERVER_URL + '/device/unassigned', { method: 'GET', headers: headers })
-        .then(res => res.json())
-        .then((results) => {
-            return results;
-        })
-        .catch((error) => { return error });
-    return allItems;
-}
-
-export const createRoom = async (hotel_id, room) => {
-    let result = await fetch(API_SERVER_URL + '/room?hotel_id=' + hotel_id, { method: 'POST', body: JSON.stringify(room), headers: headers })
-        .then(res => res.json())
-        .then((results) => {
-            return results;
-        })
-        .catch((error) => { return error; });
-    return result;
-}
-
-export const getHotelRooms = async (hotel) => {
-    let hotelRooms = await fetch(API_SERVER_URL + '/hotel/' + hotel.id, { method: 'GET', headers: headers })
-        .then(res => res.json())
-        .then((results) => {
-            return results.rooms;
-        })
-        .catch((error) => { return error });
-    return hotelRooms;
-}
-
-export const assignDevice = async (device, hotel, room) => {
-    let result = await fetch(API_SERVER_URL + '/device/' + device.id + '/register?hotel_id=' + hotel.id + '&room_no=' + room.id, { method: 'POST', headers: headers })
-        .then(res => res.json())
-        .then((results) => {
-            return results;
-        })
-        .catch((error) => { return error; });
-    return result;
-}
-
 export const changeDeviceStatus = async (state, device) => {
     let URL;
     if (isEqual(state, 'active')) {
@@ -80,19 +40,6 @@ export const deregisterDevice = async (device) => {
         })
         .catch((error) => { return error; });
     return result;
-}
-
-export const checkoutGuest = async (room) => {
-    let results = await fetch(
-        API_SERVER_URL + '/room/' + room.room_no +
-        '/checkout?hotel_id=' + room.hotel_id,
-        { method: 'POST', headers: headers })
-        .then(res => res.json())
-        .then((results) => {
-            return results;
-        })
-        .catch((error) => { return error; })
-    return results;
 }
 
 /**

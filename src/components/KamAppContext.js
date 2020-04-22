@@ -18,6 +18,7 @@ export const KamAppProvider = ({ children }) => {
         reqDate: new Date(),  //Get today's orders by default
         data: []
     });
+    const [hotel, setHotel] = useState({});
     const [token, setToken] = useState(null);
     const [incomingOrder, setIncomingOrder] = useState({});
     const { user, getTokenSilently } = useAuth0();
@@ -26,30 +27,36 @@ export const KamAppProvider = ({ children }) => {
         console.log('--dumping useAuth:', user, '--useAuth:')
         if (!isNull(user) && !isUndefined(user)) {
             getToken();
+            if (isEqual(user.app_metadata.role, 'consumer')) {
+                getOrders(orders.reqDate);
+            }
         }
-        getOrders(orders.reqDate);
     }, [user, token]);
 
     async function getToken() {
         let tkn = await getTokenSilently();
+        console.log('###got token=', tkn);
         setToken(tkn);
     }
 
     useEffect(() => {
-        const listener = orderListener(token);
+        if (!isNull(user) && !isUndefined(user) && isEqual(user.app_metadata.role, 'consumer')) {
 
-        listener.onopen = () => console.log('---Connection opened---');
-        listener.onerror = () => console.log('---Event source connection error--- ');
-        listener.onmessage = e => {
-            let order = JSON.parse(e.data);
-            console.log('new order received:', order);
-            // Check if the order is a new one or an update
-            setIncomingOrder(order);
-        }
+            const listener = orderListener(token);
 
-        return () => {
-            // Close the listener on component unmount
-            listener.close();
+            listener.onopen = () => console.log('---Connection opened---');
+            listener.onerror = () => console.log('---Event source connection error--- ');
+            listener.onmessage = e => {
+                let order = JSON.parse(e.data);
+                console.log('new order received:', order);
+                // Check if the order is a new one or an update
+                setIncomingOrder(order);
+            }
+
+            return () => {
+                // Close the listener on component unmount
+                listener.close();
+            }
         }
     });
 
@@ -83,8 +90,9 @@ export const KamAppProvider = ({ children }) => {
      * @param {*} body 
      */
     const APICall = async (endpoint, options) => {
-        console.log('+++endpoint=', endpoint, ', options=', options);
-        const headers = { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token };
+        let tkn = await getTokenSilently();
+        const headers = { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + tkn };
+        console.log('+++endpoint=', endpoint, ', options=', options, 'headers=', headers);
         let query = !isUndefined(options.keyValues) ? join(Object.keys(options.keyValues).map(key => { let s = key + '=' + options.keyValues[key]; return s; }), '&') : undefined;
         console.log('APICall query=:', query);
         let URL = API_SERVER_URL + endpoint + (!isUndefined(query) ? '?' + query : '');
@@ -123,7 +131,9 @@ export const KamAppProvider = ({ children }) => {
             value={{
                 orders,
                 getOrders,
-                APICall
+                APICall,
+                setHotel,
+                hotel
             }}
         >
             {children}

@@ -9,10 +9,11 @@ import { Grid } from '@material-ui/core';
 import IconButton from '@material-ui/core/IconButton';
 import AddCircleRoundedIcon from '@material-ui/icons/AddCircleRounded';
 
+import { useSnackbar } from 'notistack';
 import { remove, isEmpty } from 'lodash';
 
+import { useKamAppCtx } from '../KamAppContext';
 import Selector from '../Selector';
-import { APICall, allUnassignedDevices, getHotelRooms, assignDevice } from '../../utils/API';
 
 const useStyles = makeStyles(theme => ({
   root: {
@@ -41,6 +42,8 @@ export default (props) => {
   const [hotel, setHotel] = useState({});
   const [room, setRoom] = useState({});
 
+  const { enqueueSnackbar } = useSnackbar();
+  const { APICall } = useKamAppCtx();
   useEffect(() => {
     loadUnassignedDevices();
     loadHotels();
@@ -49,13 +52,14 @@ export default (props) => {
   const loadUnassignedDevices = async () => {
     if (!loading) {
       setLoading(true);
-      let results = await allUnassignedDevices();
-      setLoading(false);
-      if (results instanceof Error) {
-        //FIXME: Do something
-      } else {
+      let results = null;
+      try {
+        results = await APICall('/device/unassigned', { method: 'GET' });
         let res = results.map((d) => { return { name: d.address.addressLine1 + '; ' + d.address.addressLine2, id: d.device_id } });
         setUnassignedDevices(res);
+        setLoading(false);
+      } catch (error) {
+        enqueueSnackbar('Error fetching devices data', { variant: 'error' });
       }
     }
   }
@@ -76,18 +80,17 @@ export default (props) => {
   }
 
   const getRooms = async (hotel) => {
-    console.log('getting rooms...', hotel);
     if (!loading && !isEmpty(hotel)) {
       setLoading(true);
-      let results = await getHotelRooms(hotel);
-      setLoading(false);
-      if (results instanceof Error) {
-        console.error('error in getHotelRooms:', results);
-        //FIXME: Do something
-      } else {
+      let results = null;
+      try {
+        results = await APICall('/hotel/' + hotel.id, { method: 'GET' });
         let allRooms = results.map((r) => { return { name: r.room_no + ', ' + r.type, id: r.room_no, _id: r._id } })
         setRooms(allRooms);
         setHotel(hotel);
+        setLoading(false);
+      } catch (error) {
+        enqueueSnackbar('Error fetching devices data', { variant: 'error' });
       }
     }
   }
@@ -104,13 +107,13 @@ export default (props) => {
     console.log('device=', device, ',hotel=', hotel, ',room=', room);
     if (!loading) {
       setLoading(true);
-      // fetch(API_SERVER_URL + '/hotel', { method: 'GET', headers: { 'Content-Type': 'application/json', 'authorization': 'Bearer ' + token.access_token } })
-      let results = await assignDevice(device, hotel, room);
-      setLoading(false);
+      let results = await APICall('/device/' + device.id + '/register', { method: 'POST', keyValues: { hotel_id: hotel.id, room_no: room.id } });
+
       remove(unassignedDevices, { id: device.id });
       remove(hotels, { id: hotel.id });
       remove(rooms, { id: room.id });
       props.deviceRegistered(device);
+      setLoading(false);
     }
   }
 

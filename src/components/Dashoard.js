@@ -183,10 +183,10 @@ export default function Dashboard() {
           </div>
           <Divider />
           <List>
-            <ConsumerMenu optionSelected={menuOptionSelected} />
+            {isEqual(role, 'consumer') && <ConsumerMenu optionSelected={menuOptionSelected} />}
           </List>
           <Divider />
-          {isEqual(role, 'admin') && <List><HotelSettings optionSelected={menuOptionSelected} /></List> }
+          {isEqual(role, 'admin') && <List><HotelSettings optionSelected={menuOptionSelected} /></List>}
         </Drawer>
       </React.Fragment>
     )
