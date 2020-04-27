@@ -182,11 +182,9 @@ export default function Dashboard() {
               <ChevronLeftIcon />
             </IconButton>
           </div>
-          <Divider />
           <List>
             {isEqual(role, 'consumer') && <ConsumerMenu optionSelected={menuOptionSelected} />}
           </List>
-          <Divider />
           {isEqual(role, 'admin') && <List><HotelSettingsMenu optionSelected={menuOptionSelected} /></List>}
           {isEqual(role, 'alexacert') && <List><AlexaCertMenu optionSelected={menuOptionSelected} /></List>}
         </Drawer>

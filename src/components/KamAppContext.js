@@ -20,16 +20,16 @@ export const KamAppProvider = ({ children }) => {
     const [hotel, setHotel] = useState({});
     const [token, setToken] = useState(null);
     const [incomingOrder, setIncomingOrder] = useState({});
-    const { user, getTokenSilently } = useAuth0();
+    const { user, getTokenSilently, isAuthenticated } = useAuth0();
 
     useEffect(() => {
         console.log('--dumping useAuth:', user, '--useAuth:')
         if (!isNull(user) && !isUndefined(user)) {
             // getToken();
-            if (isEqual(user.app_metadata.role, 'consumer')) {
-                getOrders(orders.reqDate);
-            }
         }
+        // if (isAuthenticated && !isUndefined(user) && isEqual(user.app_metadata.role, 'consumer')) {
+            getOrders(orders.reqDate);
+        // }
     }, [user, token]);
 
     async function getToken() {
@@ -89,6 +89,7 @@ export const KamAppProvider = ({ children }) => {
      * @param {*} body 
      */
     const APICall = async (endpoint, options) => {
+        if (!isAuthenticated) throw new Error({error: 'user not authenticated'});
         let tkn = await getTokenSilently();
         const headers = { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + tkn };
         console.log('+++endpoint=', endpoint, ', options=', options, 'headers=', headers);

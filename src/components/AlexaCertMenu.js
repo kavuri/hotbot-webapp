@@ -14,10 +14,11 @@ import PeopleIcon from '@material-ui/icons/People';
 import ShoppingCartIcon from '@material-ui/icons/ShoppingCart';
 import Badge from '@material-ui/core/Badge';
 import PeopleAltRoundedIcon from '@material-ui/icons/PeopleAltRounded';
-import { Link } from "react-router-dom";
+import SettingsApplicationsRoundedIcon from '@material-ui/icons/SettingsApplicationsRounded';
 
 import { useAuth0 } from "../react-auth0-spa";
 import { useKamAppCtx } from './KamAppContext';
+import { Divider } from '@material-ui/core';
 
 export default function ProfileMenu(props) {
     const { logout } = useAuth0();
@@ -29,6 +30,10 @@ export default function ProfileMenu(props) {
 
     const handleCheckinCheckoutMgmtOptionClick = () => {
         props.optionSelected('checkinCheckout');
+    }
+
+    const handleSettingsOptionClick = () => {
+        props.optionSelected('settings');
     }
 
     const handleProfileOptionClick = () => {
@@ -64,7 +69,14 @@ export default function ProfileMenu(props) {
                 </ListItemIcon>
                 <ListItemText primary="Profile" onClick={handleProfileOptionClick} />
             </ListItem>
+            <Divider />
             <ListSubheader inset>Hotel Settings</ListSubheader>
+            <ListItem button>
+                <ListItemIcon>
+                    <SettingsApplicationsRoundedIcon />
+                </ListItemIcon>
+                <ListItemText primary="Settings" onClick={handleSettingsOptionClick} />
+            </ListItem>
             <ListItem button>
                 <ListItemIcon>
                     <MobileScreenShareRoundedIcon />
