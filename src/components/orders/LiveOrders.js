@@ -11,10 +11,29 @@ import { unionWith, isEqual, findIndex } from 'lodash';
 import { useSnackbar } from 'notistack';
 import moment from 'moment';
 import StatusButton from './StatusButton';
-import { cyan } from '@material-ui/core/colors';
+import { cyan, green, pink, orange } from '@material-ui/core/colors';
 import Chip from '@material-ui/core/Chip';
 
 import { useKamAppCtx } from '../KamAppContext';
+
+const renderRow = (value, type) => {
+    switch (type) {
+        case 'menu':
+            return <Chip size='medium' label={value} style={{ background: green[200] }} />
+            break;
+        case 'roomitem':
+            return <Chip size='medium' label={value} style={{ background: cyan[200] }} />
+            break;
+        case 'facility':
+            return <Chip size='medium' label={value} style={{ background: orange[200] }} />
+            break;
+        case 'problem':
+            return <Chip size='medium' label={value} style={{ background: pink[200] }} />
+            break;
+        default:
+            break;
+    }
+}
 
 export default (props) => {
     const { getOrders, orders } = useKamAppCtx();
@@ -45,7 +64,7 @@ export default (props) => {
                 sort: true,
                 searchable: true,
                 customBodyRender: (value, tableMeta, updateValue) => {
-                    return <Chip size='medium' label={value} style={{ background: cyan[200] }} />
+                    return renderRow(value, tableMeta.rowData[5]);
                 }
             }
         },
@@ -57,7 +76,7 @@ export default (props) => {
                 sort: false,
                 searchable: true,
                 customBodyRender: (value, tableMeta, updateValue) => {
-                    return <Chip size='medium' label={value} style={{ background: cyan[200] }} />
+                    return renderRow(value, tableMeta.rowData[5]);
                 }
             }
         },
@@ -69,8 +88,20 @@ export default (props) => {
                 sort: false,
                 searchable: false,
                 customBodyRender: (value, tableMeta, updateValue) => {
-                    return <Chip size='medium' label={value} style={{ background: cyan[200] }} />
+                    return renderRow(value, tableMeta.rowData[5]);
                 }
+            }
+        },
+        {
+            name: "item.type",
+            label: "Order Type",
+            options: {
+                filter: true,
+                sort: true,
+                searchable: false
+            },
+            customBodyRender: (value, tableMeta, updateValue) => {
+                return renderRow(value, value); //FIXME: This column does not get rendered
             }
         },
         {
@@ -98,7 +129,7 @@ export default (props) => {
                 sort: true,
                 searchable: true,
                 customBodyRender: (value, tableMeta, updateValue) => {
-                    // console.log('^^^^value=', value, ',tableMeta=', tableMeta);
+                    //console.log('^^^^value=', value, ',tableMeta=', tableMeta);
                     return (
                         <StatusButton status={value} chip={false} data={tableMeta.rowData} onStatusUpdated={async (newStatus) => {
                             let idx = findIndex(orders.data.allOpen, { _id: tableMeta.rowData[0] });
