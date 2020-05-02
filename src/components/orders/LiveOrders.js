@@ -13,27 +13,9 @@ import moment from 'moment';
 import StatusButton from './StatusButton';
 import { cyan, green, pink, orange } from '@material-ui/core/colors';
 import Chip from '@material-ui/core/Chip';
+import { renderRow } from './Orders';
 
 import { useKamAppCtx } from '../KamAppContext';
-
-const renderRow = (value, type) => {
-    switch (type) {
-        case 'menu':
-            return <Chip size='medium' label={value} style={{ background: green[200] }} />
-            break;
-        case 'roomitem':
-            return <Chip size='medium' label={value} style={{ background: cyan[200] }} />
-            break;
-        case 'facility':
-            return <Chip size='medium' label={value} style={{ background: orange[200] }} />
-            break;
-        case 'problem':
-            return <Chip size='medium' label={value} style={{ background: pink[200] }} />
-            break;
-        default:
-            break;
-    }
-}
 
 export default (props) => {
     const { getOrders, orders } = useKamAppCtx();

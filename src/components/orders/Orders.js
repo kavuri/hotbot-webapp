@@ -10,6 +10,8 @@ import Tabs from '@material-ui/core/Tabs';
 import Tab from '@material-ui/core/Tab';
 import ShoppingCartRoundedIcon from '@material-ui/icons/ShoppingCartRounded';
 import HistoryRoundedIcon from '@material-ui/icons/HistoryRounded';
+import { cyan, green, pink, orange } from '@material-ui/core/colors';
+import Chip from '@material-ui/core/Chip';
 import { isEqual } from 'lodash';
 
 import LiveOrders from './LiveOrders';
@@ -24,6 +26,25 @@ const useStyles = makeStyles(theme => ({
     minWidth: 650,
   },
 }));
+
+export const renderRow = (value, type) => {
+    switch (type) {
+        case 'menu':
+            return <Chip size='medium' label={value} style={{ background: green[200] }} />
+            break;
+        case 'roomitem':
+            return <Chip size='medium' label={value} style={{ background: cyan[200] }} />
+            break;
+        case 'facility':
+            return <Chip size='medium' label={value} style={{ background: orange[200] }} />
+            break;
+        case 'problem':
+            return <Chip size='medium' label={value} style={{ background: pink[200] }} />
+            break;
+        default:
+            break;
+    }
+}
 
 export default () => {
   const [value, setValue] = useState(0);

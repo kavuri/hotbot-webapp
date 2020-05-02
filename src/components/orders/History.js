@@ -21,6 +21,8 @@ import { useSnackbar } from 'notistack';
 import { useKamAppCtx } from '../KamAppContext';
 import StatusButton from './StatusButton';
 
+import { renderRow } from './Orders';
+
 export default (props) => {
     const { getOrders, orders } = useKamAppCtx();
     const { enqueueSnackbar } = useSnackbar();
@@ -79,7 +81,7 @@ export default (props) => {
                 sort: true,
                 searchable: true,
                 customBodyRender: (value, tableMeta, updateValue) => {
-                    return <Chip size='medium' label={value} style={{ background: cyan[200] }} />
+                    return renderRow(value, tableMeta.rowData[5]);
                 }
             }
         },
@@ -91,7 +93,7 @@ export default (props) => {
                 sort: false,
                 searchable: true,
                 customBodyRender: (value, tableMeta, updateValue) => {
-                    return <Chip size='medium' label={value} style={{ background: cyan[200] }} />
+                    return renderRow(value, tableMeta.rowData[5]);
                 }
             }
         },
@@ -103,8 +105,21 @@ export default (props) => {
                 sort: false,
                 searchable: false,
                 customBodyRender: (value, tableMeta, updateValue) => {
-                    return <Chip size='medium' label={value} style={{ background: cyan[200] }} />
+                    return renderRow(value, tableMeta.rowData[5]);
                 }
+            }
+        },
+        {
+            name: "item.type",
+            label: "Order Type",
+            options: {
+                filter: true,
+                sort: true,
+                searchable: false
+            },
+            customBodyRender: (value, tableMeta, updateValue) => {
+                return renderRow(value, tableMeta.rowData[5]);
+                //return renderRow(value, value); //FIXME: This column does not get rendered
             }
         },
         {
