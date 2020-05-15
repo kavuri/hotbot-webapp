@@ -11,6 +11,7 @@ import moment from "moment";
 import { useAuth0 } from "../react-auth0-spa";
 export const KamAppContext = React.createContext();
 export const useKamAppCtx = () => useContext(KamAppContext);
+
 export const KamAppProvider = ({ children }) => {
     const [orders, setOrders] = useState({
         openOrderCount: 0,
@@ -19,6 +20,7 @@ export const KamAppProvider = ({ children }) => {
     });
     const [hotel, setHotel] = useState({});
     const [token, setToken] = useState(null);
+    const [listener, setListener] = useState();
     const [incomingOrder, setIncomingOrder] = useState({});
     const { user, getTokenSilently, isAuthenticated } = useAuth0();
 
@@ -28,21 +30,14 @@ export const KamAppProvider = ({ children }) => {
             // getToken();
         }
         // if (isAuthenticated && !isUndefined(user) && isEqual(user.app_metadata.role, 'consumer')) {
-            getOrders(orders.reqDate);
-        // }
+        getOrders(orders.reqDate);
+
+        // Register order listener
+        registerListener();
     }, [user, token]);
 
-    async function getToken() {
-        let tkn = await getTokenSilently();
-        // console.log('###got token=', tkn);
-        setToken(tkn);
-    }
-
     useEffect(() => {
-        if (!isNull(user) && !isUndefined(user) && isEqual(user.app_metadata.role, 'consumer')) {
-
-            const listener = new EventSource(API_SERVER_URL + '/order/listen?token=' + token);
-
+        if (!isUndefined(listener)) {
             listener.onopen = () => console.log('---Connection opened---');
             listener.onerror = () => console.log('---Event source connection error--- ');
             listener.onmessage = e => {
@@ -57,7 +52,8 @@ export const KamAppProvider = ({ children }) => {
                 listener.close();
             }
         }
-    });
+
+    }, [listener]);
 
     useEffect(() => {
         console.log('+++incmoing=', incomingOrder);
@@ -81,6 +77,13 @@ export const KamAppProvider = ({ children }) => {
         }
     }, [incomingOrder]);
 
+    const registerListener = async () => {
+        if (!isAuthenticated) return;   // User is not authenticated
+        let tkn = await getTokenSilently();
+        let listen = new EventSource(API_SERVER_URL + '/order/listen?token=' + tkn);
+        setListener(listen);
+    }
+
     /**
      * One method to rule them all
      * @param {*} endpoint 
@@ -89,7 +92,7 @@ export const KamAppProvider = ({ children }) => {
      * @param {*} body 
      */
     const APICall = async (endpoint, options) => {
-        if (!isAuthenticated) throw new Error({error: 'user not authenticated'});
+        if (!isAuthenticated) throw new Error({ error: 'user not authenticated' });
         let tkn = await getTokenSilently();
         const headers = { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + tkn };
         console.log('+++endpoint=', endpoint, ', options=', options, 'headers=', headers);
