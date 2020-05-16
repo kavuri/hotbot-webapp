@@ -15,6 +15,7 @@ import List from '@material-ui/core/List';
 import Typography from '@material-ui/core/Typography';
 import Divider from '@material-ui/core/Divider';
 import IconButton from '@material-ui/core/IconButton';
+import HelpRoundedIcon from '@material-ui/icons/HelpRounded';
 import Badge from '@material-ui/core/Badge';
 import Container from '@material-ui/core/Container';
 import Grid from '@material-ui/core/Grid';
@@ -24,6 +25,7 @@ import ChevronLeftIcon from '@material-ui/icons/ChevronLeft';
 import { isNull, isUndefined, isEqual } from 'lodash';
 import { useSnackbar } from 'notistack';
 
+import Help from './help/Help';
 import Orders from './orders/Orders';
 import Devices from './devices/Devices';
 import HotelSettingsMenu from './HotelSettingsMenu';
@@ -193,6 +195,10 @@ export default function Dashboard() {
   }
 
   const renderHeading = () => {
+      const handleHelpRequest = () => {
+          const component = Help;
+          setComponentToRender(component);
+      }
     return (
       <AppBar position="absolute" className={clsx(classes.appBar, open && classes.appBarShift)}>
         <Toolbar className={classes.toolbar}>
@@ -206,8 +212,11 @@ export default function Dashboard() {
             <MenuIcon />
           </IconButton>
           <Typography component="h1" variant="h6" color="inherit" noWrap className={classes.title}>
-            Kamamishu
+                    Kamamishu
         </Typography>
+                <IconButton aria-label="help button" color="inherit" onClick={handleHelpRequest} >
+                    <HelpRoundedIcon />
+                </IconButton>
         </Toolbar>
       </AppBar>
     );
