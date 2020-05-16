@@ -4,4 +4,5 @@
  */
 'use strict';
 
-module.exports.API_SERVER_URL = 'http://localhost:3000/api/v1'
+module.exports.API_SERVER_URL = '/api/v1'
+//module.exports.API_SERVER_URL = 'http://localhost:3000/api/v1'
